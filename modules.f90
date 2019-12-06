@@ -110,6 +110,12 @@ integer l_pol
 integer cubeR
 endmodule
 
+module cube
+real*8 r_cyl
+real*8 c_cyl(2)
+integer n_angles
+endmodule
+
 module mmask
 real*8, allocatable :: mask(:,:,:)
 endmodule

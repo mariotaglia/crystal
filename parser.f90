@@ -382,6 +382,27 @@ do while (ios == 0)
      read(fh, *) basura
      read(fh, *) eepsc
      NNN = 0
+   
+    case(8) ! cylinder
+     read(fh, *) basura
+     read(fh, *) r_cyl ! cylinder radii
+     read(fh, *) basura
+     read(fh, *) c_cube(1), c_cube(2) ! x,y centar of cylinder
+     read(fh, *) basura
+     read(fh, *) n_angles ! number of pol by disk
+     read(fh, *) basura
+
+     call allocatecyl
+
+     do j = 1, n_angles,
+     read(fh, *) n_angles(j)
+     enddo
+
+     read(fh, *) basura
+     read(fh, *) echargec
+     read(fh, *) basura
+     read(fh, *) eepsc
+     NNN = 0
 
     case(42, 52) ! 42: channel, 52: rod
      read(fh, *) basura
