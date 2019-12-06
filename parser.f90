@@ -15,6 +15,7 @@ use s2d
 use channel
 use branches
 use cube
+use cylinder
 implicit none
 
 ! Input related variables
@@ -394,8 +395,8 @@ do while (ios == 0)
 
      call allocatecyl
 
-     do j = 1, n_angles,
-     read(fh, *) n_angles(j)
+     do j = 1, n_angles
+     read(fh, *) disk_angles(j)
      enddo
 
      read(fh, *) basura

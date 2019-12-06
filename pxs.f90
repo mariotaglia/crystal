@@ -21,6 +21,7 @@ integer testsystem
 integer testsystemr
 integer testsystemc
 integer testsystem_cube
+integer testsystem_cyl
 real*8 maxx(3)
 integer flag
 integer aa
@@ -84,6 +85,18 @@ case (7)
          write(stdout,*) 'pxs: out-of-system'
          stop
        endif
+
+case (8)
+       if(testsystem_cyl(x).eq.-1) then ! if testsystem = -1,  there is a collision with all or particle 
+         flag = -1
+         exit
+       endif
+
+       if(testsystem_cyl(x).eq.-2) then ! if testsystem = -2, the polymer goes out-of-system
+         write(stdout,*) 'pxs: out-of-system'
+         stop
+       endif
+
 
 case (60)
        if(testsystemc(x).eq.-1) then ! if testsystem = -1,  there is a collision with channel

@@ -110,10 +110,11 @@ integer l_pol
 integer cubeR
 endmodule
 
-module cube
+module cylinder
 real*8 r_cyl
 real*8 c_cyl(2)
 integer n_angles
+real*8, allocatable :: disk_angles(:)
 endmodule
 
 module mmask

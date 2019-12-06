@@ -12,12 +12,10 @@ use rotchain
 
 implicit none
 
-integer npoints ! points per cell for numerical integration 
 integer counter
 character*5 title
 logical flag
 integer j,ix,iy,iz
-real*8 r_cylL, r_cylS
 real pnumber
 real*8 area
 real*8 sumpolseg 
@@ -35,9 +33,8 @@ real*8 volxx1(dimx,dimy,dimz)
 real*8 volxx(dimx,dimy,dimz)
 real*8 x(3), v(3), hcyl
 integer nbands
-real*8 pi
-
-pi = atan(1.0)*4.0
+integer npoints
+real*8 r_cylL, r_cylS
 
 cutarea = 0.0 ! throw away cells that have less area than cutarea x area of the cell with largest area  
 sumpolseg = 0.0
@@ -58,20 +55,20 @@ ncha = 0
  originc(1) = float(dimx)*delta/2.0 
  originc(2) = float(dimy)*delta/2.0 
 
- npoints = 50
+ npoints = 50 !points per cell for numerical integration
 
  flag = .false.
 
- call integrate_cylinder(l_cubeL, c_cube,npoints, voleps1, sumvoleps1, flag)
+ call integrate_cylinder(r_cylL, c_cyl,npoints, voleps1, sumvoleps1, flag)
 
  flag = .false. ! not a problem if eps lays outside boundaries
 
  
- call integrate_cylinder(l_cube,c_cube,npoints, volprot1, sumvolprot1, flag)
+ call integrate_cylinder(r_cyl,c_cyl,npoints, volprot1, sumvolprot1, flag)
 
- call integrate_cylinder(l_cubeS,c_cube,npoints, volq1, sumvolq1, flag)
-
- call newintegrateg_cylinder(l_cube,c_cube,cubeR,npoints,volx1,sumvolx1, com1, p1, ncha1, volxx1)
+ call integrate_cylinder(r_cylS,c_cyl,npoints, volq1, sumvolq1, flag)
+ 
+ call newintegrate_cylinder(r_cyl,c_cyl,npoints,volx1,sumvolx1, com1, p1, ncha1, volxx1)
 
 !! eps
  voleps1 = voleps1-volprot1
@@ -142,21 +139,19 @@ call savetodisk(volxx, title, counter)
 
 end subroutine
 
-subroutine integrate_cylinder(r_cyl,c_cyl, npoints,volprot,sumvolprot,flag)
+subroutine integrate_cylinder(r_cyl,c_cyl,npoints,volprot,sumvolprot,flag)
 use system
 use transform
 
 implicit none
 real*8 sumvolprot
 integer npoints
-real*8 r_cyl
-real*8 c_cyl(2)
 real*8 volprot(dimx,dimy,dimz)
 real*8 dr(3), dxr(3)
 integer ix,iy,iz,ax,ay,az
 real*8 vect
 logical flagin, flagout
-real*8 intcell_cylinder
+real*8 intcell_cyl
 real*8 mmmult
 integer jx,jy, jz
 logical flag
@@ -165,6 +160,7 @@ real*8 box(4)
 real*8 x(3), v(3)
 integer xmin,xmax,ymin,ymax,zmin,zmax
 integer i,j
+real*8 r_cyl, c_cyl(2)
 
 logical flagsym
 real*8 voltemp
@@ -221,7 +217,6 @@ enddo ! ix
 enddo ! iy
 enddo ! iz
 
-
 end subroutine
 
 double precision function intcell_cyl(r_cyl,c_cyl,ix,iy,iz,n)
@@ -229,14 +224,14 @@ use system
 use transform
 
 implicit none
-real*8 l_cyl
-real*8 c_cyl(2)
 integer ix,iy,iz,ax,ay,az
 integer cc
 real*8 vect
 integer n
 real*8 mmmult
 real*8 dr(3), dxr(3)
+real*8 r_cyl, c_cyl(2)
+real*8 x(3)
 
 cc = 0
 do ax = 1, n
@@ -252,7 +247,7 @@ dxr = MATMUL(IMAT, dr)
 
 dxr(1) = dxr(1) - c_cyl(1)
 dxr(2) = dxr(2) - c_cyl(2)
-dxr(3) = dxr(3) - c_cyl(3)
+dxr(3) = dxr(3)
 
 if (((abs(x(1)**2).lt.(r_cyl**2 - x(2)**2))))cc=cc+1 ! integra dentro del cubo
 
@@ -263,20 +258,18 @@ enddo
 intcell_cyl  = float(cc)/(float(n)**3)
 end function
 
-subroutine newintegrateg_cyl(r_cyl,c_cyl,n_disks,volx1,sumvolx1,com1,p1,ncha1,volxx1)
+subroutine newintegrated_cylinder(r_cyl,c_cyl,n_disks,disk_angles,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 use system
-use cylinder
 use transform
 use chainsdat
 use ematrix
 use const
 implicit none
 real*8 sumvolx1
-integer l_pol, npoints
+integer npoints
 integer indexvolx(dimx,dimy,dimz)
 integer listvolx(ncha,3)
 real*8 sep ! separation of polymers between disks
-real*8 r_cyl, c_cyl(2)
 real*8 phi, dphi, tetha,dtetha, as, ds
 integer mphi, mtetha
 integer ix,iy,iz,jx,jy,jz
@@ -293,6 +286,12 @@ integer flagin
 integer dims(3), is(3), js(3)
 integer jjjz, jjjt, npointz, npointt
 integer RdimZ
+real*8 r_cyl, c_cyl(2)
+integer n_disks
+integer n_angles
+real*8, allocatable ::  disk_angles(:)
+
+ALLOCATE (disk_angles(n_angles))
 
 pi=acos(-1.0)
 
@@ -310,15 +309,15 @@ volxx1 = 0.0
 
 ! This routine determines the surface coverage and grafting positions only for cylinder (z direction)
 
-sep = dimz/disks ! distance disk-disk
+sep = dimz/n_disks ! distance disk-disk
 
-do ix = 1, n_angles ! l_pol = number of pol by disk
-do iz = 1, n_disks
+do ix = 1, n_angles !  number of pol by disk
+do iz = 1, n_disks ! number of disks
 
 ! Cylinder, polymer positions
 
-x(1) = r_cyl*cos(pi*n_angles(ix)/180.0 + c_cyl(1)
-x(2) = r_cyl*sin(pi*n_angles(ix)/180.0 + c_cyl(2)
+x(1) = r_cyl*cos(pi*disk_angles(ix)/180.0) + c_cyl(1)
+x(2) = r_cyl*sin(pi*disk_angles(ix)/180.0) + c_cyl(2)
 x(3) = float(iz)*sep
 
 do j = 1,3
