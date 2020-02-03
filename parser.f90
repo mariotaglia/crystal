@@ -388,7 +388,9 @@ do while (ios == 0)
      read(fh, *) basura
      read(fh, *) r_cyl ! cylinder radii
      read(fh, *) basura
-     read(fh, *) c_cube(1), c_cube(2) ! x,y centar of cylinder
+     read(fh, *) c_cyl(1), c_cyl(2) ! x,y center of cylinder in nm
+     read(fh, *) basura
+     read(fh, *) n_disks ! number of disks
      read(fh, *) basura
      read(fh, *) n_angles ! number of pol by disk
      read(fh, *) basura

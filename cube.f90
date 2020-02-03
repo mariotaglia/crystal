@@ -63,7 +63,6 @@ ncha = 0
  call integrate_cube(l_cubeL, c_cube,npoints, voleps1, sumvoleps1, flag)
 
  flag = .false. ! not a problem if eps lays outside boundaries
-
  
  call integrate_cube(l_cube,c_cube,npoints, volprot1, sumvolprot1, flag)
 
