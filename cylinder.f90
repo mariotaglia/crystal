@@ -193,8 +193,8 @@ x(1) = x(1) - c_cyl(1) ! x
 x(2) = x(2) - c_cyl(2) ! y
 x(3) = x(3) ! z doesn't matter...
 
-if (((abs((x(1)-c_cyl(1))**2 + (x(2) - c_cyl(2))**2).gt.(r_cyl**2))))flagout=.true.
-if (((abs((x(1)-c_cyl(1))**2 + (x(2) - c_cyl(2))**2).lt.(r_cyl**2))))flagout=.false.
+if (((abs((x(1))**2 + (x(2))**2).gt.(r_cyl**2))))flagout=.true.
+if (((abs((x(1))**2 + (x(2))**2).lt.(r_cyl**2))))flagin=.true.
 
 enddo
 enddo

@@ -12,6 +12,7 @@ use MPI
 use ellipsoid
 use ematrix
 use mparameters_monomer
+use montecarlo
 implicit none
 external fcn
 integer i, ix, iy, iz, ip
