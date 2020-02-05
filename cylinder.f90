@@ -193,8 +193,8 @@ x(1) = x(1) - c_cyl(1) ! x
 x(2) = x(2) - c_cyl(2) ! y
 x(3) = x(3) ! z doesn't matter...
 
-if (((abs((x(1))**2 + (x(2))**2).gt.(r_cyl**2))))flagout=.true.
-if (((abs((x(1))**2 + (x(2))**2).lt.(r_cyl**2))))flagin=.true.
+if (((abs((x(1))**2 + (x(2))**2).gt.(rcyl**2))))flagout=.true.
+if (((abs((x(1))**2 + (x(2))**2).lt.(rcyl**2))))flagin=.true.
 
 enddo
 enddo
@@ -304,58 +304,38 @@ volxx1 = 0.0
 
 ! This routine determines the surface coverage and grafting positions only for cylinder (z direction)
 
-sep = float(dimz)*delta/float(n_disks + 1) ! distance disk-disk
+sep = float(dimz)*delta/float(n_disks) ! distance disk-disk
 
 do iz = 1, n_disks ! number of disks
-print*, iz
 do ix = 1, n_angles !  number of pol by disk
-
-!print*, ix
-! Cylinder, polymer positions
 
 x(1) = r_cyl*cos(pi*disk_angles(ix)/180.0) + c_cyl(1)
 x(2) = r_cyl*sin(pi*disk_angles(ix)/180.0) + c_cyl(2)
-x(3) = iz*sep
-
-!print*, x(1), x(2), x(3)
+x(3) = (iz-1)*sep + sep/2.0
 
 do j = 1,3
     js(j) = floor(x(j)/delta) +1
-!    print*, js(j)
 enddo
-
-
 
 jx = js(1)
 jy = js(2)
 jz = js(3)
 
-!print*, jx, jy, jz
-
 ! increase counter
  ncha1 = ncha1 + 1
-
-!print*, jx, jy, jz
 
  indexvolx(jx,jy,jz) = ncha1
  p1(ncha1,1)=jx
  p1(ncha1,2)=jy
  p1(ncha1,3)=jz
 
-print*, disk_angles(:),'5'
 volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
-print*, disk_angles(:), '4'
 volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
 sumvolx1 = sumvolx1 + 1.0
-print*, disk_angles(:), '3'
 com1(ncha1,:) = x(:)
-print*, disk_angles(:), '2'
 com1(ncha1,3) = com1(ncha1,3) + lseg/2.0
-print*, disk_angles(:), '1'
 
 enddo
-
-
 enddo
 
 end subroutine
