@@ -546,7 +546,7 @@ enddo
 
 iter = iter + 1
 if(verbose.ge.3) then
-if(rank.eq.0)write(stdout,*)'fkfun:', iter, norma, q(1)
+if(rank.eq.0)write(stdout,*)'fkfun:', iter, norma
 
 endif
 
