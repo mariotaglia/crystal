@@ -309,8 +309,8 @@ sep = float(dimz)*delta/float(n_disks) ! distance disk-disk
 do iz = 1, n_disks ! number of disks
 do ix = 1, n_angles !  number of pol by disk
 
-v(1) = r_cyl*cos(pi*disk_angles(ix)/180.0 + (iz - 1)*2*pi*turns/(n_disks + 1)) + c_cyl(1)
-v(2) = r_cyl*sin(pi*disk_angles(ix)/180.0 + (iz - 1)*2*pi*turns/(n_disks + 1)) + c_cyl(2)
+v(1) = r_cyl*cos(pi*(disk_angles(ix)+theta)/180.0 + (iz - 1)*2*pi*turns/(n_disks + 1)) + c_cyl(1)
+v(2) = r_cyl*sin((pi*disk_angles(ix)+theta)/180.0 + (iz - 1)*2*pi*turns/(n_disks + 1)) + c_cyl(2)
 v(3) = (iz-1)*sep + sep/2.0  ! v in transformed space
 
 x = MATMUL(MAT,v) ! x in real space

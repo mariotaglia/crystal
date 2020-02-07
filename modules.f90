@@ -115,6 +115,7 @@ real*8 r_cyl
 real*8 c_cyl(2)
 integer n_angles
 integer n_disks
+real*8 theta
 real*8 turns
 real*8, allocatable :: disk_angles(:)
 endmodule

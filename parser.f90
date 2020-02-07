@@ -402,7 +402,9 @@ do while (ios == 0)
      enddo
 
      read(fh, *) basura
-     read(fh, *) turns
+     read(fh, *) turns ! turns in a cell (z)
+     read(fh, *) basura
+     read(fh, *) theta ! shift angle (the same for each disk)
      read(fh, *) basura
      read(fh, *) echargec
      read(fh, *) basura
