@@ -41,6 +41,12 @@ sumpolseg = 0.0
 r_cylL = r_cyl + 2*delta
 r_cylS = r_cyl - 2*delta
 
+creal(1) = c_cyl(1)
+creal(2) = c_cyl(2)
+creal(3) = 0.0
+
+ctrans = MATMUL(IMAT, creal)
+
 ! clear all
 voleps = 0.0
 volprot = 0.0
@@ -189,8 +195,8 @@ v(3) = float(az+iz-1)*delta
 ! x in real space, v in transformed space
     x = MATMUL(IMAT,v)
 
-x(1) = x(1) - c_cyl(1) ! x
-x(2) = x(2) - c_cyl(2) ! y
+x(1) = x(1) - ctrans(1) ! x
+x(2) = x(2) - ctrans(2) ! y
 x(3) = x(3) ! z doesn't matter...
 
 if (((abs((x(1))**2 + (x(2))**2).gt.(rcyl**2))))flagout=.true.
@@ -242,11 +248,10 @@ dr(1) = ix*delta-(ax)*delta/float(n)
 dr(2) = iy*delta-(ay)*delta/float(n) 
 dr(3) = iz*delta-(az)*delta/float(n) 
 
-! dr in transformed space
 dxr = MATMUL(IMAT, dr)
 
-dxr(1) = dxr(1) - c_cyl(1)
-dxr(2) = dxr(2) - c_cyl(2)
+dxr(1) = dxr(1) - ctrans(1)
+dxr(2) = dxr(2) - ctrans(2)
 dxr(3) = dxr(3)
 
 if (((abs((dxr(1))**2 + (dxr(2))**2).lt.(r_cyl**2))))cc=cc+1 ! integra dentro del cilindro
@@ -309,9 +314,9 @@ sep = float(dimz)*delta/float(n_disks) ! distance disk-disk
 do iz = 1, n_disks ! number of disks
 do ix = 1, n_angles !  number of pol by disk
 
-v(1) = r_cyl*cos(pi*(disk_angles(ix)+theta)/180.0 + (iz - 1)*2*pi*turns/(n_disks + 1)) + c_cyl(1)
-v(2) = r_cyl*sin((pi*disk_angles(ix)+theta)/180.0 + (iz - 1)*2*pi*turns/(n_disks + 1)) + c_cyl(2)
-v(3) = (iz-1)*sep + sep/2.0  ! v in transformed space
+v(1) = r_cyl*cos(pi*(disk_angles(ix)+theta)/180.0 + (iz - 1)*2*pi*turns/(n_disks + 1)) + ctrans(1)
+v(2) = r_cyl*sin((pi*disk_angles(ix)+theta)/180.0 + (iz - 1)*2*pi*turns/(n_disks + 1)) + ctrans(2)
+v(3) = (iz-1)*sep + sep/2.0  ! v in real space
 
 x = MATMUL(MAT,v) ! x in real space
 
