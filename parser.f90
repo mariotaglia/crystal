@@ -218,10 +218,28 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) dz
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
- case ('cdiva')
-   read(buffer, *, iostat=ios) cdiva
+ !case ('cdiva')
+   !read(buffer, *, iostat=ios) cdiva
+ !  if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+ !case ('transform_matrix')
+ case ('transform_type')
+   read(buffer, *, iostat=ios) transform_type
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
+   select case (transform_type) ! Unit cell transformation
+
+    case(1) ! modifies just 1 axis (c) and 1 angle (gama)
+     read(fh, *) basura
+     read(fh, *) cdiva ! norm c' basis vector with respect bais vector a'
+     read(fh, *) gama0 ! angle between a' and b' vector
+    case(2) ! Use the transformation matrix between tranformed cell to a cell of 90,90,90 angles
+     read(fh, *) basura 
+     do j = 1,3 ! read transformation matrix
+      read(fh, *) MAT(j,1), MAT(j,2), MAT(j,3)
+     enddo
+
+    endselect
 
  case ('dimy')
    read(buffer, *, iostat=ios) dimy
@@ -277,9 +295,9 @@ do while (ios == 0)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
 
- case ('gama')
-   read(buffer, *, iostat=ios) gama0
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+! case ('gama')
+   !read(buffer, *, iostat=ios) gama0
+   !if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('pHbulk')
    read(buffer, *, iostat=ios) pHbulk
@@ -565,7 +583,6 @@ if(delta.eq.ndr)call stopundef('delta')
 if(dx.eq.ndr)call stopundef('dx')
 if(dy.eq.ndr)call stopundef('dy')
 if(dz.eq.ndr)call stopundef('dz')
-if(cdiva.eq.ndr)call stopundef('cdiva')
 if(dielS.eq.ndr)call stopundef('dielS')
 if(dielP.eq.ndr)call stopundef('dielP')
 if(lseg.eq.ndr)call stopundef('lseg')
@@ -574,7 +591,10 @@ if(pHbulk.eq.ndr)call stopundef('pHbulk')
 if(vpol0.eq.ndr)call stopundef('vpol')
 if(vsol0.eq.ndr)call stopundef('vsol')
 if(benergy.eq.ndr)call stopundef('benergy')
-if(gama0.eq.ndr)call stopundef('gama')
+if(transform_type.eq.1)then
+ if(gama0.eq.ndr)call stopundef('gama')
+ if(cdiva.eq.ndr)call stopundef('cdiva')
+endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

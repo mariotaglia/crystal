@@ -1,4 +1,5 @@
 subroutine inittransf
+use system
 use const
 use transform 
 use system
@@ -13,6 +14,8 @@ real*8 vectc(3)
 real*8 fix
 real*8 cdivl
 real*8, external :: NORMA
+
+if(transform_type.eq.1)then
 
 gama0 = gama0/180.0*pi
 
@@ -33,6 +36,7 @@ MAT(3,1) = 0.0
 MAT(3,2) = 0.0
 MAT(3,3) = 1.0/cdivl/fix ! divide by cdivl to keep constant volume
 
+endif
 
 TMAT = TRANSPOSE(MAT)
 
@@ -122,9 +126,12 @@ real*8 vect(3), vect2(3)
 
 do j = 1, NNN
 
-vect(1) = Rellf(1,j) + dx*delta
-vect(2) = Rellf(2,j) + dy*delta
-vect(3) = Rellf(3,j) + dz*delta
+!vect(1) = Rellf(1,j) + dx*delta
+!vect(2) = Rellf(2,j) + dy*delta
+!vect(3) = Rellf(3,j) + dz*delta
+vect(1) = Rellf(1,j)*dimx*delta + dx*delta
+vect(2) = Rellf(2,j)*dimx*delta + dy*delta
+vect(3) = Rellf(3,j)*dimx*delta + dz*delta
 vect2 = MATMUL(IMAT,vect)
 Rell(:,j) = vect2(:)
 

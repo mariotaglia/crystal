@@ -16,6 +16,7 @@ endmodule
 
 module system 
 integer systemtype
+integer transform_type
 integer vscan
 real*8 delta
 real*8 dx,dy,dz
