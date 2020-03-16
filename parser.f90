@@ -225,9 +225,8 @@ do while (ios == 0)
    select case (transform_type) ! Unit cell transformation
 
     case(1) ! modifies just 1 axis (c) and 1 angle (gama)
-     read(fh, *) basura
+     read(fh, *) basura 
      read(fh, *) cdiva ! norm c' basis vector with respect bais vector a'
-     read(fh, *) basura
      read(fh, *) gama0 ! angle between a' and b' vector
     case(2) ! Use the transformation matrix between tranformed cell to a cell of 90,90,90 angles
      read(fh, *) basura 
@@ -343,6 +342,10 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) systemtype
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
+ case('coordinate_system')
+ read(buffer, *, iostat=ios) coordinate_system ! if 1: real 2: fractional
+  if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+ 
    select case (systemtype) ! TYPE OF SYSTEM
                             ! TYPE = 1 is nanoparticle crystal
                             ! TYPE = 2 is 3D channel
@@ -473,12 +476,10 @@ do while (ios == 0)
      if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'hydrophobicity to', eeps(j)
      enddo
 
-    case(1) 
+    case(1)
      read(fh, *) basura
      read(fh, *)NNN
-
      if(NNN.ne.0) then
-
      call allocateell
      read(fh, *) basura
      do j = 1, NNN
@@ -522,6 +523,7 @@ do while (ios == 0)
 
      endif ! NNN
 endselect
+
 endselect
 
 endif
@@ -590,6 +592,7 @@ if(transform_type.eq.2)then
    if(MAT(i,j).eq.ndr)call stopundef('MAT')
   enddo
  enddo
+if(coordinate_system.eq.ndr)call stopundef('coordinate_system')
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
