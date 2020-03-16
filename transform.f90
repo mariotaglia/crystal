@@ -15,7 +15,7 @@ real*8 fix
 real*8 cdivl
 real*8, external :: NORMA
 
-if(transform_type.eq.1)then
+if(transform_type.eq.1) then
 
 gama0 = gama0/180.0*pi
 
@@ -52,16 +52,16 @@ xx(3) = 0.0
 x = MATMUL(IMAT,xx) 
 vect1 = x
 
-xx(2) = delta
 xx(1) = 0.0
+xx(2) = delta
 xx(3) = 0.0
 
 x = MATMUL(IMAT,xx) !
 vect2 = x
 
-xx(3) = delta
-xx(2) = 0.0
 xx(1) = 0.0
+xx(2) = 0.0
+xx(3) = delta
 
 x = MATMUL(IMAT,xx) ! to real space 
 vect3 = x
@@ -130,22 +130,15 @@ do j = 1, NNN
 !vect(2) = Rellf(2,j) + dy*delta
 !vect(3) = Rellf(3,j) + dz*delta
 vect(1) = Rellf(1,j)*dimx*delta + dx*delta
-vect(2) = Rellf(2,j)*dimx*delta + dy*delta
-vect(3) = Rellf(3,j)*dimx*delta + dz*delta
+vect(2) = Rellf(2,j)*dimy*delta + dy*delta
+vect(3) = Rellf(3,j)*dimz*delta + dz*delta
 vect2 = MATMUL(IMAT,vect)
 Rell(:,j) = vect2(:)
 
 if(rank.eq.0)write(stdout,*) 'transform:','Coordinates of particle',j,' in real space ', Rell(:,j)
 enddo
 
-
-
-
 end subroutine
-
-
-
-
 
   subroutine inverse(a,c,n)
 !============================================================

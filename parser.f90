@@ -218,11 +218,6 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) dz
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
- !case ('cdiva')
-   !read(buffer, *, iostat=ios) cdiva
- !  if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
- !case ('transform_matrix')
  case ('transform_type')
    read(buffer, *, iostat=ios) transform_type
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -232,11 +227,12 @@ do while (ios == 0)
     case(1) ! modifies just 1 axis (c) and 1 angle (gama)
      read(fh, *) basura
      read(fh, *) cdiva ! norm c' basis vector with respect bais vector a'
+     read(fh, *) basura
      read(fh, *) gama0 ! angle between a' and b' vector
     case(2) ! Use the transformation matrix between tranformed cell to a cell of 90,90,90 angles
      read(fh, *) basura 
      do j = 1,3 ! read transformation matrix
-      read(fh, *) MAT(j,1), MAT(j,2), MAT(j,3)
+     read(fh, *) MAT(j,1), MAT(j,2), MAT(j,3)
      enddo
 
     endselect
@@ -293,11 +289,6 @@ do while (ios == 0)
  case ('sigmar')
    read(buffer, *, iostat=ios) sigmar
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
-
-! case ('gama')
-   !read(buffer, *, iostat=ios) gama0
-   !if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('pHbulk')
    read(buffer, *, iostat=ios) pHbulk
@@ -452,8 +443,6 @@ do while (ios == 0)
      if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'pos to',  Rellf(1,j), Rellf(2,j), Rellf(3,j)
      enddo
 
-    
-
      read(fh, *) basura
      do j = 1, NNN
      read(fh, *) Aell(1,j), Aell(2,j), Aell(3,j)
@@ -594,6 +583,13 @@ if(benergy.eq.ndr)call stopundef('benergy')
 if(transform_type.eq.1)then
  if(gama0.eq.ndr)call stopundef('gama')
  if(cdiva.eq.ndr)call stopundef('cdiva')
+endif
+if(transform_type.eq.2)then
+ do i=1,3
+  do j=1,3
+   if(MAT(i,j).eq.ndr)call stopundef('MAT')
+  enddo
+ enddo
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
