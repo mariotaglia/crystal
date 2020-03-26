@@ -234,6 +234,7 @@ do while (ios == 0)
      read(fh, *) basura
      read(fh, *) gama0 ! angle between a' and b' vector
     case(2) ! Use the transformation matrix between tranformed cell to a cell of 90,90,90 angles
+     read(fh, *) basura
      do j = 1,3 ! read transformation matrix
      read(fh, *) MAT(j,1), MAT(j,2), MAT(j,3)
      enddo
