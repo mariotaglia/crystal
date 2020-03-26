@@ -101,7 +101,9 @@ vol = DOT_PRODUCT(vect1,vectc)
 if(rank.eq.0)write(stdout,*) 'transform:', 'a / nm ', NORMA(vect1)
 if(rank.eq.0)write(stdout,*) 'transform:', 'b / nm ', NORMA(vect2)
 if(rank.eq.0)write(stdout,*) 'transform:', 'c / nm ', NORMA(vect3)
-if(rank.eq.0)write(stdout,*) 'transform:', 'gama ', gama0*180/3.14159 
+if(transform_type.eq.1)then
+if(rank.eq.0)write(stdout,*) 'transform:', 'gama ', gama0*180.0/pi
+endif
 if(rank.eq.0)write(stdout,*) 'transform:', 'c/a', NORMA(vect3)/NORMA(vect1)
 if(rank.eq.0)write(stdout,*) 'transform:', 'c/b', NORMA(vect3)/NORMA(vect2)
 if(rank.eq.0)write(stdout,*) 'transform:', 'cell volume ', vol, 'nm^3'
@@ -126,12 +128,18 @@ real*8 vect(3), vect2(3)
 
 do j = 1, NNN
 
-!vect(1) = Rellf(1,j) + dx*delta
-!vect(2) = Rellf(2,j) + dy*delta
-!vect(3) = Rellf(3,j) + dz*delta
-vect(1) = Rellf(1,j)*dimx*delta + dx*delta
-vect(2) = Rellf(2,j)*dimy*delta + dy*delta
-vect(3) = Rellf(3,j)*dimz*delta + dz*delta
+if(coordinate_system.eq.1)then
+ vect(1) = Rellf(1,j) + dx*delta
+ vect(2) = Rellf(2,j) + dy*delta
+ vect(3) = Rellf(3,j) + dz*delta
+endif
+
+if(coordinate_system.eq.2)then
+ vect(1) = Rellf(1,j)*dimx*delta + dx*delta
+ vect(2) = Rellf(2,j)*dimy*delta + dy*delta
+ vect(3) = Rellf(3,j)*dimz*delta + dz*delta
+endif
+
 vect2 = MATMUL(IMAT,vect)
 Rell(:,j) = vect2(:)
 

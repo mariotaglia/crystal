@@ -218,19 +218,22 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) dz
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
+ case ('coordinate_system') ! 1: real coordinates 2: fractional coordinates in the cell
+   read(buffer, *, iostat=ios) coordinate_system
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
  case ('transform_type')
    read(buffer, *, iostat=ios) transform_type
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
    select case (transform_type) ! Unit cell transformation
 
-    case(1) ! modifies just 1 axis (c) and 1 angle (gama)
+    case(1) ! modifies just 1 axis (c) and 1 angle (gama) 
      read(fh, *) basura
      read(fh, *) cdiva ! norm c' basis vector with respect bais vector a'
      read(fh, *) basura
      read(fh, *) gama0 ! angle between a' and b' vector
     case(2) ! Use the transformation matrix between tranformed cell to a cell of 90,90,90 angles
-     read(fh, *) basura 
      do j = 1,3 ! read transformation matrix
      read(fh, *) MAT(j,1), MAT(j,2), MAT(j,3)
      enddo
