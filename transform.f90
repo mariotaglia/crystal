@@ -104,8 +104,8 @@ if(rank.eq.0)write(stdout,*) 'transform:', 'c / nm ', NORMA(vect3)
 if(transform_type.eq.1)then
 if(rank.eq.0)write(stdout,*) 'transform:', 'gama ', gama0*180.0/pi
 endif
+if(rank.eq.0)write(stdout,*) 'transform:', 'b/a', NORMA(vect2)/NORMA(vect1)
 if(rank.eq.0)write(stdout,*) 'transform:', 'c/a', NORMA(vect3)/NORMA(vect1)
-if(rank.eq.0)write(stdout,*) 'transform:', 'c/b', NORMA(vect3)/NORMA(vect2)
 if(rank.eq.0)write(stdout,*) 'transform:', 'cell volume ', vol, 'nm^3'
 
 end subroutine
