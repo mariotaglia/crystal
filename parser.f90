@@ -218,7 +218,7 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) dz
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
- case ('coordinate_system') ! 1: real coordinates 2: fractional coordinates in the cell
+ case ('coordinate_system') ! 1: real coordinates 2: fractional coordinates in the cell 3: fractional x,y + real z
    read(buffer, *, iostat=ios) coordinate_system
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 

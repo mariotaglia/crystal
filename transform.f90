@@ -128,16 +128,22 @@ real*8 vect(3), vect2(3)
 
 do j = 1, NNN
 
-if(coordinate_system.eq.1)then
+if(coordinate_system.eq.1)then ! Real space positions
  vect(1) = Rellf(1,j) + dx*delta
  vect(2) = Rellf(2,j) + dy*delta
  vect(3) = Rellf(3,j) + dz*delta
 endif
 
-if(coordinate_system.eq.2)then
+if(coordinate_system.eq.2)then ! Fractional positions in unit cell
  vect(1) = Rellf(1,j)*dimx*delta + dx*delta
  vect(2) = Rellf(2,j)*dimy*delta + dy*delta
  vect(3) = Rellf(3,j)*dimz*delta + dz*delta
+endif
+
+if(coordinate_system.eq.3)then ! Fraction in x,y and real in z
+ vect(1) = Rellf(1,j)*dimx*delta + dx*delta
+ vect(2) = Rellf(2,j)*dimy*delta + dy*delta
+ vect(3) = Rellf(3,j) + dz*delta
 endif
 
 vect2 = MATMUL(IMAT,vect)
