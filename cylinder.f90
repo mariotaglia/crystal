@@ -36,6 +36,7 @@ integer nbands
 integer npoints
 real*8 r_cylS, r_cylL
 
+
 cutarea = 0.0 ! throw away cells that have less area than cutarea x area of the cell with largest area  
 sumpolseg = 0.0
 r_cylL = r_cyl + 2*delta
@@ -293,6 +294,8 @@ integer dims(3), is(3), js(3)
 integer jjjz, jjjt, npointz, npointt
 integer RdimZi
 
+integer, external :: PBCSYMI, PBCREFI
+
 pi=acos(-1.0)
 
 dims(1) = dimx
@@ -318,31 +321,63 @@ v(1) = r_cyl*cos(pi*(disk_angles(ix)+theta)/180.0 + (iz - 1)*2*pi*turns/(n_disks
 v(2) = r_cyl*sin((pi*disk_angles(ix)+theta)/180.0 + (iz - 1)*2*pi*turns/(n_disks + 1)) + ctrans(2)
 v(3) = (iz-1)*sep + sep/2.0  ! v in real space
 
-x = MATMUL(MAT,v) ! x in real space
+x = MATMUL(MAT,v) ! v in real space, x in transformed space
+
+flagin = 1
 
 do j = 1,3
     js(j) = floor(x(j)/delta) +1
+
+!!!! PBC
+
+select case (PBC((j-1)*2+1))
+ case (0, 2) ! Wall or bulk
+    if(js(j).lt.1) then
+       write(stdout,*) 'Error in newintegrateg: out of boundary'
+    endif
+ case (1)
+    js(j)=PBCSYMI(js(j),dims(j))
+ case(3)
+    if(v(j).lt.0.0)flagin=0 
+endselect
+
+select case (PBC((j-1)*2+1))
+ case (0, 2) ! Wall or bulk
+    if(js(j).lt.1) then
+       write(stdout,*) 'Error in newintegrateg: out of boundary'
+    endif
+ case (1)
+    js(j)=PBCSYMI(js(j),dims(j))
+ case(3)
+    if(v(j).lt.0.0)flagin=0 
+endselect
 enddo
 
 jx = js(1)
 jy = js(2)
 jz = js(3)
 
-! increase counter
- ncha1 = ncha1 + 1
+if (flagin.eq.1) then
+        if(indexvolx(jx,jy,jz).eq.0) then ! check if grafting point is free
 
- indexvolx(jx,jy,jz) = ncha1
- p1(ncha1,1)=jx
- p1(ncha1,2)=jy
- p1(ncha1,3)=jz
+! increase counter
+                ncha1 = ncha1 + 1
+                indexvolx(jx,jy,jz) = ncha1
+                p1(ncha1,1)=jx
+                p1(ncha1,2)=jy
+                p1(ncha1,3)=jz
+        endif
 
 volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
 volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
 sumvolx1 = sumvolx1 + 1.0
-com1(ncha1,:) = x(:)
+
+com1(ncha1,:) = v(:) ! v in real space
 com1(ncha1,3) = com1(ncha1,3) + lseg/2.0
 
-enddo
-enddo
+endif ! flagin
+
+enddo ! disks
+enddo ! pols per disk
 
 end subroutine
