@@ -57,7 +57,7 @@ if (v(3).gt.(float(dimz)*delta)) then
  if (PBC(6).eq.0)testsystem_cuboctahedron = -2
 endif
 
-if (testsystem_cube.eq.0) then ! saves some time
+if (testsystem_cuboctahedron.eq.0) then ! saves some time
 
 do i = 1, 3 ! put into cell
 if(v(i).lt.0.0) then
@@ -77,11 +77,11 @@ enddo
 
 !vect = xx(1)**2+xx(2)**2
 
-if(((dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.(((dxr(1)+dxr(2)+dxr(3)).lt.(locta/2))then
-   if(((-dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.(((-dxr(1)+dxr(2)+dxr(3)).lt.(locta/2))then
-      if(((dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.(((dxr(1)-dxr(2)+dxr(3)).lt.(locta/2))then
-         if(((-dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.(((-dxr(1)-dxr(2)+dxr(3)).lt.(locta/2))then
-            testsystem_cube = -1
+if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.((x(1)+x(2)+x(3)).lt.(locta/2)))then
+   if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.((-x(1)+x(2)+x(3)).lt.(locta/2)))then
+      if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.((x(1)-x(2)+x(3)).lt.(locta/2)))then
+         if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.((-x(1)-x(2)+x(3)).lt.(locta/2)))then
+            testsystem_cuboctahedron = -1
          endif
       endif
    endif

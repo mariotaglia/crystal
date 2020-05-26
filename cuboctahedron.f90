@@ -70,7 +70,7 @@ ncha = 0
 
  call integrate_cuboctahedron(lcubeS,loctaS,center,npoints,volq1,sumvolq1,flag)
 
- call newintegrateg_cuboctahedron(lcube,locta,center,l_pol,npoints,volx1,sumvolx1, com1, p1, ncha1, volxx1)
+ call newintegrateg_cuboctahedron(lcube,locta,center,npoints,volx1,sumvolx1, com1, p1, ncha1, volxx1)
 
 !! eps
  voleps1 = voleps1-volprot1
@@ -81,7 +81,7 @@ ncha = 0
  temp = sum(volq1)
  volq1 = volq1/temp*echargec/(delta**3) ! sum(volq) is echarge
 
-area = 6.0*l_cube**2   !no seeee
+area = 6.0*lcube**2   !no seeee
 
 !! volume
  volprot1 = volprot1 * 0.9999
@@ -116,7 +116,7 @@ stop
 sumpolseg = ncha
 
 if (verbose.ge.2) then
-temp = l_cube**3
+temp = lcube**3 ! no seeee
 !do j = 1, NNN
 !temp = temp + 4.0/3.0*pi*Aell(1,j)*Aell(2,j)*Aell(3,j)
 !enddo
@@ -157,7 +157,7 @@ real*8 dr(3), dxr(3)
 integer ix,iy,iz,ax,ay,az
 real*8 vect
 logical flagin, flagout
-real*8 intcell_cube
+real*8 intcell_cuboctahedron
 real*8 mmmult
 integer jx,jy, jz
 logical flag
@@ -198,10 +198,10 @@ x(1) = x(1) - center(1)
 x(2) = x(2) - center(2)
 x(3) = x(3) - center(3)
 
-if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.(((x(1)+x(2)+x(3)).lt.(locta/2))then
-   if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.(((-x(1)+x(2)+x(3)).lt.(locta/2))then
-      if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.(((x(1)-x(2)+x(3)).lt.(locta/2))then
-         if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.(((-x(1)-x(2)+x(3)).lt.(locta/2))then
+if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.((x(1)+x(2)+x(3)).lt.(locta/2)))then
+   if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.((-x(1)+x(2)+x(3)).lt.(locta/2)))then
+      if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.((x(1)-x(2)+x(3)).lt.(locta/2)))then
+         if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.((-x(1)-x(2)+x(3)).lt.(locta/2)))then
             flagin=.true.
          else
             flagout=.true.
@@ -268,10 +268,10 @@ dxr(3) = dxr(3) - center(3)
 
 !if (((abs(dxr(1)).lt.(l_cube/2)).and.(abs(dxr(2)).lt.(l_cube/2))).and.(abs(dxr(3)).lt.(l_cube/2)))cc=cc+1 ! integra dentro del cubo
 
-if(((dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.(((dxr(1)+dxr(2)+dxr(3)).lt.(locta/2))then
-   if(((-dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.(((-dxr(1)+dxr(2)+dxr(3)).lt.(locta/2))then
-      if(((dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.(((dxr(1)-dxr(2)+dxr(3)).lt.(locta/2))then
-         if(((-dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.(((-dxr(1)-dxr(2)+dxr(3)).lt.(locta/2))then
+if(((dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
+   if(((-dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
+      if(((dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)-dxr(2)+dxr(3)).lt.(locta/2)))then
+         if(((-dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)-dxr(2)+dxr(3)).lt.(locta/2)))then
             cc=cc+1
          endif
       endif
@@ -297,6 +297,8 @@ integer l_pol, npoints
 integer indexvolx(dimx,dimy,dimz)
 integer listvolx(ncha,3)
 real*8 lcube,locta,center(3)
+real*8 l_cube,sep,c_cube(3)
+integer cubeR
 real*8 phi, dphi, tetha,dtetha, as, ds
 integer mphi, mtetha
 integer ix,iy,iz,jx,jy,jz

@@ -15,6 +15,7 @@ use s2d
 use channel
 use branches
 use cube
+use cuboctahedron
 implicit none
 
 ! Input related variables
@@ -390,6 +391,19 @@ do while (ios == 0)
      read(fh, *) l_pol ! numero de polimeros por lado (integer)
      read(fh, *) basura
      read(fh, *) cubeR! cubo entero = 0; tercio del cubo = 1
+     read(fh, *) basura
+     read(fh, *) echargec
+     read(fh, *) basura
+     read(fh, *) eepsc
+     NNN = 0
+
+    case(8) !cuboctahedron
+     read(fh, *) basura
+     read(fh, *) center(1), center(2), center(3) ! center of cuboctahedron
+     read(fh, *) basura
+     read(fh, *) locta ! octahedron large
+     read(fh, *) basura
+     read(fh, *) lcube ! cube large
      read(fh, *) basura
      read(fh, *) echargec
      read(fh, *) basura

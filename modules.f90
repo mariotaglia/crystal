@@ -112,6 +112,12 @@ integer l_pol
 integer cubeR
 endmodule
 
+module cuboctahedron
+real*8 center(3)
+real*8 locta
+real*8 lcube
+endmodule
+
 module mmask
 real*8, allocatable :: mask(:,:,:)
 endmodule
