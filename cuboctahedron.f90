@@ -1,6 +1,6 @@
-subroutine update_matrix_cube(flag)
+subroutine update_matrix_cuboctahedron(flag)
 use system
-use cube !cuidado agregar channel quizas
+use cuboctahedron !cuidado agregar channel quizas
 use ematrix
 use MPI
 use const
@@ -17,7 +17,7 @@ integer counter
 character*5 title
 logical flag
 integer j,ix,iy,iz
-real*8 l_cubeL, l_cubeS
+real*8 lcubeL, lcubeS, loctaL, loctaS
 real pnumber
 real*8 area
 real*8 sumpolseg 
@@ -39,8 +39,10 @@ integer nbands
 
 cutarea = 0.0 ! throw away cells that have less area than cutarea x area of the cell with largest area  
 sumpolseg = 0.0
-l_cubeL = l_cube + 2*delta
-l_cubeS = l_cube - 2*delta
+lcubeL = lcube + 2*delta
+lcubeS = lcube - 2*delta
+loctaL = locta + 2*delta
+loctaS = locta - 2*delta
 
 ! clear all
 voleps = 0.0
@@ -60,16 +62,15 @@ ncha = 0
 
  flag = .false.
 
- call integrate_cube(l_cubeL, c_cube,npoints, voleps1, sumvoleps1, flag)
+ call integrate_cuboctahedron(lcubeL,loctaL,center,npoints,voleps1,sumvoleps1,flag)
 
  flag = .false. ! not a problem if eps lays outside boundaries
-
  
- call integrate_cube(l_cube,c_cube,npoints, volprot1, sumvolprot1, flag)
+ call integrate_cuboctahedron(lcube,locta,center,npoints,volprot1,sumvolprot1,flag)
 
- call integrate_cube(l_cubeS,c_cube,npoints, volq1, sumvolq1, flag)
+ call integrate_cuboctahedron(lcubeS,loctaS,center,npoints,volq1,sumvolq1,flag)
 
- call newintegrateg_cube(l_cube,c_cube,cubeR,l_pol,npoints,volx1,sumvolx1, com1, p1, ncha1, volxx1)
+ call newintegrateg_cuboctahedron(lcube,locta,center,l_pol,npoints,volx1,sumvolx1, com1, p1, ncha1, volxx1)
 
 !! eps
  voleps1 = voleps1-volprot1
@@ -80,7 +81,7 @@ ncha = 0
  temp = sum(volq1)
  volq1 = volq1/temp*echargec/(delta**3) ! sum(volq) is echarge
 
-area = 6.0*l_cube**2
+area = 6.0*l_cube**2   !no seeee
 
 !! volume
  volprot1 = volprot1 * 0.9999
@@ -110,6 +111,8 @@ title = 'avpro'
 counter = 1
 call savetodisk(volprot, title, counter)
 
+stop
+
 sumpolseg = ncha
 
 if (verbose.ge.2) then
@@ -118,11 +121,11 @@ temp = l_cube**3
 !temp = temp + 4.0/3.0*pi*Aell(1,j)*Aell(2,j)*Aell(3,j)
 !enddo
 if (rank.eq.0) then
-write(stdout,*) 'channel:', 'update_matrix: Total nanocube volumen real space= ', temp
-write(stdout,*) 'channel:', 'update_matrix: Total discretized volumen =', (sum(volprot))*delta**3
-write(stdout,*) 'channel:', 'number of polymers in system =', sumpolseg
-write(stdout,*) 'channel:', 'surface area =', area
-write(stdout,*) 'channel:', 'surface density =', sumpolseg/area
+write(stdout,*) 'cuboctahedron:', 'update_matrix: Total nanocuboct volumen real space= ', temp
+write(stdout,*) 'cuboctahedron:', 'update_matrix: Total discretized volumen =', (sum(volprot))*delta**3
+write(stdout,*) 'cuboctahedron:', 'number of polymers in system =', sumpolseg
+write(stdout,*) 'cuboctahedron:', 'surface area =', area
+write(stdout,*) 'cuboctahedron:', 'surface density =', sumpolseg/area
 endif
 endif
 
@@ -140,15 +143,15 @@ call savetodisk(volxx, title, counter)
 
 end subroutine
 
-subroutine integrate_cube(l_cube,c_cube, npoints,volprot,sumvolprot,flag)
+subroutine integrate_cuboctahedron(lcube,locta,center,npoints,volprot,sumvolprot,flag)
 use system
 use transform
 
 implicit none
 real*8 sumvolprot
 integer npoints
-real*8 l_cube
-real*8 c_cube(3)
+real*8 lcube, locta
+real*8 center(3)
 real*8 volprot(dimx,dimy,dimz)
 real*8 dr(3), dxr(3)
 integer ix,iy,iz,ax,ay,az
@@ -191,12 +194,23 @@ v(3) = float(az+iz-1)*delta
 ! x in real space, v in transformed space
     x = MATMUL(IMAT,v)
 
-x(1) = x(1) - c_cube(1)
-x(2) = x(2) - c_cube(2)
-x(3) = x(3) - c_cube(3)
+x(1) = x(1) - center(1)
+x(2) = x(2) - center(2)
+x(3) = x(3) - center(3)
 
-if (((abs(x(1)).gt.(l_cube/2)).or.(abs(x(2)).gt.(l_cube/2))).or.(abs(x(3)).gt.(l_cube/2)))flagout=.true.
-if (((abs(x(1)).lt.(l_cube/2))).and.(abs(x(2)).lt.(l_cube/2)).and.(abs(x(3)).lt.(l_cube/2)))flagin=.true.
+if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.(((x(1)+x(2)+x(3)).lt.(locta/2))then
+   if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.(((-x(1)+x(2)+x(3)).lt.(locta/2))then
+      if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.(((x(1)-x(2)+x(3)).lt.(locta/2))then
+         if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.(((-x(1)-x(2)+x(3)).lt.(locta/2))then
+            flagin=.true.
+         else
+            flagout=.true.
+         endif
+      endif
+   endif
+endif
+!if (((abs(x(1)).gt.(l_cube/2)).or.(abs(x(2)).gt.(l_cube/2))).or.(abs(x(3)).gt.(l_cube/2)))flagout=.true.
+!if (((abs(x(1)).lt.(l_cube/2))).and.(abs(x(2)).lt.(l_cube/2)).and.(abs(x(3)).lt.(l_cube/2)))flagin=.true.
 
 enddo
 enddo
@@ -209,7 +223,7 @@ if((flagin.eqv..false.).and.(flagout.eqv..true.)) then ! cell all outside channe
     voltemp = 0.0
 endif
 if((flagin.eqv..true.).and.(flagout.eqv..true.)) then ! cell part inside annd outside channel
-    voltemp = intcell_cube(l_cube, c_cube,ix,iy,iz,npoints)
+    voltemp = intcell_cuboctahedron(lcube,locta,center,ix,iy,iz,npoints)
 endif
 
 sumvolprot = sumvolprot + voltemp
@@ -222,13 +236,13 @@ enddo ! iz
 
 end subroutine
 
-double precision function intcell_cube(l_cube,c_cube,ix,iy,iz,n)
+double precision function intcell_cuboctahedron(lcube,locta,center,ix,iy,iz,n)
 use system
 use transform
 
 implicit none
-real*8 l_cube
-real*8 c_cube(3)
+real*8 lcube,locta
+real*8 center(3)
 integer ix,iy,iz,ax,ay,az
 integer cc
 real*8 vect
@@ -248,20 +262,30 @@ dr(3) = iz*delta-(az)*delta/float(n)
 ! dr in transformed space
 dxr = MATMUL(IMAT, dr)
 
-dxr(1) = dxr(1) - c_cube(1)
-dxr(2) = dxr(2) - c_cube(2)
-dxr(3) = dxr(3) - c_cube(3)
+dxr(1) = dxr(1) - center(1)
+dxr(2) = dxr(2) - center(2)
+dxr(3) = dxr(3) - center(3)
 
-if (((abs(dxr(1)).lt.(l_cube/2)).and.(abs(dxr(2)).lt.(l_cube/2))).and.(abs(dxr(3)).lt.(l_cube/2)))cc=cc+1 ! integra dentro del cubo
+!if (((abs(dxr(1)).lt.(l_cube/2)).and.(abs(dxr(2)).lt.(l_cube/2))).and.(abs(dxr(3)).lt.(l_cube/2)))cc=cc+1 ! integra dentro del cubo
+
+if(((dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.(((dxr(1)+dxr(2)+dxr(3)).lt.(locta/2))then
+   if(((-dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.(((-dxr(1)+dxr(2)+dxr(3)).lt.(locta/2))then
+      if(((dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.(((dxr(1)-dxr(2)+dxr(3)).lt.(locta/2))then
+         if(((-dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.(((-dxr(1)-dxr(2)+dxr(3)).lt.(locta/2))then
+            cc=cc+1
+         endif
+      endif
+   endif
+endif
 
 enddo
 enddo
 enddo
 
-intcell_cube  = float(cc)/(float(n)**3)
+intcell_cuboctahedron  = float(cc)/(float(n)**3)
 end function
 
-subroutine newintegrateg_cube(l_cube,c_cube,cubeR,l_pol,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
+subroutine newintegrateg_cuboctahedron(lcube,locta,center,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 use system
 use transform
 use chainsdat
@@ -272,9 +296,7 @@ real*8 sumvolx1
 integer l_pol, npoints
 integer indexvolx(dimx,dimy,dimz)
 integer listvolx(ncha,3)
-real*8 sep !separacion entre polimeros en una cara
-real*8 l_cube, c_cube(3)
-integer cubeR
+real*8 lcube,locta,center(3)
 real*8 phi, dphi, tetha,dtetha, as, ds
 integer mphi, mtetha
 integer ix,iy,iz,jx,jy,jz

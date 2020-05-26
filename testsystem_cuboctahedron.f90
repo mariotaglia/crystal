@@ -1,7 +1,7 @@
-integer function testsystem_cube(x)
+integer function testsystem_cuboctahedron(x)
 use system
 use transform
-use cube
+use cuboctahedron
 
 implicit none
 real*8 x(3), xx(3), v(3), maxx(3)
@@ -21,40 +21,40 @@ maxx(3) = float(dimz)*delta
 
 ! collision with walls and out of system
 
-testsystem_cube = 0
+testsystem_cuboctahedron = 0
 
 v = MATMUL(MAT,x) ! to transformed space
 
 ! out-of-boundaries check is performed in transformed space
 
 if (v(1).le.0.0) then
- if (PBC(1).eq.2)testsystem_cube = -1
- if (PBC(1).eq.0)testsystem_cube = -2
+ if (PBC(1).eq.2)testsystem_cuboctahedron = -1
+ if (PBC(1).eq.0)testsystem_cuboctahedron = -2
 endif
 
 if (v(1).gt.(float(dimx)*delta)) then
- if (PBC(2).eq.2)testsystem_cube = -1
- if (PBC(2).eq.0)testsystem_cube = -2
+ if (PBC(2).eq.2)testsystem_cuboctahedron = -1
+ if (PBC(2).eq.0)testsystem_cuboctahedron = -2
 endif
 
 if (v(2).le.0.0) then
- if (PBC(3).eq.2)testsystem_cube = -1
- if (PBC(3).eq.0)testsystem_cube = -2
+ if (PBC(3).eq.2)testsystem_cuboctahedron = -1
+ if (PBC(3).eq.0)testsystem_cuboctahedron = -2
 endif
 
 if (v(2).gt.(float(dimy)*delta)) then
- if (PBC(4).eq.2)testsystem_cube = -1
- if (PBC(4).eq.0)testsystem_cube = -2
+ if (PBC(4).eq.2)testsystem_cuboctahedron = -1
+ if (PBC(4).eq.0)testsystem_cuboctahedron = -2
 endif
 
 if (v(3).le.0.0) then
- if (PBC(5).eq.2)testsystem_cube = -1
- if (PBC(5).eq.0)testsystem_cube = -2
+ if (PBC(5).eq.2)testsystem_cuboctahedron = -1
+ if (PBC(5).eq.0)testsystem_cuboctahedron = -2
 endif
 
 if (v(3).gt.(float(dimz)*delta)) then
- if (PBC(6).eq.2)testsystem_cube = -1
- if (PBC(6).eq.0)testsystem_cube = -2
+ if (PBC(6).eq.2)testsystem_cuboctahedron = -1
+ if (PBC(6).eq.0)testsystem_cuboctahedron = -2
 endif
 
 if (testsystem_cube.eq.0) then ! saves some time
@@ -77,12 +77,20 @@ enddo
 
 !vect = xx(1)**2+xx(2)**2
 
-! if(vect.ge.rchannel**2) then
-if (((abs(x(1)).lt.(l_cube/2))).and.(abs(x(2)).lt.(l_cube/2)).and.(abs(x(3)).lt.(l_cube/2))) then
-  !if((v(3).gt.float(RdimZ)*delta).and.(v(3).lt.(float(dimz-RdimZ)*delta))) then  ! reservoirs in transformed coordinates
-  testsystem_cube = -1
-  return
+if(((dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.(((dxr(1)+dxr(2)+dxr(3)).lt.(locta/2))then
+   if(((-dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.(((-dxr(1)+dxr(2)+dxr(3)).lt.(locta/2))then
+      if(((dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.(((dxr(1)-dxr(2)+dxr(3)).lt.(locta/2))then
+         if(((-dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.(((-dxr(1)-dxr(2)+dxr(3)).lt.(locta/2))then
+            testsystem_cube = -1
+         endif
+      endif
+   endif
 endif
+
+
+!if (((abs(x(1)).lt.(l_cube/2))).and.(abs(x(2)).lt.(l_cube/2)).and.(abs(x(3)).lt.(l_cube/2))) then
+ ! testsystem_cube = -1
+ ! return
 !endif
 
 endif ! testsystem = 0
