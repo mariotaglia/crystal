@@ -81,17 +81,13 @@ if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.((x(1)+x(2)+x(3)).lt.(locta/2)))then
    if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.((-x(1)+x(2)+x(3)).lt.(locta/2)))then
       if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.((x(1)-x(2)+x(3)).lt.(locta/2)))then
          if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.((-x(1)-x(2)+x(3)).lt.(locta/2)))then
-            testsystem_cuboctahedron = -1
+            if(((abs(x(1)).lt.(lcube/2))).and.(abs(x(2)).lt.(lcube/2)).and.(abs(x(3)).lt.(lcube/2))) then
+                 testsystem_cuboctahedron = -1
+            endif
          endif
       endif
    endif
 endif
-
-
-!if (((abs(x(1)).lt.(l_cube/2))).and.(abs(x(2)).lt.(l_cube/2)).and.(abs(x(3)).lt.(l_cube/2))) then
- ! testsystem_cube = -1
- ! return
-!endif
 
 endif ! testsystem = 0
 

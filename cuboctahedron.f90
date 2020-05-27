@@ -202,15 +202,23 @@ if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.((x(1)+x(2)+x(3)).lt.(locta/2)))then
    if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.((-x(1)+x(2)+x(3)).lt.(locta/2)))then
       if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.((x(1)-x(2)+x(3)).lt.(locta/2)))then
          if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.((-x(1)-x(2)+x(3)).lt.(locta/2)))then
-            flagin=.true.
+            if(((abs(x(1)).lt.(lcube/2)).and.(abs(x(2)).lt.(lcube/2))).and.(abs(x(3)).lt.(lcube/2)))then
+               flagin=.true.
+            else
+               flagout=.true.
+            endif
          else
             flagout=.true.
          endif
+      else
+         flagout=.true.
       endif
+   else
+      flagout=.true.
    endif
+else
+   flagout=.true.
 endif
-!if (((abs(x(1)).gt.(l_cube/2)).or.(abs(x(2)).gt.(l_cube/2))).or.(abs(x(3)).gt.(l_cube/2)))flagout=.true.
-!if (((abs(x(1)).lt.(l_cube/2))).and.(abs(x(2)).lt.(l_cube/2)).and.(abs(x(3)).lt.(l_cube/2)))flagin=.true.
 
 enddo
 enddo
@@ -232,7 +240,6 @@ volprot(ix,iy,iz) = voltemp
 enddo ! ix
 enddo ! iy
 enddo ! iz
-
 
 end subroutine
 
@@ -272,7 +279,9 @@ if(((dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)+dxr(2)+dxr(3)).lt.(locta/
    if(((-dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
       if(((dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)-dxr(2)+dxr(3)).lt.(locta/2)))then
          if(((-dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)-dxr(2)+dxr(3)).lt.(locta/2)))then
+            if (((abs(dxr(1)).lt.(lcube/2)).and.(abs(dxr(2)).lt.(lcube/2))).and.(abs(dxr(3)).lt.(lcube/2)))then
             cc=cc+1
+            endif
          endif
       endif
    endif

@@ -397,7 +397,7 @@ do while (ios == 0)
      read(fh, *) eepsc
      NNN = 0
 
-    case(8) !cuboctahedron
+    case(9) !cuboctahedron
      read(fh, *) basura
      read(fh, *) center(1), center(2), center(3) ! center of cuboctahedron
      read(fh, *) basura

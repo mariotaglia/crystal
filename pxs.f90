@@ -21,6 +21,7 @@ integer testsystem
 integer testsystemr
 integer testsystemc
 integer testsystem_cube
+integer testsystem_cuboctahedron
 real*8 maxx(3)
 integer flag
 integer aa
@@ -81,6 +82,17 @@ case (7)
        endif
 
        if(testsystem_cube(x).eq.-2) then ! if testsystem = -2, the polymer goes out-of-system
+         write(stdout,*) 'pxs: out-of-system'
+         stop
+       endif
+
+case(9)
+      if(testsystem_cuboctahedron(x).eq.-1) then ! if testsystem = -1,  there is a collision with all or particle
+         flag = -1
+         exit
+       endif
+
+       if(testsystem_cuboctahedron(x).eq.-2) then ! if testsystem = -2, the polymer goes out-of-system
          write(stdout,*) 'pxs: out-of-system'
          stop
        endif
