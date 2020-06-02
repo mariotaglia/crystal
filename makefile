@@ -7,6 +7,8 @@ SRC = modules.f90 SPmain.f90 channel.f90 PBC.f90 parser.f90 init.f90 allocation.
 HOST=$(shell hostname)
 $(info HOST is ${HOST})
 
+LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
+
 
 ifeq ($(HOST),carapa)
 LFLAGS = -lsundials_fkinsol -lsundials_fnvecserial -lsundials_kinsol -lsundials_nvecserial -lm

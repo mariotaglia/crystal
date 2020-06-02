@@ -70,7 +70,8 @@ ncha = 0
 
  call integrate_cuboctahedron(lcubeS,loctaS,center,npoints,volq1,sumvolq1,flag)
 
- call newintegrateg_cuboctahedron(lcube,locta,center,npoints,volx1,sumvolx1, com1, p1, ncha1, volxx1)
+ npoints = 100
+ call newintegrateg_cuboctahedron(lcube,locta,center,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 
 !! eps
  voleps1 = voleps1-volprot1
@@ -81,7 +82,7 @@ ncha = 0
  temp = sum(volq1)
  volq1 = volq1/temp*echargec/(delta**3) ! sum(volq) is echarge
 
-area = 6.0*lcube**2   !no seeee
+! area = 6.0*lcube**2   !no seeee
 
 !! volume
  volprot1 = volprot1 * 0.9999
@@ -294,20 +295,22 @@ enddo
 intcell_cuboctahedron  = float(cc)/(float(n)**3)
 end function
 
+
 subroutine newintegrateg_cuboctahedron(lcube,locta,center,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 use system
 use transform
 use chainsdat
 use ematrix
 use const
+
 implicit none
 real*8 sumvolx1
-integer l_pol, npoints
+integer npoints
+!real*8 AAA(3,3), AAAX(3,3)
 integer indexvolx(dimx,dimy,dimz)
 integer listvolx(ncha,3)
-real*8 lcube,locta,center(3)
-real*8 l_cube,sep,c_cube(3)
-integer cubeR
+real*8 Rell(3), Aell(3)
+real*8 radio
 real*8 phi, dphi, tetha,dtetha, as, ds
 integer mphi, mtetha
 integer ix,iy,iz,jx,jy,jz
@@ -322,14 +325,10 @@ integer p1(maxvolx,3)
 real*8 volxx1(dimx,dimy,dimz)
 integer flagin
 integer dims(3), is(3), js(3)
-integer jjjz, jjjt, npointz, npointt
-integer RdimZ
+real*8 lcuber, pasoc, pasoo
+real*8 xx, yy, zz
+real*8 vector(3)
 
-pi=acos(-1.0)
-
-dims(1) = dimx
-dims(2) = dimy
-dims(3) = dimz
 
 indexvolx = 0
 ncha1 = 0
@@ -339,28 +338,238 @@ com1 = 0.0
 p1 = 0
 volxx1 = 0.0
 
-! This routine determines the surface coverage and grafting positions only for cube
+! This routine determines the surface coverage and grafting positions only for spheres
 !
-do j = 1,3
-    js(j) = floor(x(j)/delta)+1
+lcuber = lcube/locta
+
+pasoc = delta/float(npoints)/locta
+
+pasoo = pasoc*(1/3)^(1/4) ! % different integration steps are needed to have the same area element
+                          ! % Lets R(u,v) = x(u,v)i + y(u,v)j + z(u,v)k
+                          ! % then dA = dR/du x dR/dv * du*dv
+                          ! % For octahedro x = u, y = v, z = u+v-1
+                          ! % For cube x = v-1, y = 0, z = 0  
+
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!%% OCTAHEDRO
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+xx = 0.0
+
+do while (xx < 1.0)
+    yy = 0.0
+    do while (yy < (1.0-xx))
+    zz = -xx-yy+1
+    
+    if((abs(xx).lt.lcuber).and.(abs(yy).lt.lcuber).and.(abs(zz).lt.lcuber)) then 
+
+       x(1) = xx
+       x(2) = yy
+       x(3) = -xx-yy+1
+       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+
+       x(1) = -xx
+       x(2) = -yy
+       x(3) = -xx-yy+1
+       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        
+       x(1) = -xx
+       x(2) = yy
+       x(3) = -xx-yy+1
+       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        
+       x(1) = xx
+       x(2) = -yy
+       x(3) = -xx-yy+1
+       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+
+       x(1) = xx
+       x(2) = yy
+       x(3) = xx+yy-1
+       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        
+       x(1) = -xx
+       x(2) = -yy
+       x(3) = +xx+yy-1
+       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        
+       x(1) = -xx
+       x(2) = yy
+       x(3) = +xx+yy-1
+       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        
+       x(1) = xx
+       x(2) = -yy
+       x(3) = +xx+yy-1 
+       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+     
+       endif    
+        
+        yy = yy + pasoo
+    enddo    
+    xx = xx + pasoo
 enddo
+
+
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!%% CUBO
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+xx = -lcuber
+do while (xx < lcuber)
+  yy = -lcuber
+  do while (yy < lcuber)
+
+  zz = lcuber    
+        
+  if (((xx+yy+zz).gt.-1.0).and.((xx+yy+zz).lt.1.0)) then
+    if(((-xx+yy+xx).gt.-1.0).and.((-xx+yy+zz).lt.1.0)) then
+       if(((xx-yy+zz).gt.-1.0).and.((xx-yy+zz).lt.1.0)) then 
+          if(((-xx-yy+zz).gt.-1.0).and.((-xx-yy+zz).lt.1.0)) then
+                
+        x(1) = xx
+        x(2) = yy
+        x(3) = lcuber
+        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+
+        x(1) = xx
+        x(2) = yy
+        x(3) = -lcuber
+        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        
+        x(1) = lcuber
+        x(2) = xx
+        x(3) = yy
+        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+
+        x(1) = -lcuber
+        x(2) = xx
+        x(3) = yy
+        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+
+        x(1) = xx
+        x(2) = lcuber
+        x(3) = yy
+        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+
+        x(1) = xx
+        x(2) = -lcuber
+        x(3) = yy
+        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+
+          endif 
+       endif
+    endif
+  endif
+        
+  yy = yy + pasoc
+  enddo  
+  xx = xx + pasoc
+enddo 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Aca termina de tirar puntos en la superficie del cubooctahedro
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+do i = 1, ncha1
+com1(i,:) = com1(i,:)/volx1(i)
+! Moves the position of the first segment lseg/2 away from the surface to prevent collision due to round errors.
+vector(:) = com1(i,:)-centro(:)
+vector(:) = vector(:)/norm2(vector)
+com1(i,:) = com1(i,:) + 1.5*lseg*vector(:)
+enddo
+
+end
+
+
+subroutine integrar_matrices(x, centro, locta, indexvolx, ncha1, p1, volxx1, volx1, com1, sumvolx1)
+implicit none
+use system
+real*8, x(3), centro(3), locta
+integer flagin
+integer j
+integer is(3), js(3), dims(3)
+integer, external :: PBCSYMI
+integer jx,jy,jz
+integer ncha1
+integer indexvolx(dimx,dimy,dimz)
+integer p1(maxvolx,3)
+real*8 volxx1(dimx,dimy,dimz)
+real*8 com1(maxvolx,3)
+real*8 volx1(maxvolx)
+
+x(:) = x(:)*locta/2.0 + centro(:)
+
+dims(1) = dimx
+dims(2) = dimy
+dims(3) = dimz
+
+! x in real space, v in transformed space
+    v = MATMUL(MAT,x)
+
+! PBC
+
+flagin = 1
+
+do j = 1,3
+
+    is(j) = floor(v(j)/delta)+1
+    js(j) = is(j)
+
+select case (PBC((j-1)*2+1))
+  case (0 , 2)
+    if(is(j).lt.1) then
+    write(stdout,*) 'Error in newintegrateg: out of boundary'
+    endif
+  case (1)
+    js(j)=PBCSYMI(is(j), dims(j)) 
+  case (3)
+    if(v(j).lt.0.0)flagin=0
+endselect
+
+select case (PBC((j-1)*2+2))
+  case (0 , 2)
+    if(is(j).gt.dims(j)) then
+    write(stdout,*) 'Error in newintegrateg: out of boundary'
+    endif
+  case (1)
+    js(j)=PBCSYMI(is(j), dims(j)) 
+  case (3)
+    if(v(j).gt.float(dims(j))*delta)flagin=0
+endselect
+enddo
+
 jx = js(1)
 jy = js(2)
 jz = js(3)
 
- !increase counter
- ncha1 = ncha1 + 1
+if(flagin.eq.1) then
 
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'ellipsoid: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
  indexvolx(jx,jy,jz) = ncha1
  p1(ncha1,1)=jx
  p1(ncha1,2)=jy
  p1(ncha1,3)=jz
+endif
 
+! agrega el punto
 volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
 volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
-sumvolx1 = sumvolx1 + 1.0
-com1(ncha1,:) = x(:)
-com1(ncha1,1) = com1(ncha1,1) - lseg/2.0
-com1(ncha1,3) = com1(ncha1,3) + lseg/2.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+endif
 
-end subroutine
+sumvolx1 = sumvolx1 + 1.0
+
+end
+
