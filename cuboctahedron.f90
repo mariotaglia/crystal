@@ -82,7 +82,7 @@ ncha = 0
  temp = sum(volq1)
  volq1 = volq1/temp*echargec/(delta**3) ! sum(volq) is echarge
 
-! area = 6.0*lcube**2   !no seeee
+area = 6.0*lcube**2   !no seeee
 
 !! volume
  volprot1 = volprot1 * 0.9999
@@ -112,15 +112,16 @@ title = 'avpro'
 counter = 1
 call savetodisk(volprot, title, counter)
 
-stop
-
 sumpolseg = ncha
 
 if (verbose.ge.2) then
+
+
 temp = lcube**3 ! no seeee
 !do j = 1, NNN
 !temp = temp + 4.0/3.0*pi*Aell(1,j)*Aell(2,j)*Aell(3,j)
 !enddo
+
 if (rank.eq.0) then
 write(stdout,*) 'cuboctahedron:', 'update_matrix: Total nanocuboct volumen real space= ', temp
 write(stdout,*) 'cuboctahedron:', 'update_matrix: Total discretized volumen =', (sum(volprot))*delta**3
@@ -141,6 +142,8 @@ counter = 1
 title = 'avgrf'
 counter = 1
 call savetodisk(volxx, title, counter)
+
+stop
 
 end subroutine
 
@@ -304,6 +307,7 @@ use ematrix
 use const
 
 implicit none
+real*8 center(3)
 real*8 sumvolx1
 integer npoints
 !real*8 AAA(3,3), AAAX(3,3)
@@ -328,7 +332,7 @@ integer dims(3), is(3), js(3)
 real*8 lcuber, pasoc, pasoo
 real*8 xx, yy, zz
 real*8 vector(3)
-
+real*8 lcube, locta
 
 indexvolx = 0
 ncha1 = 0
@@ -344,7 +348,7 @@ lcuber = lcube/locta
 
 pasoc = delta/float(npoints)/locta
 
-pasoo = pasoc*(1/3)^(1/4) ! % different integration steps are needed to have the same area element
+pasoo = pasoc*(1.0/3.0)**(1.0/4.0) ! % different integration steps are needed to have the same area element
                           ! % Lets R(u,v) = x(u,v)i + y(u,v)j + z(u,v)k
                           ! % then dA = dR/du x dR/dv * du*dv
                           ! % For octahedro x = u, y = v, z = u+v-1
@@ -366,42 +370,42 @@ do while (xx < 1.0)
        x(1) = xx
        x(2) = yy
        x(3) = -xx-yy+1
-       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
        x(1) = -xx
        x(2) = -yy
        x(3) = -xx-yy+1
-       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = yy
        x(3) = -xx-yy+1
-       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = xx
        x(2) = -yy
        x(3) = -xx-yy+1
-       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
        x(1) = xx
        x(2) = yy
        x(3) = xx+yy-1
-       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = -yy
        x(3) = +xx+yy-1
-       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = yy
        x(3) = +xx+yy-1
-       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = xx
        x(2) = -yy
        x(3) = +xx+yy-1 
-       call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
      
        endif    
         
@@ -431,32 +435,32 @@ do while (xx < lcuber)
         x(1) = xx
         x(2) = yy
         x(3) = lcuber
-        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = xx
         x(2) = yy
         x(3) = -lcuber
-        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
         x(1) = lcuber
         x(2) = xx
         x(3) = yy
-        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = -lcuber
         x(2) = xx
         x(3) = yy
-        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = xx
         x(2) = lcuber
         x(3) = yy
-        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = xx
         x(2) = -lcuber
         x(3) = yy
-        call integrar_matrices(x,centro,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
           endif 
        endif
@@ -477,7 +481,7 @@ enddo
 do i = 1, ncha1
 com1(i,:) = com1(i,:)/volx1(i)
 ! Moves the position of the first segment lseg/2 away from the surface to prevent collision due to round errors.
-vector(:) = com1(i,:)-centro(:)
+vector(:) = com1(i,:)-center(:)
 vector(:) = vector(:)/norm2(vector)
 com1(i,:) = com1(i,:) + 1.5*lseg*vector(:)
 enddo
@@ -485,10 +489,13 @@ enddo
 end
 
 
-subroutine integrar_matrices(x, centro, locta, indexvolx, ncha1, p1, volxx1, volx1, com1, sumvolx1)
-implicit none
+subroutine integrar_matrices(x, center, locta, indexvolx, ncha1, p1, volxx1, volx1, com1, sumvolx1)
 use system
-real*8, x(3), centro(3), locta
+use const
+use ematrix
+use transform, only : MAT, IMAT
+implicit none
+real*8 x(3), center(3)
 integer flagin
 integer j
 integer is(3), js(3), dims(3)
@@ -500,8 +507,11 @@ integer p1(maxvolx,3)
 real*8 volxx1(dimx,dimy,dimz)
 real*8 com1(maxvolx,3)
 real*8 volx1(maxvolx)
+real*8 v(3)
+real*8 locta, lcube
+real*8 sumvolx1
 
-x(:) = x(:)*locta/2.0 + centro(:)
+x(:) = x(:)*locta/2.0 + center(:)
 
 dims(1) = dimx
 dims(2) = dimy
