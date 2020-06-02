@@ -70,7 +70,7 @@ ncha = 0
 
  call integrate_cuboctahedron(lcubeS,loctaS,center,npoints,volq1,sumvolq1,flag)
 
- npoints = 100
+ npoints = 200
  call newintegrateg_cuboctahedron(lcube,locta,center,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 
 !! eps
