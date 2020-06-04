@@ -82,7 +82,7 @@ ncha = 0
  temp = sum(volq1)
  volq1 = volq1/temp*echargec/(delta**3) ! sum(volq) is echarge
 
-area = 6.0*lcube**2   !no seeee
+area = 3.0**(1.0/2.0)*locta**2 + 6.0*(1.0-2.0**(1.0/2.0))*(locta - lcube)**2.0
 
 !! volume
  volprot1 = volprot1 * 0.9999
@@ -116,8 +116,8 @@ sumpolseg = ncha
 
 if (verbose.ge.2) then
 
-
-temp = lcube**3 ! no seeee
+!temp = volume of cuboctahedron
+temp = (1.0/6.0)*locta**3 - (locta -lcube)**3
 !do j = 1, NNN
 !temp = temp + 4.0/3.0*pi*Aell(1,j)*Aell(2,j)*Aell(3,j)
 !enddo
@@ -277,7 +277,6 @@ dxr(1) = dxr(1) - center(1)
 dxr(2) = dxr(2) - center(2)
 dxr(3) = dxr(3) - center(3)
 
-!if (((abs(dxr(1)).lt.(l_cube/2)).and.(abs(dxr(2)).lt.(l_cube/2))).and.(abs(dxr(3)).lt.(l_cube/2)))cc=cc+1 ! integra dentro del cubo
 
 if(((dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
    if(((-dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
@@ -297,7 +296,6 @@ enddo
 
 intcell_cuboctahedron  = float(cc)/(float(n)**3)
 end function
-
 
 subroutine newintegrateg_cuboctahedron(lcube,locta,center,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 use system
@@ -342,8 +340,7 @@ com1 = 0.0
 p1 = 0
 volxx1 = 0.0
 
-! This routine determines the surface coverage and grafting positions only for spheres
-!
+! This routine determines the surface coverage and grafting positions only for cuboctahedron!
 lcuber = lcube/locta
 
 pasoc = delta/float(npoints)/locta
