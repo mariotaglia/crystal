@@ -1,7 +1,7 @@
-subroutine allocateell
+subroutine allocateellCO
 
 use system 
-use cuboctahedron
+use ellipsoid
 
 ! cuboctahedron
 ALLOCATE (Rellf(3,NNN))

@@ -15,7 +15,6 @@ use s2d
 use channel
 use branches
 use cube
-use cuboctahedron
 implicit none
 
 ! Input related variables

@@ -1,6 +1,6 @@
 subroutine update_matrix_cuboctahedron(flag)
 use system
-use cuboctahedron !cuidado agregar channel quizas
+use ellipsoid !cuidado agregar channel quizas
 use ematrix
 use MPI
 use const
