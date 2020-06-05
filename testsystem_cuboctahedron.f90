@@ -78,7 +78,7 @@ enddo
 
 do j = 1, NNN
 
-xx(:) = x(:) - Rell(:,j) ! distance to center of CO
+xx(:) = x(:) - Rellf(:,j) ! distance to center of CO
 
 v = xx
 xx = MATMUL(MAT,v) ! to transformed space
