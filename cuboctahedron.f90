@@ -37,17 +37,11 @@ real*8 volxx(dimx,dimy,dimz)
 real*8 x(3), v(3), hcyl
 integer nbands
 
+sumpolseg = 0.0
 cutarea = 0.0 ! throw away cells that have less area than cutarea x area of the cell with largest area  
 
-do j=1,NNN ! loop ovr the particles
 
-sumpolseg = 0.0
-lcubeL = Lcubell(j) + 0.1*delta !verificar el 0.1
-lcubeS = Lcubell(j) - 0.1*delta
-loctaL = Loctall(j) + 0.1*delta
-loctaS = Loctall(j) - 0.1*delta
-
-! clear all
+! clear all (variables for the sum from all CO)
 voleps = 0.0
 volprot = 0.0
 volq = 0.0
@@ -56,7 +50,12 @@ volxx = 0.0
 com = 0.0
 ncha = 0
 
- npoints = 50
+do j=1,NNN ! loop ovr the particles
+
+lcubeL = Lcubell(j) + 0.1*delta !verificar el 0.1
+lcubeS = Lcubell(j) - 0.1*delta
+loctaL = Loctall(j) + 0.1*delta
+loctaS = Loctall(j) - 0.1*delta
 
  flag = .false.
 
@@ -66,12 +65,15 @@ ncha = 0
  center(2) = Rellf(2,j)
  center(3) = Rellf(3,j)
 
+ npoints = 50
  call integrate_cuboctahedron(lcubeL,loctaL,center,npoints,voleps1,sumvoleps1,flag)
 
  flag = .false. ! not a problem if eps lays outside boundaries
  
+ npoints = 50
  call integrate_cuboctahedron(Lcubell(j),Loctall(j),center,npoints,volprot1,sumvolprot1,flag)
 
+ npoints = 50
  call integrate_cuboctahedron(lcubeS,loctaS,center,npoints,volq1,sumvolq1,flag)
 
  npoints = 200
@@ -87,6 +89,15 @@ ncha = 0
  volq1 = volq1/temp*echarge(j)/(delta**3) ! sum(volq) is echarge
 
 area = 3.0**(1.0/2.0)*Loctall(j)**2 + 6.0*(1.0-2.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0
+
+!! Normalize volx1 and volxx1 so that the integral is equal to the total number of ligands on the CO j
+
+ volx1 = volx1/sumvolx1*area*sigma(j)
+ volxx1 = volxx1/sumvolx1*area*sigma(j)
+
+!! Sum of number of polymer segments
+
+ sumpolseg = sumpolseg + area*sigma(j)*long
 
 !! volume
  volprot1 = volprot1 * 0.9999
@@ -104,25 +115,25 @@ area = 3.0**(1.0/2.0)*Loctall(j)**2 + 6.0*(1.0-2.0**(1.0/2.0))*(Loctall(j) - Lcu
 
  volxx = volxx + volxx1 !actualizo volxx, verificar
 
-ncha = ncha1
-do i = 1, ncha
-volx(i)=volx1(i)
-com(i,:)=com1(i,:)
-p0(i,:)=p1(i,:)
-rotangle(i) = 0.0
+do i = 1, ncha1
+ncha = ncha + 1
+volx(ncha)=volx1(i)
+com(ncha,:)=com1(i,:)
+p0(ncha,:)=p1(i,:)
 enddo
 
 enddo ! NNN
 
+! save total CO density
 title = 'avpro'
 counter = 1
 call savetodisk(volprot, title, counter)
 
-sumpolseg = ncha
-
+! print information summary 
 if (verbose.ge.2) then
 
 !temp = volume of cuboctahedron
+temp = 0.0
 do j = 1, NNN
    temp = temp + (1.0/6.0)*Loctall(j)**3 - (Loctall(j) -Lcubell(j))**3
 enddo
@@ -130,19 +141,19 @@ enddo
 if (rank.eq.0) then
 write(stdout,*) 'cuboctahedron:', 'update_matrix: Total nanocuboct volumen real space= ', temp
 write(stdout,*) 'cuboctahedron:', 'update_matrix: Total discretized volumen =', (sum(volprot))*delta**3
-write(stdout,*) 'cuboctahedron:', 'number of polymers in system =', sumpolseg
-write(stdout,*) 'cuboctahedron:', 'surface area =', area
-write(stdout,*) 'cuboctahedron:', 'surface density =', sumpolseg/area
+write(stdout,*) 'cuboctahedron:', 'total number of segments in system =', sumpolseg
 endif
 endif
+
+
 
 title = 'aveps'
 counter = 1
-!call savetodisk(voleps, title, counter)
+call savetodisk(voleps, title, counter)
 
 title = 'avcha'
 counter = 1
-!call savetodisk(volq, title, counter)
+call savetodisk(volq, title, counter)
 
 title = 'avgrf'
 counter = 1
