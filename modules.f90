@@ -113,9 +113,17 @@ integer cubeR
 endmodule
 
 module cuboctahedron
-real*8 center(3)
-real*8 locta
-real*8 lcube
+integer NNN
+real*8, allocatable :: Rell(:,:)
+real*8, allocatable :: Rellf(:,:)
+real*8, allocatable :: Loctall(:)
+real*8, allocatable :: Lcubell(:)
+real*8, allocatable :: echarge(:)
+real*8, allocatable :: sigma(:)
+real*8, allocatable :: eeps(:)
+!real*8 center(3)
+!real*8 locta
+!real*8 lcube
 endmodule
 
 module mmask

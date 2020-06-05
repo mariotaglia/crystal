@@ -1,5 +1,6 @@
 subroutine allocateell
 
+use system 
 use ellipsoid
 
 ! ellipsoid
@@ -18,5 +19,4 @@ ALLOCATE (orient(3, NNN))
 ALLOCATE (echarge(NNN))
 ALLOCATE (sigma(NNN))
 ALLOCATE (eeps(NNN))
-
 end subroutine

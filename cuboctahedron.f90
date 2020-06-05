@@ -6,7 +6,7 @@ use MPI
 use const
 use chainsdat
 use molecules
-use channel
+!use channel
 use transform, only : MAT, IMAT
 use rotchain
 
@@ -18,6 +18,7 @@ character*5 title
 logical flag
 integer j,ix,iy,iz
 real*8 lcubeL, lcubeS, loctaL, loctaS
+real*8 center(3)
 real pnumber
 real*8 area
 real*8 sumpolseg 
@@ -36,13 +37,15 @@ real*8 volxx(dimx,dimy,dimz)
 real*8 x(3), v(3), hcyl
 integer nbands
 
-
 cutarea = 0.0 ! throw away cells that have less area than cutarea x area of the cell with largest area  
+
+do j=1,NNN ! loop ovr the particles
+
 sumpolseg = 0.0
-lcubeL = lcube + 2*delta
-lcubeS = lcube - 2*delta
-loctaL = locta + 2*delta
-loctaS = locta - 2*delta
+lcubeL = Lcubell(j) + 0.1*delta !verificar el 0.1
+lcubeS = Lcubell(j) - 0.1*delta
+loctaL = Loctall(j) + 0.1*delta
+loctaS = Loctall(j) - 0.1*delta
 
 ! clear all
 voleps = 0.0
@@ -53,36 +56,37 @@ volxx = 0.0
 com = 0.0
 ncha = 0
 
-! channel center in x, y plane
-
- originc(1) = float(dimx)*delta/2.0 
- originc(2) = float(dimy)*delta/2.0 
-
  npoints = 50
 
  flag = .false.
+
+ !change center 
+
+ center(1) = Rellf(1,j) 
+ center(2) = Rellf(2,j)
+ center(3) = Rellf(3,j)
 
  call integrate_cuboctahedron(lcubeL,loctaL,center,npoints,voleps1,sumvoleps1,flag)
 
  flag = .false. ! not a problem if eps lays outside boundaries
  
- call integrate_cuboctahedron(lcube,locta,center,npoints,volprot1,sumvolprot1,flag)
+ call integrate_cuboctahedron(Lcubell(j),Loctall(j),center,npoints,volprot1,sumvolprot1,flag)
 
  call integrate_cuboctahedron(lcubeS,loctaS,center,npoints,volq1,sumvolq1,flag)
 
  npoints = 200
- call newintegrateg_cuboctahedron(lcube,locta,center,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
+ call newintegrateg_cuboctahedron(Lcubell(j),Loctall(j),center,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 
 !! eps
  voleps1 = voleps1-volprot1
- voleps1 = voleps1*eepsc
+ voleps1 = voleps1*eeps(j)
 
 !! charge
  volq1 = volprot1-volq1
  temp = sum(volq1)
- volq1 = volq1/temp*echargec/(delta**3) ! sum(volq) is echarge
+ volq1 = volq1/temp*echarge(j)/(delta**3) ! sum(volq) is echarge
 
-area = 3.0**(1.0/2.0)*locta**2 + 6.0*(1.0-2.0**(1.0/2.0))*(locta - lcube)**2.0
+area = 3.0**(1.0/2.0)*Loctall(j)**2 + 6.0*(1.0-2.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0
 
 !! volume
  volprot1 = volprot1 * 0.9999
@@ -98,7 +102,7 @@ area = 3.0**(1.0/2.0)*locta**2 + 6.0*(1.0-2.0**(1.0/2.0))*(locta - lcube)**2.0
 
 ! add com1 and volx to list
 
- volxx = volxx1
+ volxx = volxx + volxx1 !actualizo volxx, verificar
 
 ncha = ncha1
 do i = 1, ncha
@@ -107,6 +111,8 @@ com(i,:)=com1(i,:)
 p0(i,:)=p1(i,:)
 rotangle(i) = 0.0
 enddo
+
+enddo ! NNN
 
 title = 'avpro'
 counter = 1
@@ -117,10 +123,9 @@ sumpolseg = ncha
 if (verbose.ge.2) then
 
 !temp = volume of cuboctahedron
-temp = (1.0/6.0)*locta**3 - (locta -lcube)**3
-!do j = 1, NNN
-!temp = temp + 4.0/3.0*pi*Aell(1,j)*Aell(2,j)*Aell(3,j)
-!enddo
+do j = 1, NNN
+   temp = temp + (1.0/6.0)*Loctall(j)**3 - (Loctall(j) -Lcubell(j))**3
+enddo
 
 if (rank.eq.0) then
 write(stdout,*) 'cuboctahedron:', 'update_matrix: Total nanocuboct volumen real space= ', temp

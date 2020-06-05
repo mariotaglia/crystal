@@ -398,17 +398,47 @@ do while (ios == 0)
      NNN = 0
 
     case(9) !cuboctahedron
+     
      read(fh, *) basura
-     read(fh, *) center(1), center(2), center(3) ! center of cuboctahedron
+     read(fh, *) NNN
+
+     call allocateellCO
+
      read(fh, *) basura
-     read(fh, *) locta ! octahedron large
+     do j = 1, NNN
+        read(fh, *) Rellf(1,j), Rellf(2,j), Rellf(3,j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'pos to',  Rellf(1,j), Rellf(2,j), Rellf(3,j)
+     enddo
+
      read(fh, *) basura
-     read(fh, *) lcube ! cube large
+     do j = 1, NNN
+        read(fh, *) Loctall(j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'octahedron size to',  Loctall(j)
+     enddo
+     
      read(fh, *) basura
-     read(fh, *) echargec
+     do j = 1, NNN
+        read(fh, *) Lcubell(j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'cube size to',  Lcubell(j)
+     enddo
+
      read(fh, *) basura
-     read(fh, *) eepsc
-     NNN = 0
+     do j = 1, NNN
+        read(fh, *) sigma(j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'surface coverage to', sigma(j)
+     enddo
+
+     read(fh, *) basura
+     do j = 1, NNN
+        read(fh, *) echarge(j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'charge to', echarge(j)
+     enddo
+
+     read(fh, *) basura
+     do j = 1, NNN
+        read(fh, *) eeps(j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'hydrophobicity to', eeps(j)
+     enddo
 
     case(42, 52) ! 42: channel, 52: rod
      read(fh, *) basura
