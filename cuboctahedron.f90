@@ -36,6 +36,7 @@ real*8 volxx1(dimx,dimy,dimz)
 real*8 volxx(dimx,dimy,dimz)
 real*8 x(3), v(3), hcyl
 integer nbands
+real*8 COvol
 
 sumpolseg = 0.0
 cutarea = 0.0 ! throw away cells that have less area than cutarea x area of the cell with largest area  
@@ -88,7 +89,7 @@ loctaS = Loctall(j) - 0.1*delta
  temp = sum(volq1)
  volq1 = volq1/temp*echarge(j)/(delta**3) ! sum(volq) is echarge
 
-area = 3.0**(1.0/2.0)*Loctall(j)**2 + 6.0*(1.0-2.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0
+ area = 3.0**(1.0/2.0)*Loctall(j)**2 + 6.0*(1.0-2.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0
 
 !! Normalize volx1 and volxx1 so that the integral is equal to the total number of ligands on the CO j
 
@@ -133,19 +134,23 @@ call savetodisk(volprot, title, counter)
 if (verbose.ge.2) then
 
 !temp = volume of cuboctahedron
-temp = 0.0
+COvol = 0.0
 do j = 1, NNN
-   temp = temp + (1.0/6.0)*Loctall(j)**3 - (Loctall(j) -Lcubell(j))**3
+   COvol = COvol + (1.0/6.0)*Loctall(j)**3 - (Loctall(j) -Lcubell(j))**3
 enddo
 
 if (rank.eq.0) then
-write(stdout,*) 'cuboctahedron:', 'update_matrix: Total nanocuboct volumen real space= ', temp
-write(stdout,*) 'cuboctahedron:', 'update_matrix: Total discretized volumen =', (sum(volprot))*delta**3
+write(stdout,*) 'cuboctahedron:', 'Total nanocuboct volumen real space= ', COvol
+write(stdout,*) 'cuboctahedron:', 'Total discretized volumen =', (sum(volprot))*delta**3
 write(stdout,*) 'cuboctahedron:', 'total number of segments in system =', sumpolseg
 endif
 endif
 
-
+do j = 1, NNN
+ area = 3.0**(1.0/2.0)*Loctall(j)**2 + 6.0*(1.0-2.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0
+ if (rank.eq.0) write(stdout,*) 'cuboctahedron:', ' Total nanocuboct #',j,' area', area
+enddo
+!
 
 title = 'aveps'
 counter = 1
@@ -163,105 +168,6 @@ stop
 
 end subroutine
 
-subroutine integrate_cuboctahedron(lcube,locta,center,npoints,volprot,sumvolprot,flag)
-use system
-use transform
-
-implicit none
-real*8 sumvolprot
-integer npoints
-real*8 lcube, locta
-real*8 center(3)
-real*8 volprot(dimx,dimy,dimz)
-real*8 dr(3), dxr(3)
-integer ix,iy,iz,ax,ay,az
-real*8 vect
-logical flagin, flagout
-real*8 intcell_cuboctahedron
-real*8 mmmult
-integer jx,jy, jz
-logical flag
-integer RdimZ
-real*8 box(4)
-real*8 x(3), v(3)
-integer xmin,xmax,ymin,ymax,zmin,zmax
-integer i,j
-
-logical flagsym
-real*8 voltemp
-
-volprot = 0.0
-sumvolprot = 0.0 ! total volumen, including that outside the system
-
-! scan over all cells
-
-do ix = 1, dimx
-do iy = 1, dimy
-do iz = 1, dimz
-
-flagin = .false.
-flagout = .false.
-
-do ax = 0,1
-do ay = 0,1
-do az = 0,1
-
-! v in transformed space
-v(1) = float(ax+ix-1)*delta
-v(2) = float(ay+iy-1)*delta
-v(3) = float(az+iz-1)*delta
-
-! x in real space, v in transformed space
-    x = MATMUL(IMAT,v)
-
-x(1) = x(1) - center(1)
-x(2) = x(2) - center(2)
-x(3) = x(3) - center(3)
-
-if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.((x(1)+x(2)+x(3)).lt.(locta/2)))then
-   if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.((-x(1)+x(2)+x(3)).lt.(locta/2)))then
-      if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.((x(1)-x(2)+x(3)).lt.(locta/2)))then
-         if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.((-x(1)-x(2)+x(3)).lt.(locta/2)))then
-            if(((abs(x(1)).lt.(lcube/2)).and.(abs(x(2)).lt.(lcube/2))).and.(abs(x(3)).lt.(lcube/2)))then
-               flagin=.true.
-            else
-               flagout=.true.
-            endif
-         else
-            flagout=.true.
-         endif
-      else
-         flagout=.true.
-      endif
-   else
-      flagout=.true.
-   endif
-else
-   flagout=.true.
-endif
-
-enddo
-enddo
-enddo
-
-if((flagin.eqv..true.).and.(flagout.eqv..false.)) then ! cell all inside channel
-    voltemp = 1.0
-endif
-if((flagin.eqv..false.).and.(flagout.eqv..true.)) then ! cell all outside channel
-    voltemp = 0.0
-endif
-if((flagin.eqv..true.).and.(flagout.eqv..true.)) then ! cell part inside annd outside channel
-    voltemp = intcell_cuboctahedron(lcube,locta,center,ix,iy,iz,npoints)
-endif
-
-sumvolprot = sumvolprot + voltemp
-volprot(ix,iy,iz) = voltemp
-
-enddo ! ix
-enddo ! iy
-enddo ! iz
-
-end subroutine
 
 double precision function intcell_cuboctahedron(lcube,locta,center,ix,iy,iz,n)
 use system
@@ -595,4 +501,253 @@ endif
 sumvolx1 = sumvolx1 + 1.0
 
 end
+
+
+
+subroutine integrate_cuboctahedron(lcube,locta,center,npoints,volprot,sumvolprot,flag)
+use system
+use transform
+use const
+implicit none
+real*8 sumvolprot
+integer npoints
+real*8 lcube, locta
+real*8 center(3)
+real*8 volprot(dimx,dimy,dimz)
+real*8 dr(3), dxr(3)
+integer ix,iy,iz,ax,ay,az
+real*8 vect
+logical flagin, flagout
+real*8 intcell_cuboctahedron
+real*8 mmmult
+integer jx,jy, jz
+logical flag
+integer RdimZ
+real*8 box(4)
+real*8 x(3), v(3)
+integer xmin,xmax,ymin,ymax,zmin,zmax
+integer i,j
+real*8 maxAell
+logical flagsym
+real*8 voltemp
+real*8 Rpos(3)
+
+
+volprot = 0.0
+sumvolprot = 0.0 ! total volumen, including that outside the system
+maxAell = locta/2.0 ! maximum size CO
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! create a box in transformed coordinate enclosing the CO
+Rpos(1) = center(1)
+Rpos(2) = center(2)
+Rpos(3) = center(3)
+
+!!!!!!!!!!!!!!!! xmin !!!!!!!!!!!!!!!
+x(1) = Rpos(1)-maxAell
+do j = 1, 2
+do i = 1, 2
+x(2) = Rpos(2)+maxAell*(-1.0)**j
+x(3) = Rpos(3)+maxAell*(-1.0)**i
+v = MATMUL(MAT,x)
+box(i+2*(j-1)) = v(1)
+enddo
+enddo
+xmin = int(minval(box)/delta)-2
+!!!!!!!!!!!!!! xmax !!!!!!!!!!!!!!!!!!!!!1
+x(1) = Rpos(1)+maxAell
+do j = 1, 2
+do i = 1, 2
+x(2) = Rpos(2)+maxAell*(-1.0)**j
+x(3) = Rpos(3)+maxAell*(-1.0)**i
+v = MATMUL(MAT,x)
+box(i+2*(j-1)) = v(1)
+enddo
+enddo
+xmax = int(maxval(box)/delta)+2
+!!!!!!!!!!!!!!!! ymin !!!!!!!!!!!!!!!
+x(2) = Rpos(2)-maxAell
+do j = 1, 2
+do i = 1, 2
+x(1) = Rpos(1)+maxAell*(-1.0)**j
+x(3) = Rpos(3)+maxAell*(-1.0)**i
+v = MATMUL(MAT,x)
+box(i+2*(j-1)) = v(2)
+enddo
+enddo
+ymin = int(minval(box)/delta)-2
+!!!!!!!!!!!!!!!! ymax !!!!!!!!!!!!!!!
+x(2) = Rpos(2)+maxAell
+do j = 1, 2
+do i = 1, 2
+x(1) = Rpos(1)+maxAell*(-1.0)**j
+x(3) = Rpos(3)+maxAell*(-1.0)**i
+v = MATMUL(MAT,x)
+box(i+2*(j-1)) = v(2)
+enddo
+enddo
+ymax = int(maxval(box)/delta)+2
+!!!!!!!!!!!!!!!! zmin !!!!!!!!!!!!!!!
+x(3) = Rpos(3)-maxAell
+do j = 1, 2
+do i = 1, 2
+x(1) = Rpos(1)+maxAell*(-1.0)**j
+x(2) = Rpos(2)+maxAell*(-1.0)**i
+v = MATMUL(MAT,x)
+box(i+2*(j-1)) = v(3)
+enddo
+enddo
+zmin = int(minval(box)/delta)-2
+!!!!!!!!!!!!!!!! zmax !!!!!!!!!!!!!!!
+x(3) = Rpos(3)+maxAell
+do j = 1, 2
+do i = 1, 2
+x(1) = Rpos(1)+maxAell*(-1.0)**j
+x(2) = Rpos(2)+maxAell*(-1.0)**i
+v = MATMUL(MAT,x)
+box(i+2*(j-1)) = v(3)
+enddo
+enddo
+zmax = int(maxval(box)/delta)+2
+
+! Make a list of the cells that have no CO, those that have part CO and those that have full CO
+! Consider boundary conditions
+
+do ix = xmin, xmax
+do iy = ymin, ymax
+do iz = zmin, zmax
+
+jx=ix
+jy=iy
+jz=iz
+
+if(PBC(1).eq.1) then
+ jx=mod(ix+dimx-1,dimx)+1
+endif
+if(PBC(3).eq.1) then
+ jy=mod(iy+dimy-1,dimy)+1
+endif
+if(PBC(5).eq.1) then
+ jz=mod(iz+dimz-1,dimz)+1
+endif
+
+flagin=.false.
+flagout=.false.
+
+do ax = 0,1
+do ay = 0,1
+do az = 0,1
+
+! v in transformed space
+v(1) = float(ax+ix-1)*delta
+v(2) = float(ay+iy-1)*delta
+v(3) = float(az+iz-1)*delta
+
+! x in real space, v in transformed space
+    x = MATMUL(IMAT,v)
+
+x(1) = x(1) - center(1)
+x(2) = x(2) - center(2)
+x(3) = x(3) - center(3)
+
+if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.((x(1)+x(2)+x(3)).lt.(locta/2)))then
+   if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.((-x(1)+x(2)+x(3)).lt.(locta/2)))then
+      if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.((x(1)-x(2)+x(3)).lt.(locta/2)))then
+         if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.((-x(1)-x(2)+x(3)).lt.(locta/2)))then
+            if(((abs(x(1)).lt.(lcube/2)).and.(abs(x(2)).lt.(lcube/2))).and.(abs(x(3)).lt.(lcube/2)))then
+               flagin=.true.
+            else
+               flagout=.true.
+            endif
+         else
+            flagout=.true.
+         endif
+      else
+         flagout=.true.
+      endif
+   else
+      flagout=.true.
+   endif
+else
+   flagout=.true.
+endif
+
+enddo
+enddo
+enddo
+
+!! Check particle out of system
+
+
+    flagsym = .false.
+    if (jx.lt.1) then
+       if(PBC(1).ne.3) then
+         write(stdout,*) 'cuboctahedron:','update_matrix: ix', ix
+         stop
+       else
+         flagsym = .true.
+       endif
+    endif
+    if (jy.lt.1) then
+       if(PBC(3).ne.3) then
+         write(stdout,*) 'cuboctahedron:','update_matrix: iy', iy
+         stop
+       else
+         flagsym = .true.
+       endif
+    endif
+    if (jz.lt.1) then
+       if(PBC(5).ne.3) then
+         write(stdout,*) 'cuboctahedron:','update_matrix: iz', iz
+         stop
+       else
+         flagsym = .true.
+       endif
+    endif
+    if (jx.gt.dimx) then
+       if(PBC(2).ne.3) then
+         write(stdout,*) 'cuboctahedron:','update_matrix: ix', ix
+         stop
+       else
+         flagsym = .true.
+       endif
+    endif
+    if (jy.gt.dimy) then
+       if(PBC(4).ne.3) then
+         write(stdout,*) 'cuboctahedron:','update_matrix: iy', iy
+         stop
+       else
+         flagsym = .true.
+       endif
+    endif
+    if (jz.gt.dimz) then
+       if(PBC(6).ne.3) then
+         write(stdout,*) 'cuboctahdron:','update_matrix: iz', iz
+         stop
+       else
+         flagsym = .true.
+       endif
+    endif
+
+if(flagsym.eqv..false.) then  ! cell is not out of system due to reflection symmetry
+if((flagin.eqv..true.).and.(flagout.eqv..false.)) then ! cell all inside channel
+    voltemp = 1.0
+endif
+if((flagin.eqv..false.).and.(flagout.eqv..true.)) then ! cell all outside channel
+    voltemp = 0.0
+endif
+if((flagin.eqv..true.).and.(flagout.eqv..true.)) then ! cell part inside annd outside channel
+    voltemp = intcell_cuboctahedron(lcube,locta,center,ix,iy,iz,npoints)
+endif
+
+sumvolprot = sumvolprot + voltemp
+volprot(jx,jy,jz) = voltemp
+endif ! flagsym
+
+
+enddo ! ix
+enddo ! iy
+enddo ! iz
+
+end subroutine
 
