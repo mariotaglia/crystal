@@ -62,9 +62,9 @@ loctaS = Loctall(j) - 0.1*delta
 
  !change center 
 
- center(1) = Rellf(1,j) 
- center(2) = Rellf(2,j)
- center(3) = Rellf(3,j)
+ center(1) = Rell(1,j) 
+ center(2) = Rell(2,j)
+ center(3) = Rell(3,j)
 
  npoints = 50
  call integrate_cuboctahedron(lcubeL,loctaL,center,npoints,voleps1,sumvoleps1,flag)
@@ -136,7 +136,7 @@ if (verbose.ge.2) then
 !temp = volume of cuboctahedron
 COvol = 0.0
 do j = 1, NNN
-   COvol = COvol + (1.0/6.0)*Loctall(j)**3 - (Loctall(j) -Lcubell(j))**3
+   COvol = COvol + (1.0/6.0)*Loctall(j)**3 - 0.5*(Loctall(j) -Lcubell(j))**3
 enddo
 
 if (rank.eq.0) then
@@ -147,7 +147,8 @@ endif
 endif
 
 do j = 1, NNN
- area = 3.0**(1.0/2.0)*Loctall(j)**2 + 6.0*(1.0-2.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0
+ area = 3.0**(1.0/2.0)*Loctall(j)**2 + 3.0*(1.0-3.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0 ! MARIO
+! area = 3.0**(1.0/2.0)*Loctall(j)**2 + 6.0*(1.0-2.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0 ! LEO
  if (rank.eq.0) write(stdout,*) 'cuboctahedron:', ' Total nanocuboct #',j,' area', area
 enddo
 !
@@ -163,8 +164,6 @@ call savetodisk(volq, title, counter)
 title = 'avgrf'
 counter = 1
 call savetodisk(volxx, title, counter)
-
-stop
 
 end subroutine
 
