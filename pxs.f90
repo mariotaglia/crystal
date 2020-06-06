@@ -192,12 +192,6 @@ endselect
             enddo
     endif
 
-
-if(newcuantas(jj).eq.0)then
-  print*, 'pxs: newcuantas for ', jj, ' equal zero. Stop'
-  stop
-endif
-
 enddo ! jj
 return
 end

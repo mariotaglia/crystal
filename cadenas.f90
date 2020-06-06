@@ -78,7 +78,7 @@ endselect
 enddo
 
 ! do il = 1, ncha
-! write(stdout,*) 'creador:', newcuantas(il)
+! write(stdout,*) 'creador:', il, newcuantas(il)
 ! enddo
 ! stop
 
