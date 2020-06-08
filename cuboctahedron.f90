@@ -89,7 +89,7 @@ loctaS = Loctall(j) - 0.1*delta
  temp = sum(volq1)
  volq1 = volq1/temp*echarge(j)/(delta**3) ! sum(volq) is echarge
 
- area = 3.0**(1.0/2.0)*Loctall(j)**2 + 6.0*(1.0-2.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0
+ area =  3.0**(1.0/2.0)*Loctall(j)**2 + 3.0*(1.0-3.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0 ! MARIO
 
 !! Normalize volx1 and volxx1 so that the integral is equal to the total number of ligands on the CO j
 
