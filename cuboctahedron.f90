@@ -53,10 +53,10 @@ ncha = 0
 
 do j=1,NNN ! loop ovr the particles
 
-lcubeL = Lcubell(j) + 0.1*delta !verificar el 0.1
-lcubeS = Lcubell(j) - 0.1*delta
-loctaL = Loctall(j) + 0.1*delta
-loctaS = Loctall(j) - 0.1*delta
+lcubeL = Lcubell(j) + delta 
+lcubeS = Lcubell(j) - delta
+loctaL = Loctall(j) + delta
+loctaS = Loctall(j) - delta
 
  flag = .false.
 
