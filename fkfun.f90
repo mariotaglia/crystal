@@ -548,6 +548,10 @@ if(verbose.ge.3) then
 if(rank.eq.0)write(stdout,*)'fkfun:', iter, norma, q(1)
 endif
 
+if(.not.((norma.gt.0).or.(norma.lt.0))) then
+stop
+endif 
+
 3333 continue
 ier2 = 0.0 
 

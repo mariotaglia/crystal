@@ -147,10 +147,10 @@ real*8 shift
 endmodule
 
 module conformations
-integer*2, allocatable :: px(:,:,:)
-integer*2, allocatable :: py(:,:,:)
-integer*2, allocatable :: pz(:,:,:)
-integer*2, allocatable :: ngauche(:,:)
+integer*1, allocatable :: px(:,:,:)
+integer*1, allocatable :: py(:,:,:)
+integer*1, allocatable :: pz(:,:,:)
+integer*1, allocatable :: ngauche(:,:)
 endmodule
 
 module MPI

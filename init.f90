@@ -233,7 +233,7 @@ if(rank.eq.0) then ! solo el jefe escribe a disco....
 ! save volprot for supercell
 
 if(rank.eq.0) then
-open (unit=8, file='out.par', form='unformatted')
+!open (unit=8, file='out.par', form='unformatted')
 do ix=1,dimx
  do iy=1,dimy
   do iz=1,dimz
@@ -241,8 +241,8 @@ do ix=1,dimx
   enddo
  enddo
 enddo
-write(8)xpar
-close(8)
+!write(8)xpar
+!close(8)
 endif
 
 ! system
@@ -307,12 +307,12 @@ close(8)
 endif
 
 if(rank.eq.0) then
-write(filename,'(A4, I3.3, A4)')'out.', counter, '.dat'
-open(unit=8, file=filename, form='unformatted')
-write(8)counter
-write(8)free_energy
-write(8)xflag
-close(8)
+!write(filename,'(A4, I3.3, A4)')'out.', counter, '.dat'
+!open(unit=8, file=filename, form='unformatted')
+!write(8)counter
+!write(8)free_energy
+!write(8)xflag
+!close(8)
 endif
 end subroutine
 
