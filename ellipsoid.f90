@@ -39,9 +39,9 @@ do j = 1, NNN
  orient(:,j) = 0
  orient(1,j) = 1.0
 
- AellL(1,j) = Aell(1,j)+delta
- AellL(2,j) = Aell(2,j)+delta
- AellL(3,j) = Aell(3,j)+delta
+ AellL(1,j) = Aell(1,j)-delta
+ AellL(2,j) = Aell(2,j)-delta
+ AellL(3,j) = Aell(3,j)-delta
 
  AellS(1,j) = Aell(1,j)-delta
  AellS(2,j) = Aell(2,j)-delta
