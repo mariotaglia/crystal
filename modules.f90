@@ -237,6 +237,7 @@ real*8, allocatable :: eeps(:)
 ! cubooctahedron only
 real*8, allocatable :: Loctall(:)
 real*8, allocatable :: Lcubell(:)
+real*8, allocatable :: rotmatCO(:,:,:)
 
 end module
 

@@ -420,6 +420,13 @@ do while (ios == 0)
         read(fh, *) Lcubell(j)
      if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'cube size to',  Lcubell(j)
      enddo
+     
+     read(fh, *) basura
+     do j = 1, NNN
+      read(fh, *) rotmatCO(1,1,j), rotmatCO(1,2,j), rotmatCO(1,3,j)
+      read(fh, *) rotmatCO(2,1,j), rotmatCO(2,2,j), rotmatCO(2,3,j)
+      read(fh, *) rotmatCO(3,1,j), rotmatCO(3,2,j), rotmatCO(3,3,j)
+     enddo
 
      read(fh, *) basura
      do j = 1, NNN
