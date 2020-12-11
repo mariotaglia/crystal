@@ -65,20 +65,20 @@ loctaS = Loctall(j) - delta
  center(1) = Rell(1,j) 
  center(2) = Rell(2,j)
  center(3) = Rell(3,j)
-
+ 
  npoints = 50
- call integrate_cuboctahedron(lcubeL,loctaL,center,npoints,voleps1,sumvoleps1,flag)
+ call integrate_cuboctahedron(lcubeL,loctaL,center,rotmatCO(:,:,j),npoints,voleps1,sumvoleps1,flag)
 
  flag = .false. ! not a problem if eps lays outside boundaries
  
  npoints = 50
- call integrate_cuboctahedron(Lcubell(j),Loctall(j),center,npoints,volprot1,sumvolprot1,flag)
+ call integrate_cuboctahedron(Lcubell(j),Loctall(j),center,rotmatCO(:,:,j),npoints,volprot1,sumvolprot1,flag)
 
  npoints = 50
- call integrate_cuboctahedron(lcubeS,loctaS,center,npoints,volq1,sumvolq1,flag)
+ call integrate_cuboctahedron(lcubeS,loctaS,center,rotmatCO(:,:,j),npoints,volq1,sumvolq1,flag)
 
  npoints = 200
- call newintegrateg_cuboctahedron(Lcubell(j),Loctall(j),center,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
+ call newintegrateg_cuboctahedron(Lcubell(j),Loctall(j),center,rotmatCO(:,:,j),npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 
 !! eps
  voleps1 = voleps1-volprot1
@@ -130,6 +130,8 @@ title = 'avpro'
 counter = 1
 call savetodisk(volprot, title, counter)
 
+stop
+
 ! print information summary 
 if (verbose.ge.2) then
 
@@ -168,19 +170,23 @@ call savetodisk(volxx, title, counter)
 end subroutine
 
 
-double precision function intcell_cuboctahedron(lcube,locta,center,ix,iy,iz,n)
+double precision function intcell_cuboctahedron(lcube,locta,center,rotmatrix,ix,iy,iz,n)
 use system
 use transform
+use COrotMod
 
 implicit none
 real*8 lcube,locta
 real*8 center(3)
+real*8 rotmatrix(3,3)
 integer ix,iy,iz,ax,ay,az
 integer cc
 real*8 vect
 integer n
 real*8 mmmult
 real*8 dr(3), dxr(3)
+
+CALL COrotation(rotmatrix,lcube,locta)
 
 cc = 0
 do ax = 1, n
@@ -199,16 +205,32 @@ dxr(2) = dxr(2) - center(2)
 dxr(3) = dxr(3) - center(3)
 
 
-if(((dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
-   if(((-dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
-      if(((dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)-dxr(2)+dxr(3)).lt.(locta/2)))then
-         if(((-dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)-dxr(2)+dxr(3)).lt.(locta/2)))then
-            if (((abs(dxr(1)).lt.(lcube/2)).and.(abs(dxr(2)).lt.(lcube/2))).and.(abs(dxr(3)).lt.(lcube/2)))then
-            cc=cc+1
-            endif
-         endif
+!if(((dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
+ !  if(((-dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
+  !    if(((dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)-dxr(2)+dxr(3)).lt.(locta/2)))then
+   !      if(((-dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)-dxr(2)+dxr(3)).lt.(locta/2)))then
+    !        if (((abs(dxr(1)).lt.(lcube/2)).and.(abs(dxr(2)).lt.(lcube/2))).and.(abs(dxr(3)).lt.(lcube/2)))then
+     !       cc=cc+1
+      !      endif
+      !   endif
+    !  endif
+ !  endif
+!endif
+
+if(((DOT_PRODUCT(plane1,dxr)).gt.(klocta1)).and.((DOT_PRODUCT(plane1,dxr)).lt.(klocta1b)))then
+ if(((DOT_PRODUCT(plane2,dxr)).gt.(klocta2)).and.((DOT_PRODUCT(plane2,dxr)).lt.(klocta2b)))then
+  if(((DOT_PRODUCT(plane3,dxr)).gt.(klocta3)).and.((DOT_PRODUCT(plane3,dxr)).lt.(klocta3b)))then
+   if(((DOT_PRODUCT(plane4,dxr)).gt.(klocta4)).and.((DOT_PRODUCT(plane4,dxr)).lt.(klocta4b)))then
+    if(((DOT_PRODUCT(plane5,dxr)).gt.(klcubex1)).and.((DOT_PRODUCT(plane5,dxr)).lt.(klcubex2)))then
+     if(((DOT_PRODUCT(plane6,dxr)).gt.(klcubey1)).and.((DOT_PRODUCT(plane6,dxr)).lt.(klcubey2)))then
+      if(((DOT_PRODUCT(plane7,dxr)).gt.(klcubez1)).and.((DOT_PRODUCT(plane7,dxr)).lt.(klcubez2)))then
+       cc = cc + 1
       endif
+     endif
+    endif
    endif
+  endif
+ endif
 endif
 
 enddo
@@ -218,7 +240,7 @@ enddo
 intcell_cuboctahedron  = float(cc)/(float(n)**3)
 end function
 
-subroutine newintegrateg_cuboctahedron(lcube,locta,center,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
+subroutine newintegrateg_cuboctahedron(lcube,locta,center,rotmatrix,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 use system
 use transform
 use chainsdat
@@ -227,6 +249,7 @@ use const
 
 implicit none
 real*8 center(3)
+real*8 rotmatrix(3,3)
 real*8 sumvolx1
 integer npoints
 !real*8 AAA(3,3), AAAX(3,3)
@@ -288,42 +311,50 @@ do while (xx < 1.0)
        x(1) = xx
        x(2) = yy
        x(3) = -xx-yy+1
-       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
        x(1) = -xx
        x(2) = -yy
        x(3) = -xx-yy+1
-       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = yy
        x(3) = -xx-yy+1
-       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = xx
        x(2) = -yy
        x(3) = -xx-yy+1
-       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
        x(1) = xx
        x(2) = yy
        x(3) = xx+yy-1
-       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = -yy
        x(3) = +xx+yy-1
-       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = yy
        x(3) = +xx+yy-1
-       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = xx
        x(2) = -yy
        x(3) = +xx+yy-1 
-       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
      
        endif    
         
@@ -353,32 +384,38 @@ do while (xx < lcuber)
         x(1) = xx
         x(2) = yy
         x(3) = lcuber
-        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = xx
         x(2) = yy
         x(3) = -lcuber
-        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
         x(1) = lcuber
         x(2) = xx
         x(3) = yy
-        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = -lcuber
         x(2) = xx
         x(3) = yy
-        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = xx
         x(2) = lcuber
         x(3) = yy
-        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = xx
         x(2) = -lcuber
         x(3) = yy
-        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
           endif 
        endif
@@ -407,13 +444,14 @@ enddo
 end
 
 
-subroutine integrar_matrices(x, center, locta, indexvolx, ncha1, p1, volxx1, volx1, com1, sumvolx1)
+subroutine integrar_matrices(x, center, locta, rotmatrix, indexvolx, ncha1, p1, volxx1, volx1, com1, sumvolx1)
 use system
 use const
 use ematrix
 use transform, only : MAT, IMAT
 implicit none
 real*8 x(3), center(3)
+real*8 rotmatrix(3,3)
 integer flagin
 integer j
 integer is(3), js(3), dims(3)
@@ -429,6 +467,7 @@ real*8 v(3)
 real*8 locta, lcube
 real*8 sumvolx1
 
+x = MATMUL(rotmatrix,x)
 x(:) = x(:)*locta/2.0 + center(:)
 
 dims(1) = dimx
@@ -503,15 +542,17 @@ end
 
 
 
-subroutine integrate_cuboctahedron(lcube,locta,center,npoints,volprot,sumvolprot,flag)
+subroutine integrate_cuboctahedron(lcube,locta,center,rotmatrix,npoints,volprot,sumvolprot,flag)
 use system
 use transform
 use const
+use COrotMod
 implicit none
 real*8 sumvolprot
 integer npoints
 real*8 lcube, locta
 real*8 center(3)
+real*8 rotmatrix(3,3)
 real*8 volprot(dimx,dimy,dimz)
 real*8 dr(3), dxr(3)
 integer ix,iy,iz,ax,ay,az
@@ -530,7 +571,10 @@ real*8 maxAell
 logical flagsym
 real*8 voltemp
 real*8 Rpos(3)
+logical test1, test2, test3, test4
+logical test5, test6, test7
 
+CALL COrotation(rotmatrix,lcube,locta)
 
 volprot = 0.0
 sumvolprot = 0.0 ! total volumen, including that outside the system
@@ -649,26 +693,71 @@ x(1) = x(1) - center(1)
 x(2) = x(2) - center(2)
 x(3) = x(3) - center(3)
 
-if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.((x(1)+x(2)+x(3)).lt.(locta/2)))then
-   if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.((-x(1)+x(2)+x(3)).lt.(locta/2)))then
-      if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.((x(1)-x(2)+x(3)).lt.(locta/2)))then
-         if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.((-x(1)-x(2)+x(3)).lt.(locta/2)))then
-            if(((abs(x(1)).lt.(lcube/2)).and.(abs(x(2)).lt.(lcube/2))).and.(abs(x(3)).lt.(lcube/2)))then
-               flagin=.true.
-            else
-               flagout=.true.
-            endif
-         else
-            flagout=.true.
-         endif
+!if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.((x(1)+x(2)+x(3)).lt.(locta/2)))then
+ !  if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.((-x(1)+x(2)+x(3)).lt.(locta/2)))then
+  !    if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.((x(1)-x(2)+x(3)).lt.(locta/2)))then
+   !      if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.((-x(1)-x(2)+x(3)).lt.(locta/2)))then
+    !        if(((abs(x(1)).lt.(lcube/2)).and.(abs(x(2)).lt.(lcube/2))).and.(abs(x(3)).lt.(lcube/2)))then
+     !          flagin=.true.
+      !      else
+       !        flagout=.true.
+        !    endif
+        ! else
+        !    flagout=.true.
+       !  endif
+     ! else
+      !   flagout=.true.
+     ! endif
+  ! else
+   !   flagout=.true.
+  ! endif
+!else
+ !  flagout=.true.
+!endif
+
+!if(((DOT_PRODUCT(plane1,x)).gt.(klocta1)).and.((DOT_PRODUCT(plane1,x)).lt.(klocta1b)))then
+ !if(((DOT_PRODUCT(plane2,x)).gt.(klocta2)).and.((DOT_PRODUCT(plane2,x)).lt.(klocta2b)))then
+  !if(((DOT_PRODUCT(plane3,x)).gt.(klocta3)).and.((DOT_PRODUCT(plane3,x)).lt.(klocta3b)))then
+   !if(((DOT_PRODUCT(plane4,x)).gt.(klocta4)).and.((DOT_PRODUCT(plane4,x)).lt.(klocta4b)))then
+    !if(((DOT_PRODUCT(plane5,x)).gt.(klcubex1)).and.((DOT_PRODUCT(plane5,x)).lt.(klcubex2)))then
+     !if(((DOT_PRODUCT(plane6,x)).gt.(klcubey1)).and.((DOT_PRODUCT(plane6,x)).lt.(klcubey2)))then
+      !if(((DOT_PRODUCT(plane7,x)).gt.(klcubez1)).and.((DOT_PRODUCT(plane7,x)).lt.(klcubez2)))then
+
+call BetweenPlanes(plane1,klocta1,klocta1b,x,test1)
+call BetweenPlanes(plane2,klocta2,klocta2b,x,test2)
+call BetweenPlanes(plane3,klocta3,klocta3b,x,test3)
+call BetweenPlanes(plane4,klocta4,klocta4b,x,test4)
+call BetweenPlanes(plane5,klcubex1,klcubex2,x,test5)
+call BetweenPlanes(plane6,klcubey1,klcubey2,x,test6)
+call BetweenPlanes(plane7,klcubez1,klcubez2,x,test7)
+if(test1)then
+ if(test2)then
+  if(test3)then
+   if(test4)then
+    if(test5)then
+     if(test6)then
+      if(test7)then
+        flagin=.true.
       else
-         flagout=.true.
+       flagout=.true.
       endif
-   else
+     else
       flagout=.true.
+     endif
+    else
+     flagout=.true.
+    endif
+   else
+    flagout=.true.
    endif
-else
+  else
    flagout=.true.
+  endif
+ else
+  flagout=.true.
+ endif
+else 
+ flagout=.true.
 endif
 
 enddo
@@ -721,7 +810,7 @@ enddo
     endif
     if (jz.gt.dimz) then
        if(PBC(6).ne.3) then
-         write(stdout,*) 'cuboctahdron:','update_matrix: iz', iz
+         write(stdout,*) 'cuboctahedron:','update_matrix: iz', iz
          stop
        else
          flagsym = .true.
@@ -736,7 +825,7 @@ if((flagin.eqv..false.).and.(flagout.eqv..true.)) then ! cell all outside channe
     voltemp = 0.0
 endif
 if((flagin.eqv..true.).and.(flagout.eqv..true.)) then ! cell part inside annd outside channel
-    voltemp = intcell_cuboctahedron(lcube,locta,center,ix,iy,iz,npoints)
+    voltemp = intcell_cuboctahedron(lcube,locta,center,rotmatrix,ix,iy,iz,npoints)
 endif
 
 sumvolprot = sumvolprot + voltemp
@@ -750,3 +839,28 @@ enddo ! iz
 
 end subroutine
 
+subroutine BetweenPlanes(normal,s1,s2,point,test)
+
+implicit none
+
+logical test
+real*8 normal(3), point(3)
+real*8 plane(3)
+real*8 norma, s1, s2, h, d
+
+norma = (normal(1)**2 + normal(2)**2 + normal(3)**2)**0.5
+
+plane(1) = normal(1)/norma
+plane(2) = normal(2)/norma
+plane(3) = normal(3)/norma
+
+h = (s2/norma) - (s1/norma)
+d = DOT_PRODUCT(point,plane) - (s1/norma)
+
+if((abs(d).lt.abs(h)).and.((d*h).gt.0)) then
+   test = .true.
+else
+   test = .false.
+endif
+
+end subroutine BetweenPlanes

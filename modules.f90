@@ -241,6 +241,21 @@ real*8, allocatable :: rotmatCO(:,:,:)
 
 end module
 
+module COrotMod
+real*8 klocta1, klocta2, klocta3, klocta4
+real*8 klocta1b, klocta2b, klocta3b, klocta4b
+real*8 klocta1v(3), klocta2v(3)
+real*8 klcubex1v(3), klcubex2v(3)
+real*8 klcubey1v(3), klcubey2v(3)
+real*8 klcubez1v(3), klcubez2v(3)
+real*8 klcubex1, klcubex2
+real*8 klcubey1, klcubey2
+real*8 klcubez1, klcubez2
+real*8 plane1(3), plane2(3), plane3(3), plane4(3)
+real*8 plane5(3), plane6(3), plane7(3)
+
+end module
+
 module inputtemp
 real*8 xsalt
 real*8 pHbulk
