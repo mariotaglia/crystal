@@ -130,7 +130,7 @@ title = 'avpro'
 counter = 1
 call savetodisk(volprot, title, counter)
 
-stop
+!stop
 
 ! print information summary 
 if (verbose.ge.2) then
@@ -185,6 +185,8 @@ real*8 vect
 integer n
 real*8 mmmult
 real*8 dr(3), dxr(3)
+logical test1, test2, test3, test4
+logical test5, test6, test7
 
 CALL COrotation(rotmatrix,lcube,locta)
 
@@ -204,26 +206,20 @@ dxr(1) = dxr(1) - center(1)
 dxr(2) = dxr(2) - center(2)
 dxr(3) = dxr(3) - center(3)
 
-
-!if(((dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
- !  if(((-dxr(1)+dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)+dxr(2)+dxr(3)).lt.(locta/2)))then
-  !    if(((dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.((dxr(1)-dxr(2)+dxr(3)).lt.(locta/2)))then
-   !      if(((-dxr(1)-dxr(2)+dxr(3)).gt.(-locta/2)).and.((-dxr(1)-dxr(2)+dxr(3)).lt.(locta/2)))then
-    !        if (((abs(dxr(1)).lt.(lcube/2)).and.(abs(dxr(2)).lt.(lcube/2))).and.(abs(dxr(3)).lt.(lcube/2)))then
-     !       cc=cc+1
-      !      endif
-      !   endif
-    !  endif
- !  endif
-!endif
-
-if(((DOT_PRODUCT(plane1,dxr)).gt.(klocta1)).and.((DOT_PRODUCT(plane1,dxr)).lt.(klocta1b)))then
- if(((DOT_PRODUCT(plane2,dxr)).gt.(klocta2)).and.((DOT_PRODUCT(plane2,dxr)).lt.(klocta2b)))then
-  if(((DOT_PRODUCT(plane3,dxr)).gt.(klocta3)).and.((DOT_PRODUCT(plane3,dxr)).lt.(klocta3b)))then
-   if(((DOT_PRODUCT(plane4,dxr)).gt.(klocta4)).and.((DOT_PRODUCT(plane4,dxr)).lt.(klocta4b)))then
-    if(((DOT_PRODUCT(plane5,dxr)).gt.(klcubex1)).and.((DOT_PRODUCT(plane5,dxr)).lt.(klcubex2)))then
-     if(((DOT_PRODUCT(plane6,dxr)).gt.(klcubey1)).and.((DOT_PRODUCT(plane6,dxr)).lt.(klcubey2)))then
-      if(((DOT_PRODUCT(plane7,dxr)).gt.(klcubez1)).and.((DOT_PRODUCT(plane7,dxr)).lt.(klcubez2)))then
+call BetweenPlanes(plane1,klocta1,klocta1b,dxr,test1)
+call BetweenPlanes(plane2,klocta2,klocta2b,dxr,test2)
+call BetweenPlanes(plane3,klocta3,klocta3b,dxr,test3)
+call BetweenPlanes(plane4,klocta4,klocta4b,dxr,test4)
+call BetweenPlanes(plane5,klcubex1,klcubex2,dxr,test5)
+call BetweenPlanes(plane6,klcubey1,klcubey2,dxr,test6)
+call BetweenPlanes(plane7,klcubez1,klcubez2,dxr,test7)
+if(test1)then
+ if(test2)then
+  if(test3)then
+   if(test4)then
+    if(test5)then
+     if(test6)then
+      if(test7)then
        cc = cc + 1
       endif
      endif
@@ -246,6 +242,7 @@ use transform
 use chainsdat
 use ematrix
 use const
+use COrotMod
 
 implicit none
 real*8 center(3)
@@ -275,6 +272,11 @@ real*8 lcuber, pasoc, pasoo
 real*8 xx, yy, zz
 real*8 vector(3)
 real*8 lcube, locta
+real*8 xtotest(3)
+logical test1, test2, test3, test4
+logical test5, test6, test7
+
+CALL COrotation(rotmatrix,lcube,locta)
 
 indexvolx = 0
 ncha1 = 0
@@ -304,60 +306,67 @@ xx = 0.0
 do while (xx < 1.0)
     yy = 0.0
     do while (yy < (1.0-xx))
-    zz = -xx-yy+1
-    
-    if((abs(xx).lt.lcuber).and.(abs(yy).lt.lcuber).and.(abs(zz).lt.lcuber)) then 
+    zz = -xx-yy+1 
 
+    xtotest(1) = xx
+    xtotest(2) = yy
+    xtotest(3) = zz
+    xtotest = MATMUL(rotmatrix,xtotest)
+   
+    call BetweenPlanes(plane5,klcubex1,klcubex2,xtotest,test5)
+    call BetweenPlanes(plane6,klcubey1,klcubey2,xtotest,test6)
+    call BetweenPlanes(plane7,klcubez1,klcubez2,xtotest,test7)
+   
+    if((test5).and.(test6).and.(test7))then
        x(1) = xx
        x(2) = yy
        x(3) = -xx-yy+1
-       x = MATMUL(rotmatrix,x)
+       x = MATMUL(rotmatrix,xtotest)
        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
        x(1) = -xx
        x(2) = -yy
        x(3) = -xx-yy+1
-       x = MATMUL(rotmatrix,x)
+       x = MATMUL(rotmatrix,xtotest)
        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = yy
        x(3) = -xx-yy+1
-       x = MATMUL(rotmatrix,x)
+       x = MATMUL(rotmatrix,xtotest)
        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = xx
        x(2) = -yy
        x(3) = -xx-yy+1
-       x = MATMUL(rotmatrix,x)
+       x = MATMUL(rotmatrix,xtotest)
        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
        x(1) = xx
        x(2) = yy
        x(3) = xx+yy-1
-       x = MATMUL(rotmatrix,x)
+       x = MATMUL(rotmatrix,xtotest)
        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = -yy
        x(3) = +xx+yy-1
-       x = MATMUL(rotmatrix,x)
+       x = MATMUL(rotmatrix,xtotest)
        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = yy
        x(3) = +xx+yy-1
-       x = MATMUL(rotmatrix,x)
+       x = MATMUL(rotmatrix,xtotest)
        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = xx
        x(2) = -yy
        x(3) = +xx+yy-1 
-       x = MATMUL(rotmatrix,x)
+       x = MATMUL(rotmatrix,xtotest)
        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
      
-       endif    
-        
+     endif  
         yy = yy + pasoo
     enddo    
     xx = xx + pasoo
@@ -375,52 +384,52 @@ do while (xx < lcuber)
   do while (yy < lcuber)
 
   zz = lcuber    
-        
-  if (((xx+yy+zz).gt.-1.0).and.((xx+yy+zz).lt.1.0)) then
-    if(((-xx+yy+xx).gt.-1.0).and.((-xx+yy+zz).lt.1.0)) then
-       if(((xx-yy+zz).gt.-1.0).and.((xx-yy+zz).lt.1.0)) then 
-          if(((-xx-yy+zz).gt.-1.0).and.((-xx-yy+zz).lt.1.0)) then
-                
+  
+  xtotest(1) = xx
+  xtotest(2) = yy
+  xtotest(3) = zz
+  x = MATMUL(rotmatrix,xtotest)
+    
+  call BetweenPlanes(plane1,klocta1,klocta1b,xtotest,test1)
+  call BetweenPlanes(plane2,klocta2,klocta2b,xtotest,test2)
+  call BetweenPlanes(plane3,klocta3,klocta3b,xtotest,test3)
+  call BetweenPlanes(plane4,klocta4,klocta4b,xtotest,test4)
+  if((test1).and.(test2).and.(test3).and.(test4))then 
+  !if (((xx+yy+zz).gt.-1.0).and.((xx+yy+zz).lt.1.0)) then
+    !if(((-xx+yy+xx).gt.-1.0).and.((-xx+yy+zz).lt.1.0)) then
+       !if(((xx-yy+zz).gt.-1.0).and.((xx-yy+zz).lt.1.0)) then 
+          !if(((-xx-yy+zz).gt.-1.0).and.((-xx-yy+zz).lt.1.0)) then     
         x(1) = xx
         x(2) = yy
         x(3) = lcuber
-        x = MATMUL(rotmatrix,x)
+        x = MATMUL(rotmatrix,xtotest)
         call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = xx
         x(2) = yy
         x(3) = -lcuber
-        x = MATMUL(rotmatrix,x)
-        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
-        
-        x(1) = lcuber
-        x(2) = xx
-        x(3) = yy
-        x = MATMUL(rotmatrix,x)
+        x = MATMUL(rotmatrix,xtotest)
         call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = -lcuber
         x(2) = xx
         x(3) = yy
-        x = MATMUL(rotmatrix,x)
+        x = MATMUL(rotmatrix,xtotest)
         call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = xx
         x(2) = lcuber
         x(3) = yy
-        x = MATMUL(rotmatrix,x)
+        x = MATMUL(rotmatrix,xtotest)
         call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = xx
         x(2) = -lcuber
         x(3) = yy
-        x = MATMUL(rotmatrix,x)
+        x = MATMUL(rotmatrix,xtotest)
         call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
-          endif 
-       endif
     endif
-  endif
         
   yy = yy + pasoc
   enddo  
@@ -692,36 +701,6 @@ v(3) = float(az+iz-1)*delta
 x(1) = x(1) - center(1)
 x(2) = x(2) - center(2)
 x(3) = x(3) - center(3)
-
-!if(((x(1)+x(2)+x(3)).gt.(-locta/2)).and.((x(1)+x(2)+x(3)).lt.(locta/2)))then
- !  if(((-x(1)+x(2)+x(3)).gt.(-locta/2)).and.((-x(1)+x(2)+x(3)).lt.(locta/2)))then
-  !    if(((x(1)-x(2)+x(3)).gt.(-locta/2)).and.((x(1)-x(2)+x(3)).lt.(locta/2)))then
-   !      if(((-x(1)-x(2)+x(3)).gt.(-locta/2)).and.((-x(1)-x(2)+x(3)).lt.(locta/2)))then
-    !        if(((abs(x(1)).lt.(lcube/2)).and.(abs(x(2)).lt.(lcube/2))).and.(abs(x(3)).lt.(lcube/2)))then
-     !          flagin=.true.
-      !      else
-       !        flagout=.true.
-        !    endif
-        ! else
-        !    flagout=.true.
-       !  endif
-     ! else
-      !   flagout=.true.
-     ! endif
-  ! else
-   !   flagout=.true.
-  ! endif
-!else
- !  flagout=.true.
-!endif
-
-!if(((DOT_PRODUCT(plane1,x)).gt.(klocta1)).and.((DOT_PRODUCT(plane1,x)).lt.(klocta1b)))then
- !if(((DOT_PRODUCT(plane2,x)).gt.(klocta2)).and.((DOT_PRODUCT(plane2,x)).lt.(klocta2b)))then
-  !if(((DOT_PRODUCT(plane3,x)).gt.(klocta3)).and.((DOT_PRODUCT(plane3,x)).lt.(klocta3b)))then
-   !if(((DOT_PRODUCT(plane4,x)).gt.(klocta4)).and.((DOT_PRODUCT(plane4,x)).lt.(klocta4b)))then
-    !if(((DOT_PRODUCT(plane5,x)).gt.(klcubex1)).and.((DOT_PRODUCT(plane5,x)).lt.(klcubex2)))then
-     !if(((DOT_PRODUCT(plane6,x)).gt.(klcubey1)).and.((DOT_PRODUCT(plane6,x)).lt.(klcubey2)))then
-      !if(((DOT_PRODUCT(plane7,x)).gt.(klcubez1)).and.((DOT_PRODUCT(plane7,x)).lt.(klcubez2)))then
 
 call BetweenPlanes(plane1,klocta1,klocta1b,x,test1)
 call BetweenPlanes(plane2,klocta2,klocta2b,x,test2)
