@@ -308,9 +308,9 @@ do while (xx < 1.0)
     do while (yy < (1.0-xx))
     zz = -xx-yy+1 
 
-    xtotest(1) = xx
-    xtotest(2) = yy
-    xtotest(3) = zz
+    xtotest(1) = xx*locta/2.0
+    xtotest(2) = yy*locta/2.0
+    xtotest(3) = zz*locta/2.0
     xtotest = MATMUL(rotmatrix,xtotest)
    
     call BetweenPlanes(plane5,klcubex1,klcubex2,xtotest,test5)
@@ -321,50 +321,50 @@ do while (xx < 1.0)
        x(1) = xx
        x(2) = yy
        x(3) = -xx-yy+1
-       x = MATMUL(rotmatrix,xtotest)
-       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
        x(1) = -xx
        x(2) = -yy
        x(3) = -xx-yy+1
-       x = MATMUL(rotmatrix,xtotest)
-       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = yy
        x(3) = -xx-yy+1
-       x = MATMUL(rotmatrix,xtotest)
-       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = xx
        x(2) = -yy
        x(3) = -xx-yy+1
-       x = MATMUL(rotmatrix,xtotest)
-       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
        x(1) = xx
        x(2) = yy
        x(3) = xx+yy-1
-       x = MATMUL(rotmatrix,xtotest)
-       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = -yy
        x(3) = +xx+yy-1
-       x = MATMUL(rotmatrix,xtotest)
-       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = -xx
        x(2) = yy
        x(3) = +xx+yy-1
-       x = MATMUL(rotmatrix,xtotest)
-       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
         
        x(1) = xx
        x(2) = -yy
        x(3) = +xx+yy-1 
-       x = MATMUL(rotmatrix,xtotest)
-       call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+       x = MATMUL(rotmatrix,x)
+       call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
      
      endif  
         yy = yy + pasoo
@@ -385,50 +385,53 @@ do while (xx < lcuber)
 
   zz = lcuber    
   
-  xtotest(1) = xx
-  xtotest(2) = yy
-  xtotest(3) = zz
-  x = MATMUL(rotmatrix,xtotest)
+  xtotest(1) = xx*locta/2.0
+  xtotest(2) = yy*locta/2.0
+  xtotest(3) = zz*locta/2.0
+
+  xtotest = MATMUL(rotmatrix,xtotest)
     
   call BetweenPlanes(plane1,klocta1,klocta1b,xtotest,test1)
   call BetweenPlanes(plane2,klocta2,klocta2b,xtotest,test2)
   call BetweenPlanes(plane3,klocta3,klocta3b,xtotest,test3)
   call BetweenPlanes(plane4,klocta4,klocta4b,xtotest,test4)
+
   if((test1).and.(test2).and.(test3).and.(test4))then 
-  !if (((xx+yy+zz).gt.-1.0).and.((xx+yy+zz).lt.1.0)) then
-    !if(((-xx+yy+xx).gt.-1.0).and.((-xx+yy+zz).lt.1.0)) then
-       !if(((xx-yy+zz).gt.-1.0).and.((xx-yy+zz).lt.1.0)) then 
-          !if(((-xx-yy+zz).gt.-1.0).and.((-xx-yy+zz).lt.1.0)) then     
-        x(1) = xx
-        x(2) = yy
-        x(3) = lcuber
-        x = MATMUL(rotmatrix,xtotest)
-        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
-
-        x(1) = xx
-        x(2) = yy
-        x(3) = -lcuber
-        x = MATMUL(rotmatrix,xtotest)
-        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
-
         x(1) = -lcuber
         x(2) = xx
         x(3) = yy
-        x = MATMUL(rotmatrix,xtotest)
-        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
-        x(1) = xx
-        x(2) = lcuber
+        x(1) = lcuber
+        x(2) = xx
         x(3) = yy
-        x = MATMUL(rotmatrix,xtotest)
-        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
         x(1) = xx
         x(2) = -lcuber
         x(3) = yy
-        x = MATMUL(rotmatrix,xtotest)
-        call integrar_matrices(x,center,locta,rotmatrix,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
 
+        x(1) = xx
+        x(2) = lcuber
+        x(3) = yy
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+
+        x(1) = xx
+        x(2) = yy
+        x(3) = -lcuber
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)      
+
+        x(1) = xx
+        x(2) = yy
+        x(3) = lcuber
+        x = MATMUL(rotmatrix,x)
+        call integrar_matrices(x,center,locta,indexvolx,ncha1,p1,volxx1,volx1,com1,sumvolx1)     
     endif
         
   yy = yy + pasoc
@@ -453,14 +456,13 @@ enddo
 end
 
 
-subroutine integrar_matrices(x, center, locta, rotmatrix, indexvolx, ncha1, p1, volxx1, volx1, com1, sumvolx1)
+subroutine integrar_matrices(x, center, locta, indexvolx, ncha1, p1, volxx1, volx1, com1, sumvolx1)
 use system
 use const
 use ematrix
 use transform, only : MAT, IMAT
 implicit none
 real*8 x(3), center(3)
-real*8 rotmatrix(3,3)
 integer flagin
 integer j
 integer is(3), js(3), dims(3)
@@ -476,7 +478,6 @@ real*8 v(3)
 real*8 locta, lcube
 real*8 sumvolx1
 
-x = MATMUL(rotmatrix,x)
 x(:) = x(:)*locta/2.0 + center(:)
 
 dims(1) = dimx

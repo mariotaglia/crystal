@@ -2,6 +2,7 @@ integer function testsystem_cuboctahedron(x)
 use system
 use transform
 use ellipsoid
+use COrotMod
 
 implicit none
 real*8 x(3), xx(3), v(3), maxx(3)
@@ -10,6 +11,8 @@ real*8 vect
 real*8 mmmult
 real, external :: PBCSYMR, PBCREFR
 real*8 dims(3)
+logical test1, test2, test3, test4
+logical test5, test6, test7
 
 dims(1) = delta*dimx
 dims(2) = delta*dimy
@@ -91,18 +94,30 @@ xx(:) = MATMUL(IMAT,xx) ! to real space
 
 
 ! Check in real space for collision with CO
+CALL COrotation(rotmatCO(:,:,NNN),Lcubell(NNN),Loctall(NNN))
 
-if(((xx(1)+xx(2)+xx(3)).gt.(-Loctall(j)/2)).and.((xx(1)+xx(2)+xx(3)).lt.(Loctall(j)/2)))then
-   if(((-xx(1)+xx(2)+xx(3)).gt.(-Loctall(j)/2)).and.((-xx(1)+xx(2)+xx(3)).lt.(Loctall(j)/2)))then
-      if(((xx(1)-xx(2)+xx(3)).gt.(-Loctall(j)/2)).and.((xx(1)-xx(2)+xx(3)).lt.(Loctall(j)/2)))then
-         if(((-xx(1)-xx(2)+xx(3)).gt.(-Loctall(j)/2)).and.((-xx(1)-xx(2)+xx(3)).lt.(Loctall(j)/2)))then
-            if(((abs(xx(1)).lt.(Lcubell(j)/2))).and.(abs(xx(2)).lt.(Lcubell(j)/2)).and.(abs(xx(3)).lt.(Lcubell(j)/2))) then
-                 testsystem_cuboctahedron = -1
-                 return
-            endif
+call BetweenPlanes(plane1,klocta1,klocta1b,xx,test1)
+call BetweenPlanes(plane2,klocta2,klocta2b,xx,test2)
+call BetweenPlanes(plane3,klocta3,klocta3b,xx,test3)
+call BetweenPlanes(plane4,klocta4,klocta4b,xx,test4)
+call BetweenPlanes(plane5,klcubex1,klcubex2,xx,test5)
+call BetweenPlanes(plane6,klcubey1,klcubey2,xx,test6)
+call BetweenPlanes(plane7,klcubez1,klcubez2,xx,test7)
+if(test1)then
+  if(test2)then
+    if(test3)then
+      if(test4)then
+        if(test5)then
+          if(test6)then
+            if(test7)then
+               testsystem_cuboctahedron = -1
+             return
+           endif
          endif
-      endif
+       endif
+     endif
    endif
+ endif
 endif
 
 enddo
