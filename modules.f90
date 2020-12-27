@@ -242,17 +242,27 @@ real*8, allocatable :: rotmatCO(:,:,:)
 end module
 
 module COrotMod
-real*8 klocta1, klocta2, klocta3, klocta4
-real*8 klocta1b, klocta2b, klocta3b, klocta4b
-real*8 klocta1v(3), klocta2v(3)
-real*8 klcubex1v(3), klcubex2v(3)
-real*8 klcubey1v(3), klcubey2v(3)
-real*8 klcubez1v(3), klcubez2v(3)
-real*8 klcubex1, klcubex2
-real*8 klcubey1, klcubey2
-real*8 klcubez1, klcubez2
-real*8 plane1(3), plane2(3), plane3(3), plane4(3)
-real*8 plane5(3), plane6(3), plane7(3)
+real*8, allocatable :: klocta1(:)
+real*8, allocatable :: klocta2(:)
+real*8, allocatable :: klocta3(:)
+real*8, allocatable :: klocta4(:)
+real*8, allocatable :: klocta1b(:)
+real*8, allocatable :: klocta2b(:)
+real*8, allocatable :: klocta3b(:)
+real*8, allocatable :: klocta4b(:)
+real*8, allocatable :: klcubex1(:)
+real*8, allocatable :: klcubex2(:)
+real*8, allocatable :: klcubey1(:)
+real*8, allocatable :: klcubey2(:)
+real*8, allocatable :: klcubez1(:)
+real*8, allocatable :: klcubez2(:)
+real*8, allocatable :: plane1(:,:)
+real*8, allocatable :: plane2(:,:)
+real*8, allocatable :: plane3(:,:)
+real*8, allocatable :: plane4(:,:)
+real*8, allocatable :: plane5(:,:)
+real*8, allocatable :: plane6(:,:)
+real*8, allocatable :: plane7(:,:)
 
 end module
 

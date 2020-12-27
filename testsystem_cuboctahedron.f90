@@ -94,15 +94,14 @@ xx(:) = MATMUL(IMAT,xx) ! to real space
 
 
 ! Check in real space for collision with CO
-CALL COrotation(rotmatCO(:,:,NNN),Lcubell(NNN),Loctall(NNN))
 
-call BetweenPlanes(plane1,klocta1,klocta1b,xx,test1)
-call BetweenPlanes(plane2,klocta2,klocta2b,xx,test2)
-call BetweenPlanes(plane3,klocta3,klocta3b,xx,test3)
-call BetweenPlanes(plane4,klocta4,klocta4b,xx,test4)
-call BetweenPlanes(plane5,klcubex1,klcubex2,xx,test5)
-call BetweenPlanes(plane6,klcubey1,klcubey2,xx,test6)
-call BetweenPlanes(plane7,klcubez1,klcubez2,xx,test7)
+call BetweenPlanes(plane1(:,j),klocta1(j),klocta1b(j),xx,test1)
+call BetweenPlanes(plane2(:,j),klocta2(j),klocta2b(j),xx,test2)
+call BetweenPlanes(plane3(:,j),klocta3(j),klocta3b(j),xx,test3)
+call BetweenPlanes(plane4(:,j),klocta4(j),klocta4b(j),xx,test4)
+call BetweenPlanes(plane5(:,j),klcubex1(j),klcubex2(j),xx,test5)
+call BetweenPlanes(plane6(:,j),klcubey1(j),klcubey2(j),xx,test6)
+call BetweenPlanes(plane7(:,j),klcubez1(j),klcubez2(j),xx,test7)
 if(test1)then
   if(test2)then
     if(test3)then

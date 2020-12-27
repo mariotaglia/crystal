@@ -67,18 +67,18 @@ loctaS = Loctall(j) - delta
  center(3) = Rell(3,j)
  
  npoints = 50
- call integrate_cuboctahedron(lcubeL,loctaL,center,rotmatCO(:,:,j),npoints,voleps1,sumvoleps1,flag)
+ call integrate_cuboctahedron(lcubeL,loctaL,center,rotmatCO(:,:,j),j,npoints,voleps1,sumvoleps1,flag)
 
  flag = .false. ! not a problem if eps lays outside boundaries
  
  npoints = 50
- call integrate_cuboctahedron(Lcubell(j),Loctall(j),center,rotmatCO(:,:,j),npoints,volprot1,sumvolprot1,flag)
+ call integrate_cuboctahedron(Lcubell(j),Loctall(j),center,rotmatCO(:,:,j),j,npoints,volprot1,sumvolprot1,flag)
 
  npoints = 50
- call integrate_cuboctahedron(lcubeS,loctaS,center,rotmatCO(:,:,j),npoints,volq1,sumvolq1,flag)
+ call integrate_cuboctahedron(lcubeS,loctaS,center,rotmatCO(:,:,j),j,npoints,volq1,sumvolq1,flag)
 
  npoints = 200
- call newintegrateg_cuboctahedron(Lcubell(j),Loctall(j),center,rotmatCO(:,:,j),npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
+ call newintegrateg_cuboctahedron(Lcubell(j),Loctall(j),center,rotmatCO(:,:,j),j,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 
 !! eps
  voleps1 = voleps1-volprot1
@@ -170,7 +170,7 @@ call savetodisk(volxx, title, counter)
 end subroutine
 
 
-double precision function intcell_cuboctahedron(lcube,locta,center,rotmatrix,ix,iy,iz,n)
+double precision function intcell_cuboctahedron(lcube,locta,center,rotmatrix,npart,ix,iy,iz,n)
 use system
 use transform
 use COrotMod
@@ -179,6 +179,7 @@ implicit none
 real*8 lcube,locta
 real*8 center(3)
 real*8 rotmatrix(3,3)
+integer npart
 integer ix,iy,iz,ax,ay,az
 integer cc
 real*8 vect
@@ -187,8 +188,6 @@ real*8 mmmult
 real*8 dr(3), dxr(3)
 logical test1, test2, test3, test4
 logical test5, test6, test7
-
-CALL COrotation(rotmatrix,lcube,locta)
 
 cc = 0
 do ax = 1, n
@@ -206,13 +205,13 @@ dxr(1) = dxr(1) - center(1)
 dxr(2) = dxr(2) - center(2)
 dxr(3) = dxr(3) - center(3)
 
-call BetweenPlanes(plane1,klocta1,klocta1b,dxr,test1)
-call BetweenPlanes(plane2,klocta2,klocta2b,dxr,test2)
-call BetweenPlanes(plane3,klocta3,klocta3b,dxr,test3)
-call BetweenPlanes(plane4,klocta4,klocta4b,dxr,test4)
-call BetweenPlanes(plane5,klcubex1,klcubex2,dxr,test5)
-call BetweenPlanes(plane6,klcubey1,klcubey2,dxr,test6)
-call BetweenPlanes(plane7,klcubez1,klcubez2,dxr,test7)
+call BetweenPlanes(plane1(:,npart),klocta1(npart),klocta1b(npart),dxr,test1)
+call BetweenPlanes(plane2(:,npart),klocta2(npart),klocta2b(npart),dxr,test2)
+call BetweenPlanes(plane3(:,npart),klocta3(npart),klocta3b(npart),dxr,test3)
+call BetweenPlanes(plane4(:,npart),klocta4(npart),klocta4b(npart),dxr,test4)
+call BetweenPlanes(plane5(:,npart),klcubex1(npart),klcubex2(npart),dxr,test5)
+call BetweenPlanes(plane6(:,npart),klcubey1(npart),klcubey2(npart),dxr,test6)
+call BetweenPlanes(plane7(:,npart),klcubez1(npart),klcubez2(npart),dxr,test7)
 if(test1)then
  if(test2)then
   if(test3)then
@@ -236,7 +235,7 @@ enddo
 intcell_cuboctahedron  = float(cc)/(float(n)**3)
 end function
 
-subroutine newintegrateg_cuboctahedron(lcube,locta,center,rotmatrix,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
+subroutine newintegrateg_cuboctahedron(lcube,locta,center,rotmatrix,npart,npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 use system
 use transform
 use chainsdat
@@ -247,6 +246,7 @@ use COrotMod
 implicit none
 real*8 center(3)
 real*8 rotmatrix(3,3)
+integer npart
 real*8 sumvolx1
 integer npoints
 !real*8 AAA(3,3), AAAX(3,3)
@@ -275,8 +275,6 @@ real*8 lcube, locta
 real*8 xtotest(3)
 logical test1, test2, test3, test4
 logical test5, test6, test7
-
-CALL COrotation(rotmatrix,lcube,locta)
 
 indexvolx = 0
 ncha1 = 0
@@ -313,9 +311,9 @@ do while (xx < 1.0)
     xtotest(3) = zz*locta/2.0
     xtotest = MATMUL(rotmatrix,xtotest)
    
-    call BetweenPlanes(plane5,klcubex1,klcubex2,xtotest,test5)
-    call BetweenPlanes(plane6,klcubey1,klcubey2,xtotest,test6)
-    call BetweenPlanes(plane7,klcubez1,klcubez2,xtotest,test7)
+    call BetweenPlanes(plane5(:,npart),klcubex1(npart),klcubex2(npart),xtotest,test5)
+    call BetweenPlanes(plane6(:,npart),klcubey1(npart),klcubey2(npart),xtotest,test6)
+    call BetweenPlanes(plane7(:,npart),klcubez1(npart),klcubez2(npart),xtotest,test7)
    
     if((test5).and.(test6).and.(test7))then
        x(1) = xx
@@ -391,10 +389,10 @@ do while (xx < lcuber)
 
   xtotest = MATMUL(rotmatrix,xtotest)
     
-  call BetweenPlanes(plane1,klocta1,klocta1b,xtotest,test1)
-  call BetweenPlanes(plane2,klocta2,klocta2b,xtotest,test2)
-  call BetweenPlanes(plane3,klocta3,klocta3b,xtotest,test3)
-  call BetweenPlanes(plane4,klocta4,klocta4b,xtotest,test4)
+  call BetweenPlanes(plane1(:,npart),klocta1(npart),klocta1b(npart),xtotest,test1)
+  call BetweenPlanes(plane2(:,npart),klocta2(npart),klocta2b(npart),xtotest,test2)
+  call BetweenPlanes(plane3(:,npart),klocta3(npart),klocta3b(npart),xtotest,test3)
+  call BetweenPlanes(plane4(:,npart),klocta4(npart),klocta4b(npart),xtotest,test4)
 
   if((test1).and.(test2).and.(test3).and.(test4))then 
         x(1) = -lcuber
@@ -552,7 +550,7 @@ end
 
 
 
-subroutine integrate_cuboctahedron(lcube,locta,center,rotmatrix,npoints,volprot,sumvolprot,flag)
+subroutine integrate_cuboctahedron(lcube,locta,center,rotmatrix,npart,npoints,volprot,sumvolprot,flag)
 use system
 use transform
 use const
@@ -560,6 +558,7 @@ use COrotMod
 implicit none
 real*8 sumvolprot
 integer npoints
+integer npart
 real*8 lcube, locta
 real*8 center(3)
 real*8 rotmatrix(3,3)
@@ -583,8 +582,6 @@ real*8 voltemp
 real*8 Rpos(3)
 logical test1, test2, test3, test4
 logical test5, test6, test7
-
-CALL COrotation(rotmatrix,lcube,locta)
 
 volprot = 0.0
 sumvolprot = 0.0 ! total volumen, including that outside the system
@@ -703,13 +700,13 @@ x(1) = x(1) - center(1)
 x(2) = x(2) - center(2)
 x(3) = x(3) - center(3)
 
-call BetweenPlanes(plane1,klocta1,klocta1b,x,test1)
-call BetweenPlanes(plane2,klocta2,klocta2b,x,test2)
-call BetweenPlanes(plane3,klocta3,klocta3b,x,test3)
-call BetweenPlanes(plane4,klocta4,klocta4b,x,test4)
-call BetweenPlanes(plane5,klcubex1,klcubex2,x,test5)
-call BetweenPlanes(plane6,klcubey1,klcubey2,x,test6)
-call BetweenPlanes(plane7,klcubez1,klcubez2,x,test7)
+call BetweenPlanes(plane1(:,npart),klocta1(npart),klocta1b(npart),x,test1)
+call BetweenPlanes(plane2(:,npart),klocta2(npart),klocta2b(npart),x,test2)
+call BetweenPlanes(plane3(:,npart),klocta3(npart),klocta3b(npart),x,test3)
+call BetweenPlanes(plane4(:,npart),klocta4(npart),klocta4b(npart),x,test4)
+call BetweenPlanes(plane5(:,npart),klcubex1(npart),klcubex2(npart),x,test5)
+call BetweenPlanes(plane6(:,npart),klcubey1(npart),klcubey2(npart),x,test6)
+call BetweenPlanes(plane7(:,npart),klcubez1(npart),klcubez2(npart),x,test7)
 if(test1)then
  if(test2)then
   if(test3)then
@@ -805,7 +802,7 @@ if((flagin.eqv..false.).and.(flagout.eqv..true.)) then ! cell all outside channe
     voltemp = 0.0
 endif
 if((flagin.eqv..true.).and.(flagout.eqv..true.)) then ! cell part inside annd outside channel
-    voltemp = intcell_cuboctahedron(lcube,locta,center,rotmatrix,ix,iy,iz,npoints)
+    voltemp = intcell_cuboctahedron(lcube,locta,center,rotmatrix,npart,ix,iy,iz,npoints)
 endif
 
 sumvolprot = sumvolprot + voltemp

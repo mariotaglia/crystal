@@ -446,6 +446,8 @@ do while (ios == 0)
      if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'hydrophobicity to', eeps(j)
      enddo
 
+    call COrotation
+
     case(42, 52) ! 42: channel, 52: rod
      read(fh, *) basura
      read(fh, *) rchannel
