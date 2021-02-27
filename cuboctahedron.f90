@@ -816,25 +816,20 @@ enddo ! iz
 
 end subroutine
 
-subroutine BetweenPlanes(normal,s1,s2,point,test)
+
+subroutine BetweenPlanes(plane,s1,s2,point,test)
 
 implicit none
 
 logical test
-real*8 normal(3), point(3)
+real*8 point(3)
 real*8 plane(3)
-real*8 norma, s1, s2, h, d
+real*8 s1, s2, h, d
 
-norma = (normal(1)**2 + normal(2)**2 + normal(3)**2)**0.5
+h = s2-s1
+d = DOT_PRODUCT(point,plane) - s1
 
-plane(1) = normal(1)/norma
-plane(2) = normal(2)/norma
-plane(3) = normal(3)/norma
-
-h = (s2/norma) - (s1/norma)
-d = DOT_PRODUCT(point,plane) - (s1/norma)
-
-if((abs(d).lt.abs(h)).and.((d*h).gt.0)) then
+if((abs(d).lt.abs(h)).and.((d*h).gt.0.0)) then
    test = .true.
 else
    test = .false.
