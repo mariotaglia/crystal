@@ -87,7 +87,8 @@ loctaS = Loctall(j) - delta
 !! charge
  volq1 = volprot1-volq1
  temp = sum(volq1)
- volq1 = volq1/temp*echarge(j)/(delta**3) ! sum(volq) is echarge
+
+ if(temp.ne.0.0)volq1 = volq1/temp*echarge(j)/(delta**3) ! sum(volq) is echarge
 
  area =  3.0**(1.0/2.0)*Loctall(j)**2 + 3.0*(1.0-3.0**(1.0/2.0))*(Loctall(j) - Lcubell(j))**2.0 ! MARIO
 
