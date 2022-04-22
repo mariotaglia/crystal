@@ -352,7 +352,7 @@ do while (ios == 0)
                             ! TYPE = 2 is 3D channel
                             ! TYPE = 3 is a 3D channel with chains at specific conditions
 
-    case(2)
+    case(2, 80)
      read(fh, *) basura
      read(fh, *) rchannel
      read(fh, *) basura
