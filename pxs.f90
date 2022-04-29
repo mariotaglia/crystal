@@ -20,7 +20,8 @@ real*8 v(3)
 integer testsystem
 integer testsystemr
 integer testsystemc
-integer testsystemsp
+integer testsystem_cylinder
+integer testsystem_superellipse
 integer testsystem_cube
 integer testsystem_cuboctahedron
 real*8 maxx(3)
@@ -134,12 +135,24 @@ case (2, 3, 4, 41, 42)
 
 case (80)
 
-       if(testsystemsp(x).eq.-1) then ! if testsystem = -1,  there is a collision with all or particle 
+       if(testsystem_cylinder(x).eq.-1) then ! if testsystem = -1,  there is a collision with all or particle 
          flag = -1
          exit
        endif
 
-       if(testsystemsp(x).eq.-2) then ! if testsystem = -2, the polymer goes out-of-system
+       if(testsystem_cylinder(x).eq.-2) then ! if testsystem = -2, the polymer goes out-of-system
+         write(stdout,*) 'pxs: out-of-system'
+         stop
+       endif
+
+case (81)
+
+       if(testsystem_superellipse(x).eq.-1) then ! if testsystem = -1,  there is a collision with all or particle 
+         flag = -1
+         exit
+       endif
+
+       if(testsystem_superellipse(x).eq.-2) then ! if testsystem = -2, the polymer goes out-of-system
          write(stdout,*) 'pxs: out-of-system'
          stop
        endif

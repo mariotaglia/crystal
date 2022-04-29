@@ -60,15 +60,15 @@ ncha = 0
  flag = .false.
 
 
- call integrate_sp(rchannelL2,RdimZ, originc ,npoints, voleps1 , sumvoleps1, flag)
+ call integrate_cylinder(rchannelL2,RdimZ, originc ,npoints, voleps1 , sumvoleps1, flag)
 
  flag = .false. ! not a problem if eps lays outside boundaries
 
- call integrate_sp(rchannel2, RdimZ, originc,npoints, volprot1, sumvolprot1, flag)
+ call integrate_cylinder(rchannel2, RdimZ, originc,npoints, volprot1, sumvolprot1, flag)
 
- call integrate_sp(rchannelS2,RdimZ, originc,npoints, volq1, sumvolq1, flag)
+ call integrate_cylinder(rchannelS2,RdimZ, originc,npoints, volq1, sumvolq1, flag)
 
- call newintegrateg_sp(rchannel2,RdimZ,originc,npoints,volx1,sumvolx1, com1, p1, ncha1, volxx1)
+ call newintegrateg_cylinder(rchannel2,RdimZ,originc,npoints,volx1,sumvolx1, com1, p1, ncha1, volxx1)
 
 !! eps
  voleps1 = voleps1-volprot1
@@ -165,7 +165,7 @@ call savetodisk(volxx, title, counter)
 
 end subroutine
 
-subroutine newintegrateg_sp(rchannel2,RdimZ,originc, npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
+subroutine newintegrateg_cylinder(rchannel2,RdimZ,originc, npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 use system
 use transform
 use chainsdat
@@ -268,7 +268,7 @@ com1(i,2) = com1(i,2) + 0.5*lseg*((com1(i,2)-originc(2)))/rchannel
 enddo
 end
 
-subroutine integrate_sp(rchannel2,RdimZ, originc, npoints,volprot,sumvolprot, flag)
+subroutine integrate_cylinder(rchannel2,RdimZ, originc, npoints,volprot,sumvolprot, flag)
 use system
 use transform
 
@@ -281,7 +281,7 @@ real*8 dr(3), dxr(3)
 integer ix,iy,iz,ax,ay,az
 real*8 vect
 logical flagin, flagout
-real*8 intcell_sp
+real*8 intcell_cylinder
 real*8 mmmult
 integer jx,jy, jz
 logical flag
@@ -336,7 +336,7 @@ if((flagin.eqv..false.).and.(flagout.eqv..true.)) then ! cell all outside channe
     voltemp = 0.0
 endif
 if((flagin.eqv..true.).and.(flagout.eqv..true.)) then ! cell part inside annd outside channel
-    voltemp = intcell_sp(rchannel2, originc,ix,iy,iz, npoints)
+    voltemp = intcell_cylinder(rchannel2, originc,ix,iy,iz, npoints)
 endif
 
 sumvolprot = sumvolprot + voltemp
@@ -346,10 +346,9 @@ enddo ! ix
 enddo ! iy
 enddo ! iz
 
-
 end subroutine
 
-double precision function intcell_sp(rchannel2,originc,ix,iy,iz,n)
+double precision function intcell_cylinder(rchannel2,originc,ix,iy,iz,n)
 use system
 use transform
 
@@ -385,7 +384,7 @@ enddo
 enddo
 enddo
 
-intcell_sp = float(cc)/(float(n)**3)
+intcell_cylinder = float(cc)/(float(n)**3)
 end function
 
 

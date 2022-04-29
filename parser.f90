@@ -361,7 +361,17 @@ do while (ios == 0)
      read(fh, *) echargec
      read(fh, *) basura
      read(fh, *) eepsc
-  
+
+   case(81) 
+     read(fh, *) basura
+     read(fh, *) rchannel
+     read(fh, *) basura
+     read(fh, *) sigmac
+     read(fh, *) basura
+     read(fh, *) echargec
+     read(fh, *) basura
+     read(fh, *) eepsc
+
     case(3, 4, 41)
      read(fh, *) basura
      read(fh, *) rchannel

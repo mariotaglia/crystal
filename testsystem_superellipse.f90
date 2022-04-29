@@ -1,4 +1,4 @@
-integer function testsystemsp(x)
+integer function testsystem_superellipse(x)
 use system
 use transform
 use channel
@@ -21,43 +21,43 @@ maxx(3) = float(dimz)*delta
 
 ! collision with walls and out of system
 
-testsystemsp = 0
+testsystem_superellipse = 0
 
 v = MATMUL(MAT,x) ! to transformed space
 
 ! out-of-boundaries check is performed in transformed space
 
 if (v(1).le.0.0) then
- if (PBC(1).eq.2)testsystemsp = -1
- if (PBC(1).eq.0)testsystemsp = -2
+ if (PBC(1).eq.2)testsystem_superellipse = -1
+ if (PBC(1).eq.0)testsystem_superellipse = -2
 endif
 
 if (v(1).gt.(float(dimx)*delta)) then
- if (PBC(2).eq.2)testsystemsp = -1
- if (PBC(2).eq.0)testsystemsp = -2
+ if (PBC(2).eq.2)testsystem_superellipse = -1
+ if (PBC(2).eq.0)testsystem_superellipse = -2
 endif
 
 if (v(2).le.0.0) then
- if (PBC(3).eq.2)testsystemsp = -1
- if (PBC(3).eq.0)testsystemsp = -2
+ if (PBC(3).eq.2)testsystem_superellipse = -1
+ if (PBC(3).eq.0)testsystem_superellipse = -2
 endif
 
 if (v(2).gt.(float(dimy)*delta)) then
- if (PBC(4).eq.2)testsystemsp = -1
- if (PBC(4).eq.0)testsystemsp = -2
+ if (PBC(4).eq.2)testsystem_superellipse = -1
+ if (PBC(4).eq.0)testsystem_superellipse = -2
 endif
 
 if (v(3).le.0.0) then
- if (PBC(5).eq.2)testsystemsp = -1
- if (PBC(5).eq.0)testsystemsp = -2
+ if (PBC(5).eq.2)testsystem_superellipse = -1
+ if (PBC(5).eq.0)testsystem_superellipse = -2
 endif
 
 if (v(3).gt.(float(dimz)*delta)) then
- if (PBC(6).eq.2)testsystemsp = -1
- if (PBC(6).eq.0)testsystemsp = -2
+ if (PBC(6).eq.2)testsystem_superellipse = -1
+ if (PBC(6).eq.0)testsystem_superellipse = -2
 endif
 
-if (testsystemsp.eq.0) then ! saves some time
+if (testsystem_superellipse.eq.0) then ! saves some time
 
 do i = 1, 3 ! put into cell
 if(v(i).lt.0.0) then
@@ -78,7 +78,7 @@ xx(2) = x(2) - originc(2)
 vect = xx(1)**2+xx(2)**2
 
  if(vect.le.rchannel**2) then
-  testsystemsp = -1
+  testsystem_superellipse = -1
   return
  endif
 
