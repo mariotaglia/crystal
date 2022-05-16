@@ -60,15 +60,15 @@ ncha = 0
  flag = .false.
 
 
- call integrate_superellipse(rsuperL2, RdimZs, originc, npoints, voleps1, sumvoleps1, flag)
+ call integrate_superellipse(rsuperL2, originc, npoints, voleps1, sumvoleps1, flag)
 
  flag = .false. ! not a problem if eps lays outside boundaries
 
- call integrate_superellipse(rsuper2, RdimZs, originc, npoints, volprot1, sumvolprot1, flag)
+ call integrate_superellipse(rsuper2, originc, npoints, volprot1, sumvolprot1, flag)
 
- call integrate_superellipse(rsuperS2, RdimZs, originc, npoints, volq1, sumvolq1, flag)
+ call integrate_superellipse(rsuperS2, originc, npoints, volq1, sumvolq1, flag)
 
- call newintegrateg_superellipse(rsuper2, RdimZs, originc, npoints, volx1, sumvolx1, com1, p1, ncha1, volxx1)
+ call newintegrateg_superellipse(rsuper2, originc, npoints, volx1, sumvolx1, com1, p1, ncha1, volxx1)
 
 !! eps
  voleps1 = voleps1-volprot1
@@ -165,7 +165,7 @@ call savetodisk(volxx, title, counter)
 
 end subroutine
 
-subroutine newintegrateg_superellipse(rsuper2,RdimZs,originc, npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
+subroutine newintegrateg_superellipse(rsuper2, originc, npoints, volx1, sumvolx1, com1, p1, ncha1, volxx1)
 use system
 use transform
 use chainsdat
@@ -193,7 +193,6 @@ real*8 volxx1(dimx,dimy,dimz)
 integer flagin
 integer dims(3), is(3), js(3)
 integer jjjz, jjjt, npointz, npointt
-integer RdimZs
 
 pi=acos(-1.0)
 
@@ -268,7 +267,7 @@ com1(i,2) = com1(i,2) + 0.5*lseg*((com1(i,2)-originc(2)))/rsuper
 enddo
 end
 
-subroutine integrate_superellipse(rsuper2,RdimZs, originc, npoints,volprot,sumvolprot, flag)
+subroutine integrate_superellipse(rsuper2, originc, npoints,volprot,sumvolprot, flag)
 use system
 use transform
 
@@ -285,7 +284,6 @@ real*8 intcell_superellipse
 real*8 mmmult
 integer jx,jy, jz
 logical flag
-integer RdimZs
 
 real*8 box(4)
 real*8 x(3), v(3)
@@ -302,7 +300,7 @@ sumvolprot = 0.0 ! total volumen, including that outside the system
 
 do ix = 1, dimx
 do iy = 1, dimy
-do iz = RdimZs+1, dimz-RdimZs
+do iz = 1, dimz
 
 flagin = .false.
 flagout = .false.

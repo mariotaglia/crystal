@@ -69,7 +69,6 @@ module superellipse
 real*8 rsuper, sizeX, sizeY, pfactor
 real*8 originc(2)
 real*8 echarges, eepss, sigmas, sigmars
-integer RdimZs ! size of reservoirs in delta units
 endmodule
 
 module s2d
