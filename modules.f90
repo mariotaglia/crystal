@@ -66,7 +66,7 @@ integer Npolx, Npoly
 endmodule
 
 module superellipse
-real*8 rsuper, sizeX, sizeY, pfactor
+real*8 sizeX, sizeY, pfactor
 real*8 originc(2)
 real*8 echarges, eepss, sigmas, sigmars
 endmodule

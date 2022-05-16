@@ -365,8 +365,6 @@ do while (ios == 0)
 
    case(81) ! superellipse
      read(fh, *) basura
-     read(fh, *) rsuper
-     read(fh, *) basura
      read(fh, *) sizeX, sizeY
      read(fh, *) basura
      read(fh, *) pfactor

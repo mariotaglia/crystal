@@ -9,7 +9,7 @@ use molecules
 use rotchain
 implicit none
 
-real*8 rsuper2, rsuperL2, rsuperS2
+real*8 sizeXS, sizeXL, sizeYS, sizeYL
 real*8, external :: rands
 integer npoints ! points per cell for numerical integration 
 integer counter
@@ -37,9 +37,11 @@ integer nbands
 cutarea = 0.0 ! throw away cells that have less area than cutarea x area of the cell with largest area  
 sumpolseg = 0.0
 
-rsuper2 = rsuper**2
-rsuperL2 = (rsuper + 3*delta)**2
-rsuperS2 = (rsuper - delta)**2
+! Lower and greater X and Y size
+sizeXL = sizeX + delta 
+sizeXS = sizeX - delta 
+sizeXL = sizeY + delta
+sizeXS = sizeY - delta
 
 ! clear all
 voleps = 0.0
@@ -52,27 +54,26 @@ ncha = 0
 
 ! channel center in x, y plane
 
- originc(1) = float(dimx)*delta/2.0 
- originc(2) = float(dimy)*delta/2.0 
+originc(1) = float(dimx)*delta/2.0 
+originc(2) = float(dimy)*delta/2.0 
 
- npoints = 50
+npoints = 50
 
- flag = .false.
+flag = .false.
 
+call integrate_superellipse(sizeXS, sizeYS, pfactor, originc, npoints, voleps1, sumvoleps1, flag)
 
- call integrate_superellipse(rsuperL2, originc, npoints, voleps1, sumvoleps1, flag)
+flag = .false. ! not a problem if eps lays outside boundaries
 
- flag = .false. ! not a problem if eps lays outside boundaries
+call integrate_superellipse(sizeX, sizeY, pfactor, originc, npoints, volprot1, sumvolprot1, flag)
 
- call integrate_superellipse(rsuper2, originc, npoints, volprot1, sumvolprot1, flag)
+call integrate_superellipse(sizeXL, sizeYL, pfactor, originc, npoints, volq1, sumvolq1, flag)
 
- call integrate_superellipse(rsuperS2, originc, npoints, volq1, sumvolq1, flag)
-
- call newintegrateg_superellipse(rsuper2, originc, npoints, volx1, sumvolx1, com1, p1, ncha1, volxx1)
+call newintegrateg_superellipse(sizeX, sizeY, pfactor, originc, npoints, volx1, sumvolx1, com1, p1, ncha1, volxx1)
 
 !! eps
- voleps1 = voleps1-volprot1
- voleps1 = voleps1*eepss
+voleps1 = voleps1-volprot1
+voleps1 = voleps1*eepss
 
 ! epstype
 
@@ -88,7 +89,6 @@ enddo
 
 endselect
 
-
 !! charge
 volq1 = volprot1-volq1
 temp = sumvolprot1-sumvolq1
@@ -96,7 +96,7 @@ volq1 = volq1/temp*echarges/(delta**3) ! sum(volq) is echarge
 
 !! grafting
 
-area = 2.0*pi*rsuper*float(dimz)*delta
+area = 4*sizeX*sizeY*gamma(1 + 1.0/pfactor)**2/gamma(1 + 2.0/pfactor)
 
 temp2 = maxval(volx1)
 
@@ -142,7 +142,7 @@ counter = 1
 call savetodisk(volprot, title, counter)
 
 if (verbose.ge.2) then
-temp = pi*rsuper2*float(dimz)*delta
+temp = area*float(dimz)*delta
 
 if (rank.eq.0) then
 write(stdout,*) 'superellipse:', 'update_matrix: Total nanosuperellipse volumen real space= ', temp
@@ -165,19 +165,20 @@ call savetodisk(volxx, title, counter)
 
 end subroutine
 
-subroutine newintegrateg_superellipse(rsuper2, originc, npoints, volx1, sumvolx1, com1, p1, ncha1, volxx1)
+subroutine newintegrateg_superellipse(sizeX, sizeY, pfactor, originc, npoints, volx1, sumvolx1, com1, p1, ncha1, volxx1)
 use system
 use transform
 use chainsdat
 use ematrix
 use const
+
 implicit none
+real*8 sizeX, sizeY, pfactor
 real*8 sumvolx1
 integer npoints
 integer indexvolx(dimx,dimy,dimz)
 integer listvolx(ncha,3)
-real*8 radio
-real*8 rsuper, rsuper2, originc(2)
+real*8 originc(2)
 real*8 phi, dphi, tetha,dtetha, as, ds
 integer mphi, mtetha
 integer ix,iy,iz,jx,jy,jz
@@ -200,8 +201,6 @@ dims(1) = dimx
 dims(2) = dimy
 dims(3) = dimz
 
-rsuper = sqrt(rsuper2)
-
 indexvolx = 0
 ncha1 = 0
 volx1 = 0.0
@@ -214,13 +213,13 @@ volxx1 = 0.0
 !
 
 npointz = npoints*dimz
-npointt = int(2.0*pi*rsuper/delta)*npoints
+npointt = int(2.0*pi/delta)*npoints
 
 do jjjz = 1, npointz-1
 do jjjt = 1, npointt
 
-x(1) = cos(float(jjjt)/float(npointt)*2.0*pi)*rsuper
-x(2) = sin(float(jjjt)/float(npointt)*2.0*pi)*rsuper
+x(1) = cos(float(jjjt)/float(npointt)*2.0*pi)
+x(2) = sin(float(jjjt)/float(npointt)*2.0*pi)
 x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
 
 x(1) = x(1) + originc(1)
@@ -262,19 +261,20 @@ com1(i,:) = com1(i,:)/volx1(i)
 
 ! Moves the position of the first segment lseg/2 away from the surface to prevent collision due to round errors.
 
-com1(i,1) = com1(i,1) + 0.5*lseg*((com1(i,1)-originc(1)))/rsuper 
-com1(i,2) = com1(i,2) + 0.5*lseg*((com1(i,2)-originc(2)))/rsuper 
+com1(i,1) = com1(i,1) + 0.5*lseg*((com1(i,1)-originc(1))) 
+com1(i,2) = com1(i,2) + 0.5*lseg*((com1(i,2)-originc(2))) 
 enddo
 end
 
-subroutine integrate_superellipse(rsuper2, originc, npoints,volprot,sumvolprot, flag)
+subroutine integrate_superellipse(sizeX, sizeY, pfactor, originc, npoints,volprot,sumvolprot, flag)
 use system
 use transform
 
 implicit none
+real*8 sizeX, sizeY, pfactor
 real*8 sumvolprot
 integer npoints
-real*8 rsuper2, originc(2)
+real*8 originc(2)
 real*8 volprot(dimx,dimy,dimz)
 real*8 dr(3), dxr(3)
 integer ix,iy,iz,ax,ay,az
@@ -320,8 +320,10 @@ v(3) = 0.0
 x(1) = x(1) - originc(1)
 x(2) = x(2) - originc(2)
 
-if((x(1)**2+x(2)**2).lt.rsuper2)flagin=.true. ! inside the channel
-if((x(1)**2+x(2)**2).gt.rsuper2)flagout=.true. ! outside the channel
+
+
+if((x(1)**2+x(2)**2).lt.232)flagin=.true. ! inside the channel
+if((x(1)**2+x(2)**2).gt.232)flagout=.true. ! outside the channel
 
 enddo
 enddo
@@ -334,7 +336,7 @@ if((flagin.eqv..false.).and.(flagout.eqv..true.)) then ! cell all outside channe
     voltemp = 0.0
 endif
 if((flagin.eqv..true.).and.(flagout.eqv..true.)) then ! cell part inside annd outside channel
-    voltemp = intcell_superellipse(rsuper2, originc,ix,iy,iz, npoints)
+    voltemp = intcell_superellipse(sizeX, sizeY, pfactor, originc,ix,iy,iz, npoints)
 endif
 
 sumvolprot = sumvolprot + voltemp
@@ -347,12 +349,12 @@ enddo ! iz
 
 end subroutine
 
-double precision function intcell_superellipse(rsuper2,originc,ix,iy,iz,n)
+double precision function intcell_superellipse(sizeX, sizeY, pfactor, originc, ix, iy, iz, n)
 use system
 use transform
 
 implicit none
-real*8 rsuper2
+real*8 sizeX, sizeY, pfactor
 real*8 originc(2)
 integer ix,iy,iz,ax,ay,az
 integer cc
@@ -377,7 +379,7 @@ dxr(1) = dxr(1)-originc(1)
 dxr(2) = dxr(2)-originc(2)
 
 vect = dxr(1)**2+dxr(2)**2
-if(vect.lt.rsuper2)cc=cc+1 ! outside channel, integrate
+if(vect.lt.232)cc=cc+1 ! outside channel, integrate
 
 enddo
 enddo
@@ -385,5 +387,3 @@ enddo
 
 intcell_superellipse = float(cc)/(float(n)**3)
 end function
-
-
