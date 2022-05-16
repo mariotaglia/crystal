@@ -13,6 +13,7 @@ use kai
 use kaist
 use s2d
 use channel
+use superellipse
 use branches
 use cube
 implicit none
@@ -352,7 +353,7 @@ do while (ios == 0)
                             ! TYPE = 2 is 3D channel
                             ! TYPE = 3 is a 3D channel with chains at specific conditions
 
-    case(2, 80)
+    case(2, 80) ! channel, cylinder
      read(fh, *) basura
      read(fh, *) rchannel
      read(fh, *) basura
@@ -362,15 +363,19 @@ do while (ios == 0)
      read(fh, *) basura
      read(fh, *) eepsc
 
-   case(81) 
+   case(81) ! superellipse
      read(fh, *) basura
-     read(fh, *) rchannel
+     read(fh, *) rsuper
      read(fh, *) basura
-     read(fh, *) sigmac
+     read(fh, *) sizeX, sizeY
      read(fh, *) basura
-     read(fh, *) echargec
+     read(fh, *) pfactor
      read(fh, *) basura
-     read(fh, *) eepsc
+     read(fh, *) sigmas
+     read(fh, *) basura
+     read(fh, *) echarges
+     read(fh, *) basura
+     read(fh, *) eepss
 
     case(3, 4, 41)
      read(fh, *) basura

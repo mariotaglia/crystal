@@ -1,6 +1,6 @@
 subroutine update_matrix_superellipse(flag)
 use system
-use channel
+use superellipse
 use ematrix
 use MPI
 use const
@@ -9,7 +9,7 @@ use molecules
 use rotchain
 implicit none
 
-real*8 rchannel2, rchannelL2, rchannelS2
+real*8 rsuper2, rsuperL2, rsuperS2
 real*8, external :: rands
 integer npoints ! points per cell for numerical integration 
 integer counter
@@ -37,9 +37,9 @@ integer nbands
 cutarea = 0.0 ! throw away cells that have less area than cutarea x area of the cell with largest area  
 sumpolseg = 0.0
 
-rchannel2 = rchannel**2
-rchannelL2 = (rchannel + 3*delta)**2
-rchannelS2 = (rchannel - delta)**2
+rsuper2 = rsuper**2
+rsuperL2 = (rsuper + 3*delta)**2
+rsuperS2 = (rsuper - delta)**2
 
 ! clear all
 voleps = 0.0
@@ -60,19 +60,19 @@ ncha = 0
  flag = .false.
 
 
- call integrate_superellipse(rchannelL2,RdimZ, originc ,npoints, voleps1 , sumvoleps1, flag)
+ call integrate_superellipse(rsuperL2, RdimZs, originc, npoints, voleps1, sumvoleps1, flag)
 
  flag = .false. ! not a problem if eps lays outside boundaries
 
- call integrate_superellipse(rchannel2, RdimZ, originc,npoints, volprot1, sumvolprot1, flag)
+ call integrate_superellipse(rsuper2, RdimZs, originc, npoints, volprot1, sumvolprot1, flag)
 
- call integrate_superellipse(rchannelS2,RdimZ, originc,npoints, volq1, sumvolq1, flag)
+ call integrate_superellipse(rsuperS2, RdimZs, originc, npoints, volq1, sumvolq1, flag)
 
- call newintegrateg_superellipse(rchannel2,RdimZ,originc,npoints,volx1,sumvolx1, com1, p1, ncha1, volxx1)
+ call newintegrateg_superellipse(rsuper2, RdimZs, originc, npoints, volx1, sumvolx1, com1, p1, ncha1, volxx1)
 
 !! eps
  voleps1 = voleps1-volprot1
- voleps1 = voleps1*eepsc
+ voleps1 = voleps1*eepss
 
 ! epstype
 
@@ -90,51 +90,51 @@ endselect
 
 
 !! charge
- volq1 = volprot1-volq1
- temp = sumvolprot1-sumvolq1
- volq1 = volq1/temp*echargec/(delta**3) ! sum(volq) is echarge
+volq1 = volprot1-volq1
+temp = sumvolprot1-sumvolq1
+volq1 = volq1/temp*echarges/(delta**3) ! sum(volq) is echarge
 
 !! grafting
 
- area = 2.0*pi*rchannel*float(dimz)*delta
+area = 2.0*pi*rsuper*float(dimz)*delta
 
- temp2 = maxval(volx1)
+temp2 = maxval(volx1)
 
- where(volx1<temp2*cutarea) ! remove cells with very little area
- volx1 = 0.0
- end where 
+where(volx1<temp2*cutarea) ! remove cells with very little area
+volx1 = 0.0
+end where 
 
- do i = 1, ncha1
- volx1(i) = volx1(i)/sumvolx1*area*(sigmac+sigmar*(rands(seed)-0.5))
- volxx1(p1(i,1),p1(i,2),p1(i,3)) = & 
-     volxx1(p1(i,1),p1(i,2),p1(i,3))/sumvolx1*area*(sigmac+sigmar*(rands(seed)-0.5))
- enddo
+do i = 1, ncha1
+volx1(i) = volx1(i)/sumvolx1*area*(sigmas+sigmars*(rands(seed)-0.5))
+volxx1(p1(i,1),p1(i,2),p1(i,3)) = & 
+    volxx1(p1(i,1),p1(i,2),p1(i,3))/sumvolx1*area*(sigmas+sigmars*(rands(seed)-0.5))
+enddo
 
- maxss = 1.0d100
- sumpolseg = sumpolseg + area*sigmac*long
+maxss = 1.0d100
+sumpolseg = sumpolseg + area*sigmas*long
 
 !! volume  
- volprot1 = volprot1 * 0.9999
- volprot = volprot+volprot1
+volprot1 = volprot1 * 0.9999
+volprot = volprot+volprot1
 
 ! CHECK COLLISION HERE...
- if(maxval(volprot).gt.1.0) then ! collision
+if(maxval(volprot).gt.1.0) then ! collision
    flag=.true. 
- endif
+endif
  
- voleps = voleps + voleps1
- volq = volq + volq1 
+voleps = voleps + voleps1
+volq = volq + volq1 
 
 ! add com1 and volx to list
 
- volxx = volxx + volxx1
+volxx = volxx + volxx1
 
 ncha = ncha1
 do i = 1, ncha
-volx(i)=volx1(i)
-com(i,:)=com1(i,:)
-p0(i,:)=p1(i,:)
-rotangle(i) = atan2(com1(i,1)-originc(1), com1(i,2)-originc(2))
+   volx(i)=volx1(i)
+   com(i,:)=com1(i,:)
+   p0(i,:)=p1(i,:)
+   rotangle(i) = atan2(com1(i,1)-originc(1), com1(i,2)-originc(2))
 enddo
 
 title = 'avpro'
@@ -142,7 +142,7 @@ counter = 1
 call savetodisk(volprot, title, counter)
 
 if (verbose.ge.2) then
-temp = pi*rchannel2*float(dimz)*delta
+temp = pi*rsuper2*float(dimz)*delta
 
 if (rank.eq.0) then
 write(stdout,*) 'superellipse:', 'update_matrix: Total nanosuperellipse volumen real space= ', temp
@@ -165,7 +165,7 @@ call savetodisk(volxx, title, counter)
 
 end subroutine
 
-subroutine newintegrateg_superellipse(rchannel2,RdimZ,originc, npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
+subroutine newintegrateg_superellipse(rsuper2,RdimZs,originc, npoints,volx1,sumvolx1,com1,p1,ncha1,volxx1)
 use system
 use transform
 use chainsdat
@@ -177,7 +177,7 @@ integer npoints
 integer indexvolx(dimx,dimy,dimz)
 integer listvolx(ncha,3)
 real*8 radio
-real*8 rchannel, rchannel2, originc(2)
+real*8 rsuper, rsuper2, originc(2)
 real*8 phi, dphi, tetha,dtetha, as, ds
 integer mphi, mtetha
 integer ix,iy,iz,jx,jy,jz
@@ -193,7 +193,7 @@ real*8 volxx1(dimx,dimy,dimz)
 integer flagin
 integer dims(3), is(3), js(3)
 integer jjjz, jjjt, npointz, npointt
-integer RdimZ
+integer RdimZs
 
 pi=acos(-1.0)
 
@@ -201,7 +201,7 @@ dims(1) = dimx
 dims(2) = dimy
 dims(3) = dimz
 
-rchannel = sqrt(rchannel2)
+rsuper = sqrt(rsuper2)
 
 indexvolx = 0
 ncha1 = 0
@@ -215,13 +215,13 @@ volxx1 = 0.0
 !
 
 npointz = npoints*dimz
-npointt = int(2.0*pi*rchannel/delta)*npoints
+npointt = int(2.0*pi*rsuper/delta)*npoints
 
 do jjjz = 1, npointz-1
 do jjjt = 1, npointt
 
-x(1) = cos(float(jjjt)/float(npointt)*2.0*pi)*rchannel
-x(2) = sin(float(jjjt)/float(npointt)*2.0*pi)*rchannel
+x(1) = cos(float(jjjt)/float(npointt)*2.0*pi)*rsuper
+x(2) = sin(float(jjjt)/float(npointt)*2.0*pi)*rsuper
 x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
 
 x(1) = x(1) + originc(1)
@@ -263,19 +263,19 @@ com1(i,:) = com1(i,:)/volx1(i)
 
 ! Moves the position of the first segment lseg/2 away from the surface to prevent collision due to round errors.
 
-com1(i,1) = com1(i,1) + 0.5*lseg*((com1(i,1)-originc(1)))/rchannel 
-com1(i,2) = com1(i,2) + 0.5*lseg*((com1(i,2)-originc(2)))/rchannel 
+com1(i,1) = com1(i,1) + 0.5*lseg*((com1(i,1)-originc(1)))/rsuper 
+com1(i,2) = com1(i,2) + 0.5*lseg*((com1(i,2)-originc(2)))/rsuper 
 enddo
 end
 
-subroutine integrate_superellipse(rchannel2,RdimZ, originc, npoints,volprot,sumvolprot, flag)
+subroutine integrate_superellipse(rsuper2,RdimZs, originc, npoints,volprot,sumvolprot, flag)
 use system
 use transform
 
 implicit none
 real*8 sumvolprot
 integer npoints
-real*8 rchannel2, originc(2)
+real*8 rsuper2, originc(2)
 real*8 volprot(dimx,dimy,dimz)
 real*8 dr(3), dxr(3)
 integer ix,iy,iz,ax,ay,az
@@ -285,7 +285,7 @@ real*8 intcell_superellipse
 real*8 mmmult
 integer jx,jy, jz
 logical flag
-integer RdimZ
+integer RdimZs
 
 real*8 box(4)
 real*8 x(3), v(3)
@@ -302,7 +302,7 @@ sumvolprot = 0.0 ! total volumen, including that outside the system
 
 do ix = 1, dimx
 do iy = 1, dimy
-do iz = RdimZ+1, dimz-RdimZ
+do iz = RdimZs+1, dimz-RdimZs
 
 flagin = .false.
 flagout = .false.
@@ -322,8 +322,8 @@ v(3) = 0.0
 x(1) = x(1) - originc(1)
 x(2) = x(2) - originc(2)
 
-if((x(1)**2+x(2)**2).lt.rchannel2)flagin=.true. ! inside the channel
-if((x(1)**2+x(2)**2).gt.rchannel2)flagout=.true. ! outside the channel
+if((x(1)**2+x(2)**2).lt.rsuper2)flagin=.true. ! inside the channel
+if((x(1)**2+x(2)**2).gt.rsuper2)flagout=.true. ! outside the channel
 
 enddo
 enddo
@@ -336,7 +336,7 @@ if((flagin.eqv..false.).and.(flagout.eqv..true.)) then ! cell all outside channe
     voltemp = 0.0
 endif
 if((flagin.eqv..true.).and.(flagout.eqv..true.)) then ! cell part inside annd outside channel
-    voltemp = intcell_superellipse(rchannel2, originc,ix,iy,iz, npoints)
+    voltemp = intcell_superellipse(rsuper2, originc,ix,iy,iz, npoints)
 endif
 
 sumvolprot = sumvolprot + voltemp
@@ -349,12 +349,12 @@ enddo ! iz
 
 end subroutine
 
-double precision function intcell_superellipse(rchannel2,originc,ix,iy,iz,n)
+double precision function intcell_superellipse(rsuper2,originc,ix,iy,iz,n)
 use system
 use transform
 
 implicit none
-real*8 rchannel2
+real*8 rsuper2
 real*8 originc(2)
 integer ix,iy,iz,ax,ay,az
 integer cc
@@ -379,7 +379,7 @@ dxr(1) = dxr(1)-originc(1)
 dxr(2) = dxr(2)-originc(2)
 
 vect = dxr(1)**2+dxr(2)**2
-if(vect.lt.rchannel2)cc=cc+1 ! outside channel, integrate
+if(vect.lt.rsuper2)cc=cc+1 ! outside channel, integrate
 
 enddo
 enddo

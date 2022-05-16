@@ -1,7 +1,7 @@
 integer function testsystem_superellipse(x)
 use system
 use transform
-use channel
+use superellipse
 
 implicit none
 real*8 x(3), xx(3), v(3), maxx(3)
@@ -77,7 +77,7 @@ xx(2) = x(2) - originc(2)
 
 vect = xx(1)**2+xx(2)**2
 
- if(vect.le.rchannel**2) then
+ if(vect.le.rsuper**2) then
   testsystem_superellipse = -1
   return
  endif

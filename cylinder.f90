@@ -88,46 +88,44 @@ enddo
 
 endselect
 
-
 !! charge
- volq1 = volprot1-volq1
- temp = sumvolprot1-sumvolq1
- volq1 = volq1/temp*echargec/(delta**3) ! sum(volq) is echarge
+volq1 = volprot1-volq1
+temp = sumvolprot1-sumvolq1
+volq1 = volq1/temp*echargec/(delta**3) ! sum(volq) is echarge
 
 !! grafting
 
- area = 2.0*pi*rchannel*float(dimz)*delta
+area = 2.0*pi*rchannel*float(dimz)*delta
 
- temp2 = maxval(volx1)
+temp2 = maxval(volx1)
 
- where(volx1<temp2*cutarea) ! remove cells with very little area
- volx1 = 0.0
- end where 
+where(volx1<temp2*cutarea) ! remove cells with very little area
+volx1 = 0.0
+end where 
 
- do i = 1, ncha1
- volx1(i) = volx1(i)/sumvolx1*area*(sigmac+sigmar*(rands(seed)-0.5))
- volxx1(p1(i,1),p1(i,2),p1(i,3)) = & 
+do i = 1, ncha1
+volx1(i) = volx1(i)/sumvolx1*area*(sigmac+sigmar*(rands(seed)-0.5))
+volxx1(p1(i,1),p1(i,2),p1(i,3)) = & 
      volxx1(p1(i,1),p1(i,2),p1(i,3))/sumvolx1*area*(sigmac+sigmar*(rands(seed)-0.5))
- enddo
+enddo
 
- maxss = 1.0d100
- sumpolseg = sumpolseg + area*sigmac*long
+maxss = 1.0d100
+sumpolseg = sumpolseg + area*sigmac*long
 
 !! volume  
- volprot1 = volprot1 * 0.9999
- volprot = volprot+volprot1
+volprot1 = volprot1 * 0.9999
+volprot = volprot+volprot1
 
 ! CHECK COLLISION HERE...
- if(maxval(volprot).gt.1.0) then ! collision
+if(maxval(volprot).gt.1.0) then ! collision
    flag=.true. 
- endif
+endif
  
- voleps = voleps + voleps1
- volq = volq + volq1 
+voleps = voleps + voleps1
+volq = volq + volq1 
 
 ! add com1 and volx to list
-
- volxx = volxx + volxx1
+volxx = volxx + volxx1
 
 ncha = ncha1
 do i = 1, ncha
@@ -145,9 +143,9 @@ if (verbose.ge.2) then
 temp = pi*rchannel2*float(dimz)*delta
 
 if (rank.eq.0) then
-write(stdout,*) 'channel:', 'update_matrix: Total nanocylinder volumen real space= ', temp
-write(stdout,*) 'channel:', 'update_matrix: Total discretized volumen =', (sum(volprot))*delta**3
-write(stdout,*) 'channel:', 'number of monomers in system =', sumpolseg 
+write(stdout,*) 'cylinder:', 'update_matrix: Total nanocylinder volumen real space= ', temp
+write(stdout,*) 'cylinder:', 'update_matrix: Total discretized volumen =', (sum(volprot))*delta**3
+write(stdout,*) 'cylinder:', 'number of monomers in system =', sumpolseg 
 endif
 endif
 

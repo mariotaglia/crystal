@@ -65,6 +65,13 @@ real*8, allocatable :: ringpos(:) ! position along the pore
 integer Npolx, Npoly
 endmodule
 
+module superellipse
+real*8 rsuper, sizeX, sizeY, pfactor
+real*8 originc(2)
+real*8 echarges, eepss, sigmas, sigmars
+integer RdimZs ! size of reservoirs in delta units
+endmodule
+
 module s2d
 integer scx,scy,scz
 endmodule
