@@ -174,6 +174,7 @@ use const
 
 implicit none
 real*8 sizeX, sizeY, pfactor
+real*8 signX, signY
 real*8 sumvolx1
 integer npoints
 integer indexvolx(dimx,dimy,dimz)
@@ -209,7 +210,7 @@ com1 = 0.0
 p1 = 0
 volxx1 = 0.0
 
-! This routine determines the surface coverage and grafting positions only for cylinder
+! This routine determines the surface coverage and grafting positions only for superellipses
 !
 
 npointz = npoints*dimz
@@ -218,8 +219,10 @@ npointt = int(2.0*pi/delta)*npoints
 do jjjz = 1, npointz-1
 do jjjt = 1, npointt
 
-x(1) = cos(float(jjjt)/float(npointt)*2.0*pi)
-x(2) = sin(float(jjjt)/float(npointt)*2.0*pi)
+signX = cos(float(jjjt)/float(npointt)*2.0*pi)
+signY = sin(float(jjjt)/float(npointt)*2.0*pi)
+x(1) = sizeX*sign(abs(cos(float(jjjt)/float(npointt)*2.0*pi))**(2.0/pfactor)*cos(float(jjjt)/float(npointt)*2.0*pi),signX)
+x(2) = sizeY*sign(abs(sin(float(jjjt)/float(npointt)*2.0*pi))**(2.0/pfactor)*sin(float(jjjt)/float(npointt)*2.0*pi),signY)
 x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
 
 x(1) = x(1) + originc(1)
@@ -271,6 +274,7 @@ use system
 use transform
 
 implicit none
+real*8 testIn
 real*8 sizeX, sizeY, pfactor
 real*8 sumvolprot
 integer npoints
@@ -320,10 +324,10 @@ v(3) = 0.0
 x(1) = x(1) - originc(1)
 x(2) = x(2) - originc(2)
 
+testIn = abs(x(1)/sizeX)**pfactor + abs(x(2)/sizeY)**pfactor
 
-
-if((x(1)**2+x(2)**2).lt.232)flagin=.true. ! inside the channel
-if((x(1)**2+x(2)**2).gt.232)flagout=.true. ! outside the channel
+if(testIn.lt.1)flagin=.true. ! inside the channel
+if(testIn.gt.1)flagout=.true. ! outside the channel
 
 enddo
 enddo
@@ -354,6 +358,7 @@ use system
 use transform
 
 implicit none
+real*8 testIn
 real*8 sizeX, sizeY, pfactor
 real*8 originc(2)
 integer ix,iy,iz,ax,ay,az
@@ -378,8 +383,8 @@ dxr = MATMUL(IMAT, dr)
 dxr(1) = dxr(1)-originc(1)
 dxr(2) = dxr(2)-originc(2)
 
-vect = dxr(1)**2+dxr(2)**2
-if(vect.lt.232)cc=cc+1 ! outside channel, integrate
+vect = abs(dxr(1)/sizeX)**pfactor + abs(dxr(2)/sizeY)**pfactor
+if(vect.lt.1)cc=cc+1 ! outside channel, integrate
 
 enddo
 enddo

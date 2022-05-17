@@ -75,7 +75,7 @@ enddo
 xx(1) = x(1) - originc(1) ! distance to the center of the channel
 xx(2) = x(2) - originc(2) 
 
-vect = abs(xx(1)/sizeX)**(2.0/pfactor)+abs(xx(2)/sizeY)**(2.0/pfactor)
+vect = abs(xx(1)/sizeX)**pfactor+abs(xx(2)/sizeY)**pfactor
 
  if(vect.le.1) then
   testsystem_superellipse = -1
