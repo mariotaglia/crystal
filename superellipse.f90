@@ -33,7 +33,6 @@ real*8 volxx1(dimx,dimy,dimz)
 real*8 volxx(dimx,dimy,dimz)
 integer nbands
 
-
 cutarea = 0.0 ! throw away cells that have less area than cutarea x area of the cell with largest area  
 sumpolseg = 0.0
 
@@ -96,7 +95,7 @@ volq1 = volq1/temp*echarges/(delta**3) ! sum(volq) is echarge
 
 !! grafting
 
-area = 4*sizeX*sizeY*gamma(1 + 1.0/pfactor)**2/gamma(1 + 2.0/pfactor)
+area = delta*4*sizeX*sizeY*gamma(1 + 1.0/pfactor)**2/gamma(1 + 2.0/pfactor)
 
 temp2 = maxval(volx1)
 
@@ -145,7 +144,7 @@ if (verbose.ge.2) then
 temp = area*float(dimz)*delta
 
 if (rank.eq.0) then
-write(stdout,*) 'superellipse:', 'update_matrix: Total nanosuperellipse volumen real space= ', temp
+write(stdout,*) 'superellipse:', 'update_matrix: Total superellipse volumen real space= ', temp
 write(stdout,*) 'superellipse:', 'update_matrix: Total discretized volumen =', (sum(volprot))*delta**3
 write(stdout,*) 'superellipse:', 'number of monomers in system =', sumpolseg 
 endif
@@ -175,6 +174,10 @@ use const
 implicit none
 real*8 sizeX, sizeY, pfactor
 real*8 signX, signY
+real*8 deltatA, deltatB
+real*8 angle, maxangle
+real*8 sqrtUp, sqrtDown
+real*8 tau, arclength
 real*8 sumvolx1
 integer npoints
 integer indexvolx(dimx,dimy,dimz)
@@ -211,26 +214,48 @@ p1 = 0
 volxx1 = 0.0
 
 ! This routine determines the surface coverage and grafting positions only for superellipses
-!
+! Optimal parametric sampling, Pilu and Fisher
 
 npointz = npoints*dimz
-npointt = int(2.0*pi/delta)*npoints
+
+arclength = 0.01 ! arclenght between sample points in the superellipse
+maxangle = pi/4.0 ! max angle to sample
+tau = 0.01 ! tolerance to switch between Method A and B
+angle = 0.0
+
+do while (angle.lt.maxangle)
+
+! deltat Method A
+deltatA = (pfactor*arclength/2)
+sqrtUp = (cos(angle))**2*(sin(angle))**2
+sqrtDown = sizeX**2*(sin(angle))**4*(cos(angle))**(4.0/pfactor)
+sqrtDown = sqrtDown + sizeY**2*(cos(angle))**4*(sin(angle))**(4.0/pfactor)
+deltatA = deltatA*sqrt(sqrtUp/sqrtDown)
+
+! deltat Method B
+deltatB = ((arclength + sizeY*angle**(2.0/pfactor))/sizeY)**(pfactor/2.0) - angle
+
+if (angle.gt.tau) then
+   angle = angle + deltatA
+else
+   angle = angle + deltatB
+endif
 
 do jjjz = 1, npointz-1
-do jjjt = 1, npointt
 
-signX = cos(float(jjjt)/float(npointt)*2.0*pi)
-signY = sin(float(jjjt)/float(npointt)*2.0*pi)
-x(1) = sizeX*sign(abs(cos(float(jjjt)/float(npointt)*2.0*pi))**(2.0/pfactor)*cos(float(jjjt)/float(npointt)*2.0*pi),signX)
-x(2) = sizeY*sign(abs(sin(float(jjjt)/float(npointt)*2.0*pi))**(2.0/pfactor)*sin(float(jjjt)/float(npointt)*2.0*pi),signY)
+! First quadrant 1
+
+x(1) = sizeX*abs(cos(angle))**(2.0/pfactor)
+x(2) = sizeY*abs(sin(angle))**(2.0/pfactor)
 x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
 
 x(1) = x(1) + originc(1)
 x(2) = x(2) + originc(2)
 
 do j = 1,3
-    js(j) = floor(x(j)/delta)+1
+   js(j) = floor(x(j)/delta)+1
 enddo
+
 jx = js(1)
 jy = js(2)
 jz = js(3)
