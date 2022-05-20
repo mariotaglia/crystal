@@ -281,6 +281,270 @@ volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
 com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
 sumvolx1 = sumvolx1 + 1.0
 
+! First quadrant 2
+
+x(1) = sizeY*abs(sin(angle))**(2.0/pfactor)
+x(2) = sizeX*abs(cos(angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+do j = 1,3
+   js(j) = floor(x(j)/delta)+1
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'channel: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
+
+! Second quadrant 1
+
+x(1) = sizeY*abs(sin(angle))**(2.0/pfactor)
+x(2) = -sizeX*abs(cos(angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+do j = 1,3
+   js(j) = floor(x(j)/delta)+1
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'channel: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
+! Second quadrant 2
+
+x(1) = -sizeX*abs(cos(angle))**(2.0/pfactor)
+x(2) = sizeY*abs(sin(angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+do j = 1,3
+   js(j) = floor(x(j)/delta)+1
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'channel: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
+
+! Third quadrant 1
+
+x(1) = -sizeX*abs(cos(angle))**(2.0/pfactor)
+x(2) = -sizeY*abs(sin(angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+do j = 1,3
+   js(j) = floor(x(j)/delta)+1
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'channel: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
+
+! Third quadrant 2
+
+x(1) = -sizeY*abs(sin(angle))**(2.0/pfactor)
+x(2) = -sizeX*abs(cos(angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+do j = 1,3
+   js(j) = floor(x(j)/delta)+1
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'channel: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
+
+! Fourth quadrant 1
+
+x(1) = -sizeY*abs(sin(angle))**(2.0/pfactor)
+x(2) = sizeX*abs(cos(angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+do j = 1,3
+   js(j) = floor(x(j)/delta)+1
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'channel: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
+
+! Fourth quadrant 2
+
+x(1) = sizeX*abs(cos(angle))**(2.0/pfactor)
+x(2) = -sizeY*abs(sin(angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+do j = 1,3
+   js(j) = floor(x(j)/delta)+1
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'channel: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
 enddo ! jjjt
 enddo ! jjjz
 
