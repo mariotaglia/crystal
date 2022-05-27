@@ -733,13 +733,14 @@ do j = 1,3
     js(j) = is(j)
 
 select case (PBC((j-1)*2+1))
-  case (0 , 2)
+  case (0 , 2) ! BULK, WALL
     if(is(j).lt.1) then
     write(stdout,*) 'Error in newintegrateg: out of boundary'
-    endif
-  case (1)
+    stop    
+  endif
+  case (1) ! PBC
     js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-  case (3)
+  case (3) ! Reflection
     if(v(j).lt.0.0)flagin=0
 endselect
 
@@ -747,6 +748,7 @@ select case (PBC((j-1)*2+2))
   case (0 , 2)
     if(is(j).gt.dims(j)) then
     write(stdout,*) 'Error in newintegrateg: out of boundary'
+    stop
     endif
   case (1)
     js(j)=mod(is(j)+dims(j)-1,dims(j))+1
@@ -790,8 +792,3 @@ com1(i,:) = com1(i,:) + 1.5*lseg*((com1(i,:)-Rell(:)))/Aell(:)
 enddo
 
 end
-
-
-
-
-
