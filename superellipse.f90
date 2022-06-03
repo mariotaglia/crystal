@@ -560,6 +560,7 @@ end
 
 subroutine integrate_superellipse(sizeX, sizeY, pfactor, originc, npoints,volprot,sumvolprot, flag)
 use system
+use const
 use transform
 
 implicit none
@@ -580,8 +581,9 @@ logical flag
 
 real*8 box(4)
 real*8 x(3), v(3)
-integer xmin,xmax,ymin,ymax,zmin,zmax
+integer xmin,xmax,ymin,ymax
 integer i,j
+real*8 vertx(4), verty(4)
 
 logical flagsym
 real*8 voltemp
@@ -589,56 +591,280 @@ real*8 voltemp
 volprot = 0.0
 sumvolprot = 0.0 ! total volumen, including that outside the system
 
-! scan over all cells
+! Create a box in transformed coordinates around the cylinder
 
-do ix = 1, dimx
-do iy = 1, dimy
+x(1) = originc(1) + 1.1*sizeX ! x axis of superellipse in real coordinates
+x(2) = originc(2)
+x(3) = 0.0
+v = MATMUL(MAT,x) ! x axis of superellipse in transformed coordinates
+vertx(1) = v(1)
+verty(1) = v(2)
+
+x(1) = originc(1) - 1.1*sizeX ! x axis of superellipse in real coordinates
+x(2) = originc(2)
+x(3) = 0.0
+v = MATMUL(MAT,x) ! x axis of superellipse in transformed coordinates
+vertx(2) = v(1)
+verty(2) = v(2)
+
+x(1) = originc(1) ! y axis of superellipse in real coordinates
+x(2) = originc(2) + 1.1*sizeY
+x(3) = 0.0
+v = MATMUL(MAT,x) ! y axis of superellipse in transformed coordinates
+vertx(3) = v(1)
+verty(3) = v(2)
+
+x(1) = originc(1) ! y axis of superellipse in real coordinates
+x(2) = originc(2) - 1.1*sizeY
+x(3) = 0.0
+v = MATMUL(MAT,x) ! y axis of superellipse in transformed coordinates
+vertx(4) = v(1)
+verty(4) = v(2)
+
+xmin = int(minval(vertx)/delta) - 2
+xmax = int(maxval(vertx)/delta) + 2
+
+ymin = int(minval(verty)/delta) - 2
+ymax = int(maxval(verty)/delta) + 2
+
+! scan over all cells in the box created
+
+do ix = xmin, xmax
+do iy = ymin, ymax
 do iz = 1, dimz
+
+jx = ix
+jy = iy
+jz = iz
+
+if(PBC(1).eq.1) then
+   jx=mod(ix+dimx-1,dimx)+1
+endif
+if(PBC(3).eq.1) then
+   jy=mod(iy+dimy-1,dimy)+1
+endif
+if(PBC(5).eq.1) then
+   jz=mod(iz+dimz-1,dimz)+1
+endif
 
 flagin = .false.
 flagout = .false.
 
-do ax = 0,1
-do ay = 0,1
-do az = 0,1
+do ax = -1,0
+do ay = -1,0
+do az = -1,0
 
 ! v in transformed space
-v(1) = float(ax+ix-1)*delta
-v(2) = float(ay+iy-1)*delta
+v(1) = float(ax+ix)*delta
+v(2) = float(ay+iy)*delta
 v(3) = 0.0
 
 ! x in real space, v in transformed space
-    x = MATMUL(IMAT,v)
+x = MATMUL(IMAT,v)
 
 x(1) = x(1) - originc(1)
 x(2) = x(2) - originc(2)
 
 testIn = abs(x(1)/sizeX)**pfactor + abs(x(2)/sizeY)**pfactor
 
-if(testIn.lt.1)flagin=.true. ! inside the channel
-if(testIn.gt.1)flagout=.true. ! outside the channel
+if(testIn.le.1.0)then ! inside the superellipse
+   flagin=.true.
+   if(flagout.eqv..true.) then
 
-enddo
-enddo
-enddo
+      flagsym = .false.
 
-if((flagin.eqv..true.).and.(flagout.eqv..false.)) then ! cell all inside channel
-    voltemp = 1.0
+      if (jx.lt.1) then
+         if(PBC(1).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: ix', ix
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+      if (jy.lt.1) then
+         if(PBC(3).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: iy', iy
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+      if (jz.lt.1) then
+         if(PBC(5).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: iz', iz
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+      if (jx.gt.dimx) then
+         if(PBC(2).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: ix', ix
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+      if (jy.gt.dimy) then
+         if(PBC(4).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: iy', iy
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+      if (jz.gt.dimz) then
+         if(PBC(6).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: iz', iz
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+
+      voltemp = intcell_superellipse(sizeX, sizeY, pFactor, originc, ix, iy, iz, npoints)
+      sumvolprot = sumvolprot + voltemp
+
+      if(flagsym.eqv..false.) then ! cell is not out of system due to reflection symmetry
+         volprot(jx,jy,jz) = voltemp
+      endif
+
+      goto 999 ! one in and one out, break the cycle
+
+   endif
+else
+   flagout = .true.
+   if(flagin.eqv..true.)then
+      flagsym = .false.
+      if (jx.lt.1) then
+         if(PBC(1).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: ix', ix
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+      if (jy.lt.1) then
+         if(PBC(3).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: iy', iy
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+      if (jz.lt.1) then
+         if(PBC(5).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: iz', iz
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+      if (jx.gt.dimx) then
+         if(PBC(2).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: ix', ix
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+      if (jy.gt.dimy) then
+         if(PBC(4).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: iy', iy
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+if (jz.gt.dimz) then
+         if(PBC(6).ne.3) then
+            write(stdout,*) 'cylinder:','update_matrix: iz', iz
+            stop
+         else
+            flagsym = .true.
+         endif
+      endif
+
+      voltemp = intcell_superellipse(sizeX, sizeY, pFactor, originc, ix, iy, iz, npoints)
+      sumvolprot = sumvolprot + voltemp
+
+      if(flagsym.eqv..false.) then ! cell is not out of system due to reflection symmetry
+         volprot(jx,jy,jz) = voltemp ! all inside
+      endif
+
+      goto 999 ! one in and one out, break the cycle
+   endif
 endif
-if((flagin.eqv..false.).and.(flagout.eqv..true.)) then ! cell all outside channel
-    voltemp = 0.0
-endif
-if((flagin.eqv..true.).and.(flagout.eqv..true.)) then ! cell part inside annd outside channel
-    voltemp = intcell_superellipse(sizeX, sizeY, pfactor, originc,ix,iy,iz, npoints)
+
+enddo ! az
+enddo ! ay
+enddo ! ax
+
+if((flagin.eqv..true.).and.(flagout.eqv..false.))then
+
+   flagsym = .false.
+
+   if (jx.lt.1) then
+      if(PBC(1).ne.3)then
+         write(stdout,*) 'cylinder:','update_matrix: ix', ix
+         stop
+      else
+         flagsym = .true.
+      endif
+   endif
+   if (jy.lt.1) then
+      if(PBC(3).ne.3)then
+         write(stdout,*) 'cylinder:','update_matrix: iy', iy
+         stop
+      else
+         flagsym = .true.
+      endif
+   endif
+   if (jz.lt.1) then
+      if(PBC(5).ne.3)then
+         write(stdout,*) 'cylinder:','update_matrix: iz', iz
+         stop
+      else
+         flagsym = .true.
+      endif
+   endif
+   if (jx.gt.dimx) then
+      if(PBC(2).ne.3)then
+         write(stdout,*) 'cylinder:','update_matrix: ix', ix
+         stop
+      else
+         flagsym = .true.
+      endif
+   endif
+   if (jy.gt.dimy) then
+      if(PBC(4).ne.3)then
+         write(stdout,*) 'cylinder:','update_matrix: ix', iy
+         stop
+      else
+         flagsym = .true.
+      endif
+   endif
+   if (jz.gt.dimz) then
+      if(PBC(6).ne.3)then
+         write(stdout,*) 'cylinder:','update_matrix: ix', iz
+         stop
+      else
+         flagsym = .true.
+      endif
+   endif
+
+   sumvolprot = sumvolprot + 1.0
+
+   if(flagsym.eqv..false.)then ! cell is not out of system due to reflection symmetry
+      volprot(jx,jy,jz) = 1.0 ! all inside
+   endif
 endif
 
-sumvolprot = sumvolprot + voltemp
-volprot(ix,iy,iz) = voltemp
+999 continue
 
-enddo ! ix
-enddo ! iy
 enddo ! iz
-
+enddo ! iy
+enddo ! ix
 
 end subroutine
 
