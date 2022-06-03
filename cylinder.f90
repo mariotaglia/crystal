@@ -313,7 +313,7 @@ use transform
 implicit none
 real*8 sumvolprot
 integer npoints
-real*8 rchannel2, originc(2)
+real*8 rchannel, rchannel2, originc(2)
 real*8 volprot(dimx,dimy,dimz)
 real*8 dr(3), dxr(3)
 integer ix, iy, iz
@@ -329,22 +329,62 @@ real*8 box(4)
 real*8 x(3), v(3)
 integer xmin,xmax,ymin,ymax,zmin,zmax
 integer i,j
-
 logical flagsym
 real*8 voltemp
+real*8 vertx(4), verty(4)
+
 
 volprot = 0.0
 sumvolprot = 0.0 ! total volumen, including that outside the system
+rchannel = sqrt(rchannel2)
+
+
+! Create a box in transformed coordinates around the cylinder
+
+x(1) = originc(1)+rchannel ! axis of cylinder in real coordinates
+x(2) = originc(2)
+x(3) = 0.0
+v = MATMUL(MAT,x) ! axis of cylinder in transformed coordinates
+vertx(1) = v(1)
+verty(1) = v(2)
+
+x(1) = originc(1)-rchannel ! axis of cylinder in real coordinates
+x(2) = originc(2)
+x(3) = 0.0
+v = MATMUL(MAT,x) ! axis of cylinder in transformed coordinates
+vertx(2) = v(1)
+verty(2) = v(2)
+
+x(1) = originc(1) ! axis of cylinder in real coordinates
+x(2) = originc(2) + rchannel
+x(3) = 0.0
+v = MATMUL(MAT,x) ! axis of cylinder in transformed coordinates
+vertx(3) = v(1)
+verty(3) = v(2)
+
+x(1) = originc(1) ! axis of cylinder in real coordinates
+x(2) = originc(2) - rchannel
+x(3) = 0.0
+v = MATMUL(MAT,x) ! axis of cylinder in transformed coordinates
+vertx(4) = v(1)
+verty(4) = v(2)
+
+xmin = int(minval(vertx)/delta)-2
+xmax = int(maxval(vertx)/delta)+2
+
+ymin = int(minval(verty)/delta)-2
+ymax = int(maxval(verty)/delta)+2
 
 ! scan over all cells
 
-do ix = 1, dimx
-do iy = 1, dimy
+do ix = xmin, xmax
+do iy = ymin, ymax
 do iz = 1, dimz
 
 jx = ix
 jy = iy
 jz = iz
+
 
 if(PBC(1).eq.1) then
  jx=mod(ix+dimx-1,dimx)+1
@@ -355,6 +395,7 @@ endif
 if(PBC(5).eq.1) then
  jz=mod(iz+dimz-1,dimz)+1
 endif
+
 
 flagin = .false.
 flagout = .false.
@@ -375,7 +416,7 @@ x = MATMUL(IMAT,v)
 x(1) = x(1) - originc(1)
 x(2) = x(2) - originc(2)
 
-if((x(1)**2+x(2)**2).le.rchannel2)then           ! inside the ellipsoid
+if((x(1)**2+x(2)**2).le.rchannel2)then           ! inside the cylinder
    flagin=.true.
    if(flagout.eqv..true.) then
 
