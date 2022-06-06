@@ -327,7 +327,7 @@ logical flag
 
 real*8 box(4)
 real*8 x(3), v(3)
-integer xmin,xmax,ymin,ymax,zmin,zmax
+integer xmin,xmax,ymin,ymax
 integer i,j
 logical flagsym
 real*8 voltemp
@@ -341,14 +341,14 @@ rchannel = sqrt(rchannel2)
 
 ! Create a box in transformed coordinates around the cylinder
 
-x(1) = originc(1)+rchannel ! axis of cylinder in real coordinates
+x(1) = originc(1) + rchannel ! axis of cylinder in real coordinates
 x(2) = originc(2)
 x(3) = 0.0
 v = MATMUL(MAT,x) ! axis of cylinder in transformed coordinates
 vertx(1) = v(1)
 verty(1) = v(2)
 
-x(1) = originc(1)-rchannel ! axis of cylinder in real coordinates
+x(1) = originc(1) - rchannel ! axis of cylinder in real coordinates
 x(2) = originc(2)
 x(3) = 0.0
 v = MATMUL(MAT,x) ! axis of cylinder in transformed coordinates
@@ -369,13 +369,13 @@ v = MATMUL(MAT,x) ! axis of cylinder in transformed coordinates
 vertx(4) = v(1)
 verty(4) = v(2)
 
-xmin = int(minval(vertx)/delta)-2
-xmax = int(maxval(vertx)/delta)+2
+xmin = int(minval(vertx)/delta) - 2
+xmax = int(maxval(vertx)/delta) + 2
 
-ymin = int(minval(verty)/delta)-2
-ymax = int(maxval(verty)/delta)+2
+ymin = int(minval(verty)/delta) - 2
+ymax = int(maxval(verty)/delta) + 2
 
-! scan over all cells
+! scan over all cells in the box created
 
 do ix = xmin, xmax
 do iy = ymin, ymax
@@ -384,7 +384,6 @@ do iz = 1, dimz
 jx = ix
 jy = iy
 jz = iz
-
 
 if(PBC(1).eq.1) then
  jx=mod(ix+dimx-1,dimx)+1
@@ -395,7 +394,6 @@ endif
 if(PBC(5).eq.1) then
  jz=mod(iz+dimz-1,dimz)+1
 endif
-
 
 flagin = .false.
 flagout = .false.
@@ -545,9 +543,9 @@ else
    endif
 endif
 
-enddo
-enddo
-enddo
+enddo ! az
+enddo ! ay
+enddo ! ax
 
 if((flagin.eqv..true.).and.(flagout.eqv..false.))then
 
@@ -611,9 +609,9 @@ endif
 
 999 continue
 
-enddo
-enddo
-enddo
+enddo ! iz
+enddo ! iy
+enddo ! ix
 
 end subroutine
 
@@ -650,9 +648,9 @@ vect = dxr(1)**2 + dxr(2)**2
 
 if(vect.le.rchannel2)cc=cc+1 ! outside channel, integrate
 
-enddo
-enddo
-enddo
+enddo ! az
+enddo ! ay
+enddo ! ax
 
 intcell_cylinder = float(cc)/(float(n)**3)
 end function
