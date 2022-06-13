@@ -17,7 +17,7 @@ character*5 title
 logical flag
 integer j,ix,iy,iz
 real pnumber
-real*8 area
+real*8 perimeter, area
 real*8 sumpolseg 
 real*8 sstemp,vvtemp, maxss
 real*8 cutarea
@@ -32,6 +32,9 @@ integer i
 real*8 volxx1(dimx,dimy,dimz)
 real*8 volxx(dimx,dimy,dimz)
 integer nbands
+integer nPerimeter
+real*8 superellipse_perimeter
+real*8 superellipse_area
 
 cutarea = 0.0 ! throw away cells that have less area than cutarea x area of the cell with largest area  
 sumpolseg = 0.0
@@ -94,8 +97,9 @@ temp = sumvolprot1-sumvolq1
 volq1 = volq1/temp*echarges/(delta**3) ! sum(volq) is echarge
 
 !! grafting
-
-area = delta*4*sizeX*sizeY*gamma(1 + 1.0/pfactor)**2/gamma(1 + 2.0/pfactor)
+nPerimeter = 100000000
+perimeter = superellipse_perimeter(sizeX, sizeY, pFactor, nPerimeter)
+area = perimeter*float(dimZ)*delta
 
 temp2 = maxval(volx1)
 
@@ -141,7 +145,7 @@ counter = 1
 call savetodisk(volprot, title, counter)
 
 if (verbose.ge.2) then
-temp = area*float(dimz)*delta
+temp = superellipse_area(sizeX, sizeY, pFactor)*float(dimz)*delta
 
 if (rank.eq.0) then
 write(stdout,*) 'superellipse:', 'update_matrix: Total superellipse volumen real space= ', temp
@@ -1166,11 +1170,52 @@ dxr(1) = dxr(1)-originc(1)
 dxr(2) = dxr(2)-originc(2)
 
 vect = abs(dxr(1)/sizeX)**pfactor + abs(dxr(2)/sizeY)**pfactor
-if(vect.lt.1)cc=cc+1 ! outside channel, integrate
+if(vect.lt.1)cc=cc+1 ! inside superellipse, integrate
 
 enddo
 enddo
 enddo
 
 intcell_superellipse = float(cc)/(float(n)**3)
+end function
+
+double precision function superellipse_perimeter(sizeX, sizeY, pFactor, N)
+use const
+
+implicit none
+
+real*8 sizeX, sizeY, pFactor
+integer N, i
+real*8 x, y, xPlus, yPlus
+real*8 dist
+real*8 perimeter
+
+perimeter = 0.0
+
+do i = 0, N - 1
+   x = sizeX*(cos(float(i)*pi/2/float(N + 1)))**(2/pFactor)
+   y = sizeY*(sin(float(i)*pi/2/float(N + 1)))**(2/pFactor)
+   xPlus = sizeX*(cos(float(i + 1)*pi/2/float(N + 1)))**(2/pFactor)
+   yPlus = sizeY*(sin(float(i + 1)*pi/2/float(N + 1)))**(2/pFactor)
+   dist = sqrt((xPlus - x)**2 + (yPlus - y)**2)
+   perimeter = perimeter + dist
+enddo
+
+superellipse_perimeter = 4*perimeter
+
+end function
+
+double precision function superellipse_area(sizeX, sizeY, pFactor)
+use const
+
+implicit none
+
+real*8 sizeX, sizeY, pFactor
+real*8 term1, term2
+
+term1 = 4*sizeX*sizeY*gamma(1.0 + 1.0/pFactor)**2
+term2 = gamma(1.0 + 2.0/pFactor)
+
+superellipse_area = term1/term2
+
 end function
