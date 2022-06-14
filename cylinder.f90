@@ -300,7 +300,11 @@ com1(i,:) = com1(i,:)/volx1(i)
 ! Moves the position of the first segment lseg/2 away from the surface to prevent collision due to round errors.
 
 com1(i,1) = com1(i,1) + 0.5*lseg*((com1(i,1)-originc(1)))/rchannel 
-com1(i,2) = com1(i,2) + 0.5*lseg*((com1(i,2)-originc(2)))/rchannel 
+com1(i,2) = com1(i,2) + 0.5*lseg*((com1(i,2)-originc(2)))/rchannel
+
+!print*,i, originc(:)
+!print*, i, com1(i,:)
+
 enddo
 
 end

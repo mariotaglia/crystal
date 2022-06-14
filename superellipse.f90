@@ -97,9 +97,12 @@ temp = sumvolprot1-sumvolq1
 volq1 = volq1/temp*echarges/(delta**3) ! sum(volq) is echarge
 
 !! grafting
-nPerimeter = 100000000
+nPerimeter = 5000000
 perimeter = superellipse_perimeter(sizeX, sizeY, pFactor, nPerimeter)
 area = perimeter*float(dimZ)*delta
+
+print*, 'area', area
+print*, 'perimeter', perimeter
 
 temp2 = maxval(volx1)
 
@@ -182,6 +185,7 @@ real*8 deltatA, deltatB
 real*8 angle, maxangle
 real*8 sqrtUp, sqrtDown
 real*8 tau, arclength
+real*8 vect(2)
 real*8 sumvolx1
 integer npoints
 integer indexvolx(dimx,dimy,dimz)
@@ -222,11 +226,14 @@ volxx1 = 0.0
 
 npointz = npoints*dimz
 
-arclength = 0.01 ! arclenght between sample points in the superellipse
+arclength = 0.00001 ! arclenght between sample points in the superellipse
 maxangle = pi/4.0 ! max angle to sample
 tau = 0.01 ! tolerance to switch between Method A and B
 angle = 0.0
 
+! Sampling from 0 to pi/4
+
+do jjjz = 1, npointz-1
 do while (angle.lt.maxangle)
 
 ! deltat Method A
@@ -244,8 +251,6 @@ if (angle.gt.tau) then
 else
    angle = angle + deltatB
 endif
-
-do jjjz = 1, npointz-1
 
 ! First quadrant 1
 
@@ -318,149 +323,7 @@ volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
 com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
 sumvolx1 = sumvolx1 + 1.0
 
-! First quadrant 2
-
-x(1) = sizeY*abs(sin(angle))**(2.0/pfactor)
-x(2) = sizeX*abs(cos(angle))**(2.0/pfactor)
-x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
-
-x(1) = x(1) + originc(1)
-x(2) = x(2) + originc(2)
-
-! x in real space, v in transformed space
-v = MATMUL(MAT, x)
-
-! Periodic boundary conditions
-
-flagin = 1
-
-do j = 1,3
-   is(j) = floor(v(j)/delta)+1
-   js(j) = is(j)
-
-select case (PBC((j-1)*2+1))
-   case (0, 2) ! BULK, WALL
-      if(is(j).lt.1) then
-         write(stdout,*) 'Error in newintegrateg: out of boundary'
-         stop
-      endif
-   case (1) ! PBC
-      js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-   case (3) ! Reflection
-      if(v(j).lt.0.0)flagin=0
-endselect
-
-select case (PBC((j-1)*2+2))
-   case (0 , 2)
-      if(is(j).gt.dims(j)) then
-         write(stdout,*) 'Error in newintegrateg: out of boundary'
-    stop
-    endif
-  case (1)
-    js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-  case (3)
-    if(v(j).gt.float(dims(j))*delta)flagin=0
-endselect
-
-enddo
-
-jx = js(1)
-jy = js(2)
-jz = js(3)
-
-! increase counter
-if(indexvolx(jx,jy,jz).eq.0) then
-
- if(ncha1.eq.maxvolx) then
-   write(stdout,*) 'superellipse: increase maxvolx'
-   stop
- endif
-
- ncha1 = ncha1 + 1
-
- indexvolx(jx,jy,jz) = ncha1
- p1(ncha1,1)=jx
- p1(ncha1,2)=jy
- p1(ncha1,3)=jz
-endif
-
-volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
-volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
-com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
-sumvolx1 = sumvolx1 + 1.0
-
 ! Second quadrant 1
-
-x(1) = sizeY*abs(sin(angle))**(2.0/pfactor)
-x(2) = -sizeX*abs(cos(angle))**(2.0/pfactor)
-x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
-
-x(1) = x(1) + originc(1)
-x(2) = x(2) + originc(2)
-
-! x in real space, v in transformed space
-v = MATMUL(MAT, x)
-
-! Periodic boundary conditions
-
-flagin = 1
-
-do j = 1,3
-   is(j) = floor(v(j)/delta)+1
-   js(j) = is(j)
-
-select case (PBC((j-1)*2+1))
-   case (0, 2) ! BULK, WALL
-      if(is(j).lt.1) then
-         write(stdout,*) 'Error in newintegrateg: out of boundary'
-         stop
-      endif
-   case (1) ! PBC
-      js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-   case (3) ! Reflection
-      if(v(j).lt.0.0)flagin=0
-endselect
-
-select case (PBC((j-1)*2+2))
-   case (0 , 2)
-      if(is(j).gt.dims(j)) then
-         write(stdout,*) 'Error in newintegrateg: out of boundary'
-    stop
-    endif
-  case (1)
-    js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-  case (3)
-    if(v(j).gt.float(dims(j))*delta)flagin=0
-endselect
-
-enddo
-
-jx = js(1)
-jy = js(2)
-jz = js(3)
-
-! increase counter
-if(indexvolx(jx,jy,jz).eq.0) then
-
- if(ncha1.eq.maxvolx) then
-   write(stdout,*) 'channel: increase maxvolx'
-   stop
- endif
-
- ncha1 = ncha1 + 1
-
- indexvolx(jx,jy,jz) = ncha1
- p1(ncha1,1)=jx
- p1(ncha1,2)=jy
- p1(ncha1,3)=jz
-endif
-
-volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
-volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
-com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
-sumvolx1 = sumvolx1 + 1.0
-
-! Second quadrant 2
 
 x(1) = -sizeX*abs(cos(angle))**(2.0/pfactor)
 x(2) = sizeY*abs(sin(angle))**(2.0/pfactor)
@@ -533,219 +396,6 @@ sumvolx1 = sumvolx1 + 1.0
 
 ! Third quadrant 1
 
-x(1) = -sizeX*abs(cos(angle))**(2.0/pfactor)
-x(2) = -sizeY*abs(sin(angle))**(2.0/pfactor)
-x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
-
-x(1) = x(1) + originc(1)
-x(2) = x(2) + originc(2)
-
-! x in real space, v in transformed space
-v = MATMUL(MAT, x)
-
-! Periodic boundary conditions
-
-flagin = 1
-
-do j = 1,3
-   is(j) = floor(v(j)/delta)+1
-   js(j) = is(j)
-
-select case (PBC((j-1)*2+1))
-   case (0, 2) ! BULK, WALL
-      if(is(j).lt.1) then
-         write(stdout,*) 'Error in newintegrateg: out of boundary'
-         stop
-      endif
-   case (1) ! PBC
-      js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-   case (3) ! Reflection
-      if(v(j).lt.0.0)flagin=0
-endselect
-
-select case (PBC((j-1)*2+2))
-   case (0 , 2)
-      if(is(j).gt.dims(j)) then
-         write(stdout,*) 'Error in newintegrateg: out of boundary'
-    stop
-    endif
-  case (1)
-    js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-  case (3)
-    if(v(j).gt.float(dims(j))*delta)flagin=0
-endselect
-
-enddo
-
-jx = js(1)
-jy = js(2)
-jz = js(3)
-
-! increase counter
-if(indexvolx(jx,jy,jz).eq.0) then
-
- if(ncha1.eq.maxvolx) then
-   write(stdout,*) 'channel: increase maxvolx'
-   stop
- endif
-
- ncha1 = ncha1 + 1
-
- indexvolx(jx,jy,jz) = ncha1
- p1(ncha1,1)=jx
- p1(ncha1,2)=jy
- p1(ncha1,3)=jz
-endif
-
-volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
-volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
-com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
-sumvolx1 = sumvolx1 + 1.0
-
-! Third quadrant 2
-
-x(1) = -sizeY*abs(sin(angle))**(2.0/pfactor)
-x(2) = -sizeX*abs(cos(angle))**(2.0/pfactor)
-x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
-
-x(1) = x(1) + originc(1)
-x(2) = x(2) + originc(2)
-
-! x in real space, v in transformed space
-v = MATMUL(MAT, x)
-
-! Periodic boundary conditions
-
-flagin = 1
-
-do j = 1,3
-   is(j) = floor(v(j)/delta)+1
-   js(j) = is(j)
-
-select case (PBC((j-1)*2+1))
-   case (0, 2) ! BULK, WALL
-      if(is(j).lt.1) then
-         write(stdout,*) 'Error in newintegrateg: out of boundary'
-         stop
-      endif
-   case (1) ! PBC
-      js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-   case (3) ! Reflection
-      if(v(j).lt.0.0)flagin=0
-endselect
-
-select case (PBC((j-1)*2+2))
-   case (0 , 2)
-      if(is(j).gt.dims(j)) then
-         write(stdout,*) 'Error in newintegrateg: out of boundary'
-    stop
-    endif
-  case (1)
-    js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-  case (3)
-    if(v(j).gt.float(dims(j))*delta)flagin=0
-endselect
-
-enddo
-
-jx = js(1)
-jy = js(2)
-jz = js(3)
-
-! increase counter
-if(indexvolx(jx,jy,jz).eq.0) then
-
- if(ncha1.eq.maxvolx) then
-   write(stdout,*) 'channel: increase maxvolx'
-   stop
- endif
-
- ncha1 = ncha1 + 1
-
- indexvolx(jx,jy,jz) = ncha1
- p1(ncha1,1)=jx
- p1(ncha1,2)=jy
- p1(ncha1,3)=jz
-endif
-
-volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
-volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
-com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
-sumvolx1 = sumvolx1 + 1.0
-
-! Fourth quadrant 1
-
-x(1) = -sizeY*abs(sin(angle))**(2.0/pfactor)
-x(2) = sizeX*abs(cos(angle))**(2.0/pfactor)
-x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
-
-x(1) = x(1) + originc(1)
-x(2) = x(2) + originc(2)
-
-! x in real space, v in transformed space
-v = MATMUL(MAT, x)
-
-! Periodic boundary conditions
-
-flagin = 1
-
-do j = 1,3
-   is(j) = floor(v(j)/delta)+1
-   js(j) = is(j)
-
-select case (PBC((j-1)*2+1))
-   case (0, 2) ! BULK, WALL
-      if(is(j).lt.1) then
-         write(stdout,*) 'Error in newintegrateg: out of boundary'
-         stop
-      endif
-   case (1) ! PBC
-      js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-   case (3) ! Reflection
-      if(v(j).lt.0.0)flagin=0
-endselect
-
-select case (PBC((j-1)*2+2))
-   case (0 , 2)
-      if(is(j).gt.dims(j)) then
-         write(stdout,*) 'Error in newintegrateg: out of boundary'
-    stop
-    endif
-  case (1)
-    js(j)=mod(is(j)+dims(j)-1,dims(j))+1
-  case (3)
-    if(v(j).gt.float(dims(j))*delta)flagin=0
-endselect
-
-enddo
-
-jx = js(1)
-jy = js(2)
-jz = js(3)
-
-! increase counter
-if(indexvolx(jx,jy,jz).eq.0) then
-
- if(ncha1.eq.maxvolx) then
-   write(stdout,*) 'channel: increase maxvolx'
-   stop
- endif
-
- ncha1 = ncha1 + 1
-
- indexvolx(jx,jy,jz) = ncha1
- p1(ncha1,1)=jx
- p1(ncha1,2)=jy
- p1(ncha1,3)=jz
-endif
-
-volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
-volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
-com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
-sumvolx1 = sumvolx1 + 1.0
-
-! Fourth quadrant 2
-
 x(1) = sizeX*abs(cos(angle))**(2.0/pfactor)
 x(2) = -sizeY*abs(sin(angle))**(2.0/pfactor)
 x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
@@ -815,7 +465,381 @@ volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
 com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
 sumvolx1 = sumvolx1 + 1.0
 
-enddo ! jjjt
+! Fourth quadrant 1
+
+x(1) = -sizeX*abs(cos(angle))**(2.0/pfactor)
+x(2) = -sizeY*abs(sin(angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+! x in real space, v in transformed space
+v = MATMUL(MAT, x)
+
+! Periodic boundary conditions
+
+flagin = 1
+
+do j = 1,3
+   is(j) = floor(v(j)/delta)+1
+   js(j) = is(j)
+
+select case (PBC((j-1)*2+1))
+   case (0, 2) ! BULK, WALL
+      if(is(j).lt.1) then
+         write(stdout,*) 'Error in newintegrateg: out of boundary'
+         stop
+      endif
+   case (1) ! PBC
+      js(j)=mod(is(j)+dims(j)-1,dims(j))+1
+   case (3) ! Reflection
+      if(v(j).lt.0.0)flagin=0
+endselect
+
+select case (PBC((j-1)*2+2))
+   case (0 , 2)
+      if(is(j).gt.dims(j)) then
+         write(stdout,*) 'Error in newintegrateg: out of boundary'
+    stop
+    endif
+  case (1)
+    js(j)=mod(is(j)+dims(j)-1,dims(j))+1
+  case (3)
+    if(v(j).gt.float(dims(j))*delta)flagin=0
+endselect
+
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'channel: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
+
+enddo ! maxangle condition
+enddo ! jjjz
+
+! Sampling from pi/4 to pi/2
+
+angle = 0.0
+
+do jjjz = 1, npointz - 1
+do while (angle.lt.maxangle)
+
+! deltat Method A
+deltatA = (pfactor*arclength/2)
+sqrtUp = (cos(angle))**2*(sin(angle))**2
+sqrtDown = sizeY**2*(sin(angle))**4*(cos(angle))**(4.0/pfactor)
+sqrtDown = sqrtDown + sizeX**2*(cos(angle))**4*(sin(angle))**(4.0/pfactor)
+deltatA = deltatA*sqrt(sqrtUp/sqrtDown)
+
+! deltat Method B
+deltatB = ((arclength + sizeX*angle**(2.0/pfactor))/sizeX)**(pfactor/2.0) - angle
+
+if (angle.gt.tau) then
+   angle = angle + deltatA
+else
+   angle = angle + deltatB
+endif
+
+! First quadrant 2
+x(1) = sizeX*abs(cos(pi/2.0 - angle))**(2.0/pfactor)
+x(2) = sizeY*abs(sin(pi/2.0 - angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+! x in real space, v in transformed space
+v = MATMUL(MAT, x)
+
+! Periodic boundary conditions
+
+flagin = 1
+
+do j = 1,3
+   is(j) = floor(v(j)/delta)+1
+   js(j) = is(j)
+
+select case (PBC((j-1)*2+1))
+   case (0, 2) ! BULK, WALL
+      if(is(j).lt.1) then
+         write(stdout,*) 'Error in newintegrateg: out of boundary'
+         stop
+      endif
+   case (1) ! PBC
+      js(j)=mod(is(j)+dims(j)-1,dims(j))+1
+   case (3) ! Reflection
+      if(v(j).lt.0.0)flagin=0
+endselect
+
+select case (PBC((j-1)*2+2))
+   case (0 , 2)
+      if(is(j).gt.dims(j)) then
+         write(stdout,*) 'Error in newintegrateg: out of boundary'
+    stop
+    endif
+  case (1)
+    js(j)=mod(is(j)+dims(j)-1,dims(j))+1
+  case (3)
+    if(v(j).gt.float(dims(j))*delta)flagin=0
+endselect
+
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'superellipse: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
+
+! Second quadrant 2
+x(1) = -sizeX*abs(cos(pi/2.0 - angle))**(2.0/pfactor)
+x(2) = sizeY*abs(sin(pi/2.0 - angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+! x in real space, v in transformed space
+v = MATMUL(MAT, x)
+
+! Periodic boundary conditions
+
+flagin = 1
+
+do j = 1,3
+   is(j) = floor(v(j)/delta)+1
+   js(j) = is(j)
+
+select case (PBC((j-1)*2+1))
+   case (0, 2) ! BULK, WALL
+      if(is(j).lt.1) then
+         write(stdout,*) 'Error in newintegrateg: out of boundary'
+         stop
+      endif
+   case (1) ! PBC
+      js(j)=mod(is(j)+dims(j)-1,dims(j))+1
+   case (3) ! Reflection
+      if(v(j).lt.0.0)flagin=0
+endselect
+
+select case (PBC((j-1)*2+2))
+   case (0 , 2)
+      if(is(j).gt.dims(j)) then
+         write(stdout,*) 'Error in newintegrateg: out of boundary'
+    stop
+    endif
+  case (1)
+    js(j)=mod(is(j)+dims(j)-1,dims(j))+1
+  case (3)
+    if(v(j).gt.float(dims(j))*delta)flagin=0
+endselect
+
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'superellipse: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+
+! Third quadrant 2
+x(1) = sizeX*abs(cos(pi/2.0 - angle))**(2.0/pfactor)
+x(2) = -sizeY*abs(sin(pi/2.0 - angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+! x in real space, v in transformed space
+v = MATMUL(MAT, x)
+
+! Periodic boundary conditions
+
+flagin = 1
+
+do j = 1,3
+   is(j) = floor(v(j)/delta)+1
+   js(j) = is(j)
+
+select case (PBC((j-1)*2+1))
+   case (0, 2) ! BULK, WALL
+      if(is(j).lt.1) then
+         write(stdout,*) 'Error in newintegrateg: out of boundary'
+         stop
+      endif
+   case (1) ! PBC
+      js(j)=mod(is(j)+dims(j)-1,dims(j))+1
+   case (3) ! Reflection
+      if(v(j).lt.0.0)flagin=0
+endselect
+
+select case (PBC((j-1)*2+2))
+   case (0 , 2)
+      if(is(j).gt.dims(j)) then
+         write(stdout,*) 'Error in newintegrateg: out of boundary'
+    stop
+    endif
+  case (1)
+    js(j)=mod(is(j)+dims(j)-1,dims(j))+1
+  case (3)
+    if(v(j).gt.float(dims(j))*delta)flagin=0
+endselect
+
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'superellipse: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+
+! Fourth quadrant 2
+x(1) = -sizeX*abs(cos(pi/2.0 - angle))**(2.0/pfactor)
+x(2) = -sizeY*abs(sin(pi/2.0 - angle))**(2.0/pfactor)
+x(3) = float(jjjz)/float(npointz)*float(dimz)*delta
+
+x(1) = x(1) + originc(1)
+x(2) = x(2) + originc(2)
+
+! x in real space, v in transformed space
+v = MATMUL(MAT, x)
+
+! Periodic boundary conditions
+
+flagin = 1
+
+do j = 1,3
+   is(j) = floor(v(j)/delta)+1
+   js(j) = is(j)
+
+select case (PBC((j-1)*2+1))
+   case (0, 2) ! BULK, WALL
+      if(is(j).lt.1) then
+         write(stdout,*) 'Error in newintegrateg: out of boundary'
+         stop
+      endif
+   case (1) ! PBC
+      js(j)=mod(is(j)+dims(j)-1,dims(j))+1
+   case (3) ! Reflection
+      if(v(j).lt.0.0)flagin=0
+endselect
+
+select case (PBC((j-1)*2+2))
+   case (0 , 2)
+      if(is(j).gt.dims(j)) then
+         write(stdout,*) 'Error in newintegrateg: out of boundary'
+    stop
+    endif
+  case (1)
+    js(j)=mod(is(j)+dims(j)-1,dims(j))+1
+  case (3)
+    if(v(j).gt.float(dims(j))*delta)flagin=0
+endselect
+
+enddo
+
+jx = js(1)
+jy = js(2)
+jz = js(3)
+
+! increase counter
+if(indexvolx(jx,jy,jz).eq.0) then
+
+ if(ncha1.eq.maxvolx) then
+   write(stdout,*) 'superellipse: increase maxvolx'
+   stop
+ endif
+
+ ncha1 = ncha1 + 1
+
+ indexvolx(jx,jy,jz) = ncha1
+ p1(ncha1,1)=jx
+ p1(ncha1,2)=jy
+ p1(ncha1,3)=jz
+endif
+
+volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
+volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
+com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+
+enddo ! maxangle condition
 enddo ! jjjz
 
 do i = 1, ncha1
@@ -823,8 +847,11 @@ com1(i,:) = com1(i,:)/volx1(i)
 
 ! Moves the position of the first segment lseg/2 away from the surface to prevent collision due to round errors.
 
-com1(i,1) = com1(i,1) + 0.5*lseg*((com1(i,1)-originc(1))) 
-com1(i,2) = com1(i,2) + 0.5*lseg*((com1(i,2)-originc(2))) 
+vect(1) = com1(i,1) - originc(1)
+vect(2) = com1(i,2) - originc(2)
+
+com1(i,1) = com1(i,1) + 0.5*lseg*((com1(i,1)-originc(1)))/norm2(vect)
+com1(i,2) = com1(i,2) + 0.5*lseg*((com1(i,2)-originc(2)))/norm2(vect)
 enddo
 
 end
