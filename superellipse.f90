@@ -1,5 +1,6 @@
 subroutine update_matrix_superellipse(flag)
 use system
+use transform
 use superellipse
 use ematrix
 use MPI
@@ -55,9 +56,12 @@ com = 0.0
 ncha = 0
 
 ! channel center in x, y plane
-
-originc(1) = float(dimx)*delta/2.0 
-originc(2) = float(dimy)*delta/2.0 
+voriginc(1) = float(dimx)*delta/2.0 
+voriginc(2) = float(dimy)*delta/2.0 
+voriginc(3) = 0.0
+voriginc = MATMUL(IMAT, voriginc)
+originc(1) = voriginc(1)
+originc(2) = voriginc(2)
 
 npoints = 50
 
@@ -65,13 +69,21 @@ flag = .false.
 
 call integrate_superellipse(sizeXS, sizeYS, pfactor, originc, npoints, voleps1, sumvoleps1, flag)
 
+print*, 1
+
 flag = .false. ! not a problem if eps lays outside boundaries
 
 call integrate_superellipse(sizeX, sizeY, pfactor, originc, npoints, volprot1, sumvolprot1, flag)
 
+print*, 2
+
 call integrate_superellipse(sizeXL, sizeYL, pfactor, originc, npoints, volq1, sumvolq1, flag)
 
+print*, 3
+
 call newintegrateg_superellipse(sizeX, sizeY, pfactor, originc, npoints, volx1, sumvolx1, com1, p1, ncha1, volxx1)
+
+print*, 4
 
 !! eps
 voleps1 = voleps1-volprot1

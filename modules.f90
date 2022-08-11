@@ -7,7 +7,6 @@ integer, allocatable :: hydroph(:) ! 0: hydrophilic, 1 < x < N_poorsol, type of 
 real*8, allocatable ::  pKa(:), Ka(:), K0(:)
 endmodule mparameters_monomer
 
-
 module branches
 integer longb(3), longbb
 integer branched
@@ -31,8 +30,6 @@ integer electroflag
 integer eqs ! number of set of equations 
 endmodule
 
-
-
 module ematrix
 use system
 real*8, allocatable :: volprot(:,:,:)
@@ -46,8 +43,6 @@ real*8 volx(maxvolx)
 real*8 com(maxvolx,3)
 integer p0(maxvolx,3)
 end module
-
-
 
 module rotchain
 use ematrix, only : maxvolx
@@ -68,6 +63,7 @@ endmodule
 module superellipse
 real*8 sizeX, sizeY, pfactor
 real*8 originc(2)
+real*8 voriginc(3)
 real*8 echarges, eepss, sigmas, sigmars
 endmodule
 
