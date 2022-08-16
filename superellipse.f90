@@ -56,8 +56,8 @@ com = 0.0
 ncha = 0
 
 ! channel center in x, y plane
-voriginc(1) = float(dimx)*delta/2.0 
-voriginc(2) = float(dimy)*delta/2.0 
+voriginc(1) = float(dimx)*delta/2.0 + dx*delta
+voriginc(2) = float(dimy)*delta/2.0 + dy*delta
 voriginc(3) = 0.0
 voriginc = MATMUL(IMAT, voriginc)
 originc(1) = voriginc(1)
