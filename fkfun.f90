@@ -16,6 +16,7 @@ use ellipsoid
 use transform
 use kaist
 use mparameters_monomer
+use pdb
 implicit none
 
 integer*4 ier2
@@ -168,6 +169,7 @@ endselect
 
 fdis = 0.0
 avpol = 0.0
+fdispdb = 0.0
 
 do ix=1,dimx
  do iy=1,dimy
@@ -189,7 +191,16 @@ do ix=1,dimx
  enddo  
 enddo
 
-
+do im = 1, naa
+select case (zpdb(im))
+  case (1)
+     fdispdb(im) = 1.0 /(1.0 + xOHmin(xxpdb(im),yypdb(im), zzpdb(im))  &
+   /(K0pdb(im)*xh(xxpdb(im),yypdb(im), zzpdb(im)))) 
+  case (-1)
+   fdispdb(im) = 1.0 /(1.0 + xHplus(xxpdb(im),yypdb(im), zzpdb(im))  &
+   /(K0pdb(im)*xh(xxpdb(im),yypdb(im), zzpdb(im))))
+endselect
+enddo
 
 ! Compute dielectric permitivity
 
@@ -368,6 +379,18 @@ do iz=1,dimz
 enddo
 enddo
 enddo
+
+do im = 1, naa
+  ix = xxpdb(im)
+  iy = yypdb(im)
+  iz = zzpdb(im)
+  qtot(ix,iy,iz) = qtot(ix,iy,iz) + float(zpdb(im))*fdispdb(im)*vsol
+!  print*, im, float(zpdb(im))*fdispdb(im)*vsol, zpdb(im), fdispdb(im)
+
+enddo
+
+
+
 
 ! Volume fraction
 

@@ -121,7 +121,7 @@ do j = 1, naa ! loop over all beads
  Aellpdb(i) = radiuspdb(j)
  enddo
 
- npoints = 5
+ npoints = 20
  call integrate(AAApdb(:,:),Aellpdb(:), aapos(:,j),npoints, volpdb, sumvolpdb, flag)
 
  volprot1 = volprot1 + volpdb

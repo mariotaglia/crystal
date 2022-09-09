@@ -43,6 +43,7 @@ use ellipsoid
 use chainsdat
 use inputtemp
 use mparameters_monomer
+use pdb
 implicit none
 integer im
 

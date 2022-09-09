@@ -1,9 +1,10 @@
 subroutine pdbfromfile
 use pdb
 use ellipsoid
+use system
 implicit none
 integer i
-
+integer ix,iy,iz
 
 !aaID = 0.0 ! numero de aminoacido en ix,iy,iz
 
@@ -15,9 +16,10 @@ read(3333,*)naa ! number of beads
 allocate(aapos(3,naa)) ! position of aminoacid naa
 allocate(aal(naa))     ! string with aminoacid ID (one-letter code)
 allocate(aan(naa))     ! number of aminoacid
-allocate(xx(naa)) ! keeps info of position of original aminoacids
-allocate(yy(naa)) ! keeps info of position of original aminoacids
-allocate(zz(naa)) ! keeps info of position of original aminoacids
+allocate(xxpdb(naa)) ! keeps info of position of original aminoacids
+allocate(yypdb(naa)) ! keeps info of position of original aminoacids
+allocate(zzpdb(naa)) ! keeps info of position of original aminoacids
+allocate(fdispdb(naa)) ! keeps info of position of original aminoacids
 
 ! allocate discretization list
 !allocate(maxelement_list(naa))
@@ -63,13 +65,13 @@ do i = 1, naa
 
 ! PROJECTS TO THE LATTICE
 
-!ix=int(aapos(1,i)/delta)+1
-!iy=int(aapos(2,i)/delta)+1
-!iz=int(aapos(3,i)/delta)+1
+ix=int(aapos(1,i)/delta)+1
+iy=int(aapos(2,i)/delta)+1
+iz=int(aapos(3,i)/delta)+1
 
-!xxpdb(i) = ix
-!yypdb(i) = iy
-!zzpdb(i) = iz
+xxpdb(i) = ix
+yypdb(i) = iy
+zzpdb(i) = iz
 
 !aaID(ix,iy,iz) = aan(i)
 enddo ! loop over number of aa, i
@@ -94,6 +96,8 @@ end subroutine
 subroutine assign_aa
 use pdb
 use const
+use bulk
+use molecules
 implicit none
 
       integer i
@@ -234,6 +238,19 @@ implicit none
       endselect
 
       radiuspdb(i) = (radiuspdb(i)*(1.0d21/6.02d23)/(4.0/3.0*pi))**(1.0/3.0)
+
+      Kapdb(i)=10**(-pKapdb(i)) ! calculate thermodynamic equilibrium constants
+      select case (zpdb(i))
+         case (-1) ! acid
+         K0pdb(i) = (Kapdb(i)*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant, Ka
+         case (1) ! base
+         K0pdb(i) = ((Kw/Kapdb(i))*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant, Kb
+      end select
+
+
+
+
+
 
       enddo ! loop sobre naa
 

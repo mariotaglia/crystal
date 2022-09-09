@@ -284,14 +284,16 @@ real*8, allocatable :: volpdb(:,:,:)
 real*8 sumvolpdb
 real*8, allocatable :: aapos(:,:)
 character*1, allocatable :: aal(:)
-integer, allocatable :: xx(:)
-integer, allocatable :: yy(:)
-integer, allocatable :: zz(:)
+integer, allocatable :: xxpdb(:)
+integer, allocatable :: yypdb(:)
+integer, allocatable :: zzpdb(:)
 integer, allocatable :: aan(:)
 real*8, ALLOCATABLE :: radiuspdb(:)
 integer, ALLOCATABLE :: zpdb(:)
 real*8, ALLOCATABLE :: pKapdb(:), Kapdb(:)
 real*8, ALLOCATABLE :: K0pdb(:)
+real*8, allocatable :: fdispdb(:) 
+
 end module
 
 
