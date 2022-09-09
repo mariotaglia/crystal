@@ -121,10 +121,10 @@ do j = 1, naa ! loop over all beads
  Aellpdb(i) = radiuspdb(j)
  enddo
 
- npoints = 50
- call integrate(AAApdb(:,:),Aellpdb(:), aapos(:,j),npoints, volprotpdb, sumvolprotpdb, flag)
+ npoints = 20
+ call integrate(AAApdb(:,:),Aellpdb(:), aapos(:,j),npoints, volpdb, sumvolpdb, flag)
 
- volprot1 = volprot1 + volprotpdb
+ volprot1 = volprot1 + volpdb
 
 enddo ! j
 
@@ -133,18 +133,14 @@ where (volprot1 > 1.0) volprot1 = 1.0 ! protein has a maximum volume fraction of
 sumvolprot1 = sum(volprot1)
 
 !! volume
-temp = 4.0/3.0*pi*(radiuspdb(j)**3)/(sumvolprotpdb*delta**3) ! rescales volume
-volprot1 = volprot1*temp                                                 ! OJO: transformation should mantain cell volumen
-sumvolprot1 = sumvolprot1*temp
-volprot1 = volprot1 * 0.99
 
+volprot1 = volprot1 * 0.99
 volprot = volprot+volprot1 ! sum particle to channel
 
 
 ! CHECK COLLISION HERE...
 if(maxval(volprot).gt.1.0) then ! collision
    flag=.true.
-   exit
 endif
 
 if (rank.eq.0) then

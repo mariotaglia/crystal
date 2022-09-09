@@ -1,6 +1,9 @@
 subroutine pdbfromfile
-
+use pdb
+use ellipsoid
 implicit none
+integer i
+
 
 !aaID = 0.0 ! numero de aminoacido en ix,iy,iz
 
@@ -83,18 +86,19 @@ enddo ! loop over number of aa, i
 
 close(3333)
 
-end
+end subroutine
 
 
 
 subroutine assign_aa
-
+use pdb
+use const
 implicit none
 
       integer i
 
       ALLOCATE (zpdb(naa))    ! charge of monomer segment: 1: base, -1: acid, 0:neutral
-      ALLOCATE (pKapdbpdb(naa), Kapdb(naa), K0pdb(naa), radiuspdbpdb(naa))
+      ALLOCATE (pKapdb(naa), Kapdb(naa), K0pdb(naa), radiuspdb(naa))
 
       do i = 1, naa
       select case (aal(i))

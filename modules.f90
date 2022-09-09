@@ -279,18 +279,23 @@ endmodule
 
 
 module pdb
-use system
-integer pdbtype
 integer naa
-real*8, allocatable :: aaID(:,:,:)
-real*8, allocatable :: qpdbT(:,:,:)
-real*8, allocatable :: volprotpdb(:,:,:)
-real*8, sumvolprotpdb
+real*8, allocatable :: volpdb(:,:,:)
+real*8 sumvolpdb
 real*8, allocatable :: aapos(:,:)
 character*1, allocatable :: aal(:)
 integer, allocatable :: xx(:)
 integer, allocatable :: yy(:)
 integer, allocatable :: zz(:)
 integer, allocatable :: aan(:)
+real*8, ALLOCATABLE :: radiuspdb(:)
+integer, ALLOCATABLE :: zpdb(:)
+real*8, ALLOCATABLE :: pKapdb(:), Kapdb(:)
+real*8, ALLOCATABLE :: K0pdb(:)
 end module
+
+
+
+
+
 

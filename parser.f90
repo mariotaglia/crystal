@@ -401,6 +401,35 @@ do while (ios == 0)
      read(fh, *) basura
      read(fh, *) eepsc
 
+
+
+    case(70) ! channel + protein from pdb
+     read(fh, *) basura
+     read(fh, *) rchannel
+     read(fh, *) basura
+     read(fh, *) RdimZ
+     read(fh, *) basura
+     read(fh, *) NBRUSH ! number of brushes in the tetha direction
+     read(fh, *) basura
+     read(fh, *) Nrings
+
+     allocate (ringpos(Nrings))
+
+     read(fh, *) basura
+     do i = 1, Nrings
+       read(fh, *) ringpos(i)
+     enddo
+      ringpos = ringpos - 0.5
+   
+     NNN = 1 
+     call allocateell
+
+     read(fh, *) basura  
+     do j = 1, NNN
+     read(fh, *) Rellf(1,j), Rellf(2,j), Rellf(3,j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set protein center of mass',j,'pos to',  Rellf(1,j), Rellf(2,j), Rellf(3,j)
+     enddo
+
     case(60) ! channel + particle
      read(fh, *) basura
      read(fh, *) rchannel
