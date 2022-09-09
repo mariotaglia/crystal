@@ -93,3 +93,5 @@ randominput 0
 !seed
 seed 938121
 
+! fz
+fz 0
