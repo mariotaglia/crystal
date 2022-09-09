@@ -12,6 +12,7 @@ use ellipsoid
 use MPI
 use kai
 use mparameters_monomer
+use pdb
 implicit none
 
 ! fields_fkfun
@@ -37,6 +38,7 @@ ALLOCATE (Depsfcn(0:dimx+1, 0:dimy+1, 0:dimz+1))
 
 ! ematrix
 ALLOCATE (volprot(dimx,dimy,dimz))
+ALLOCATE (volprotpdb(dimx,dimy,dimz))
 ALLOCATE (volprot1(dimx,dimy,dimz))
 ALLOCATE (voleps(dimx,dimy,dimz))
 ALLOCATE (voleps1(dimx,dimy,dimz))

@@ -277,3 +277,20 @@ real*8 TMAT(3,3)
 real*8 IMAT(3,3)
 endmodule
 
+
+module pdb
+use system
+integer pdbtype
+integer naa
+real*8, allocatable :: aaID(:,:,:)
+real*8, allocatable :: qpdbT(:,:,:)
+real*8, allocatable :: volprotpdb(:,:,:)
+real*8, sumvolprotpdb
+real*8, allocatable :: aapos(:,:)
+character*1, allocatable :: aal(:)
+integer, allocatable :: xx(:)
+integer, allocatable :: yy(:)
+integer, allocatable :: zz(:)
+integer, allocatable :: aan(:)
+end module
+
