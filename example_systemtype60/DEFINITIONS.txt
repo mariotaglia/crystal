@@ -11,9 +11,9 @@ electroflag 1
 verbose 5
 
 !system size
-dimx 80
-dimy 80
-dimz 100
+dimx 40
+dimy 40
+dimz 50
 
 delta 0.5
 
@@ -44,10 +44,8 @@ nkp 1
 nst 1
 0.0
 
-npH 3
+npH 1
 5
-6
-7
 
 
 neps 1
@@ -60,9 +58,9 @@ benergy 0.0
 Xucutoff 0.0
 
 !chains
-long 20
+long 10
 lseg 0.5
-cuantas 100000
+cuantas 100
 
 !solution
 csalt 0.1
@@ -89,19 +87,17 @@ dielS 10.0
 !systemtype
 systemtype 60
 ! channel radii in nm
-7.5
+5
 ! Reservoir size in delta units
-20
-! number of polymers in circunference
 10
+! number of polymers in circunference
+2
 ! number of rings
-3
+1
 ! position of rings inside the pore in fractional positions along the pore (0 and 1 are the entrances)
-0
 0.5
-1.0
 ! particle position in nm ! center at 20 20 25
-20 20 25
+10 10 12.5
 ! particle axis in nm
 1.0 1.0 1.0
 ! particle rotation matrix
