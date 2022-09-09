@@ -384,7 +384,7 @@ do im = 1, naa
   ix = xxpdb(im)
   iy = yypdb(im)
   iz = zzpdb(im)
-  qtot(ix,iy,iz) = qtot(ix,iy,iz) + float(zpdb(im))*fdispdb(im)*vsol
+  qtot(ix,iy,iz) = qtot(ix,iy,iz) + float(zpdb(im))*fdispdb(im)*vsol/(delta**3)
 !  print*, im, float(zpdb(im))*fdispdb(im)*vsol, zpdb(im), fdispdb(im)
 
 enddo
