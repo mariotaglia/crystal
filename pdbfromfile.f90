@@ -62,13 +62,14 @@ do i = 1, naa
 !volprot(:,:,:) = volprot(:,:,:) + protn(:,:,:)/(delta**3)
 
 ! PROJECTS TO THE LATTICE
-!ix=int(aapos(i,1)/delta)+1
-!iy=int(aapos(i,2)/delta)+1
-!iz=int(aapos(i,3)/delta)+1
 
-!xx(i) = ix
-!yy(i) = iy
-!zz(i) = iz
+!ix=int(aapos(1,i)/delta)+1
+!iy=int(aapos(2,i)/delta)+1
+!iz=int(aapos(3,i)/delta)+1
+
+!xxpdb(i) = ix
+!yypdb(i) = iy
+!zzpdb(i) = iz
 
 !aaID(ix,iy,iz) = aan(i)
 enddo ! loop over number of aa, i

@@ -41,7 +41,7 @@ do jj = 1, cpp(rank+1)
        x(3) = in1(j, 1)
 
        if((systemtype.eq.2).or.(systemtype.eq.3).or.(systemtype.eq.4).or.(systemtype.eq.41)   &
-       .or.(systemtype.eq.42).or.(systemtype.eq.52).or.(systemtype.eq.60))call rot_chain_cyl(x,ii)
+       .or.(systemtype.eq.42).or.(systemtype.eq.52).or.(systemtype.eq.60).or.(systemtype.eq.70))call rot_chain_cyl(x,ii)
 
        x = x + posicion(ii,:)
        ztemp=ztemp+x(3)*zpol(segtype(j))
@@ -92,6 +92,17 @@ case (60)
        endif
 
        if(testsystem(x).eq.-2) then ! if testsystem = -2, the polymer goes out-of-system
+         write(stdout,*) 'pxs: out-of-system'
+         stop
+       endif
+
+case (70)
+       if(testsystemc(x).eq.-1) then ! if testsystem = -1,  there is a collision with channel
+         flag = -1
+         exit
+       endif
+
+       if(testsystemc(x).eq.-2) then ! if testsystem = -2, the polymer goes out-of-system
          write(stdout,*) 'pxs: out-of-system'
          stop
        endif

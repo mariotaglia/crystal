@@ -121,7 +121,7 @@ do j = 1, naa ! loop over all beads
  Aellpdb(i) = radiuspdb(j)
  enddo
 
- npoints = 20
+ npoints = 5
  call integrate(AAApdb(:,:),Aellpdb(:), aapos(:,j),npoints, volpdb, sumvolpdb, flag)
 
  volprot1 = volprot1 + volpdb
@@ -167,9 +167,6 @@ endif
 title = 'aveps'
 counter = 1
 call savetodisk(voleps, title, counter)
-
-
-STOP ! check volumes
 
 end subroutine
 
