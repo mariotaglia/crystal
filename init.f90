@@ -61,6 +61,7 @@ if(rank.eq.0) then
        open(unit=307, file='F_conf.dat',  access='APPEND')
        open(unit=3071, file='F_gauche.dat',  access='APPEND')
        open(unit=308, file='F_eq.dat',  access='APPEND')
+       open(unit=308, file='F_eq_pdb.dat',  access='APPEND')
        open(unit=309, file='F_vdW.dat',  access='APPEND')
        open(unit=410, file='F_eps.dat',  access='APPEND')
        open(unit=311, file='F_electro.dat',  access='APPEND')

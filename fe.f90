@@ -22,6 +22,7 @@ use kaist
 use conformations
 use mparameters_monomer
 use mkl
+use pdb
 implicit none
 
 integer looped
@@ -30,9 +31,9 @@ real*8  q0(ncha), sumgauche0(ncha)
 integer newcuantas0(ncha)
 real*8 F_Mix_s, F_Mix_pos
 real*8 F_Mix_neg, F_Mix_Hplus
-real*8 Free_energy2, sumpi, sumrho, sumel, sumdiel, suma, mupol
+real*8 Free_energy2, sumpi, sumrho, sumel, sumelp, sumdiel, suma, mupol
 real*8 temp
-real*8 F_Mix_OHmin, F_gauche, F_Conf, F_Eq, F_vdW, F_eps, F_electro
+real*8 F_Mix_OHmin, F_gauche, F_Conf, F_Eq, F_vdW, F_eps, F_electro, F_pdb
 real*8 pro0(cuantas, maxcpp)
 real*8 entropy(dimx,dimy,dimz)
 character*5  title
@@ -476,6 +477,31 @@ endif
 
       Free_Energy = Free_Energy + F_eps
 
+! 6. Chemical EQ PDB
+
+      F_pdb = 0.0
+
+      do i = 1, naa
+
+      if(zpdb(i).ne.0) then ! only charged
+
+      if(fdispdb(i).ne.0.0)F_eq = F_pdb + fdispdb(i)*dlog(fdispdb(i))
+      if(fdispdb(i).ne.1.0)F_eq = F_pdb + (1.0-fdispdb(i))*dlog(1.0-fdispdb(i))
+
+      F_pdb = F_pdb + (1.0-fdispdb(i))*dlog(K0pdb(i))
+
+      select case (zpdb(i))
+      case (1) ! base
+      F_pdb = F_pdb + (1.0-fdispdb(i))*(-dlog(expmuOHmin))
+      case (-1) ! acid
+      F_pdb = F_pdb + (1.0-fdispdb(i))*(-dlog(expmuHplus))
+      endselect
+      endif ! zpol
+
+      enddo ! i
+
+      Free_Energy = Free_Energy + F_pdb
+
       if (verbose.ge.1) then
       write(stdout,*) 'Free_Energy_Calc: Free energy(1) = ', Free_energy
       endif
@@ -493,6 +519,7 @@ endif
         sumpi = 0.0
         sumrho=0.0
         sumel=0.0
+        sumelp=0.0
         sumdiel = 0.0
 
         do ix=1,dimx
@@ -526,6 +553,26 @@ endif
          enddo
          enddo
          enddo
+
+! charge protein
+
+
+      do im = 1, naa
+       if(zpdb(im).ne.0) then
+
+      sumelp = sumelp + dlog(fdispdb(im))
+
+
+      ix =  xxpdb(im)
+      iy = yypdb(im)
+      iz = zzpdb(im)
+
+      sumelp = sumelp + zpdb(im)*psi(ix,iy,iz)
+
+       endif ! zpol
+      enddo ! im
+
+
          
          sumpi = (delta**3/vsol)*sumpi
          sumrho = (delta**3/vsol)*sumrho
@@ -533,7 +580,7 @@ endif
          sumdiel = (delta**3/vsol)*sumdiel
 
 
-         suma = sumpi + sumrho + sumel + sumdiel
+         suma = sumpi + sumrho + sumel + sumelp +  sumdiel
 
 
          do ii = 1, ncha
@@ -543,7 +590,7 @@ endif
          Free_Energy2 = Free_Energy2 + suma - F_vdW
 
       if (verbose.ge.1) then
-      write(stdout,*) 'Free_Energy_Calc: Free energy(2) = ', Free_energy2, sumdiel
+      write(stdout,*) 'Free_Energy_Calc: Free energy(2) = ', Free_energy2
       endif
 
 ! Guarda energia libre
@@ -569,6 +616,7 @@ endif
 	 write(3071,*)looped, F_gauche
          write(307,*)looped, F_Conf
          write(308,*)looped, F_Eq
+         write(314,*)looped, F_pdb
          write(309,*)looped, F_vdW
          write(410,*)looped, F_eps
          write(311,*)looped, F_electro
