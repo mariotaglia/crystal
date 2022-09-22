@@ -485,8 +485,8 @@ endif
 
       if(zpdb(i).ne.0) then ! only charged
 
-      if(fdispdb(i).ne.0.0)F_eq = F_pdb + fdispdb(i)*dlog(fdispdb(i))
-      if(fdispdb(i).ne.1.0)F_eq = F_pdb + (1.0-fdispdb(i))*dlog(1.0-fdispdb(i))
+      if(fdispdb(i).ne.0.0)F_pdb = F_pdb + fdispdb(i)*dlog(fdispdb(i))
+      if(fdispdb(i).ne.1.0)F_pdb = F_pdb + (1.0-fdispdb(i))*dlog(1.0-fdispdb(i))
 
       F_pdb = F_pdb + (1.0-fdispdb(i))*dlog(K0pdb(i))
 
