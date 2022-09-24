@@ -28,7 +28,7 @@ cdiva 1.0
 PBC 0 0 0 0 0 0
 
 !infile
-infile 2
+infile 0
 !what to scan: (hamiltonian inception parameter kp always scanned), 1, pH, 2, attraction strength st. If 1 then the system will use the first st value.
 vscan 1
 
