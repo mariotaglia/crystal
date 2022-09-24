@@ -62,7 +62,7 @@ if (v(3).gt.(float(dimz)*delta)) then
  if (PBC(6).eq.0)testsystempdb = -2
 endif
 
-if (testsystem.eq.0) then ! saves some time
+if (testsystempdb.eq.0) then ! saves some time
 
 ! put chain in lattice
 
