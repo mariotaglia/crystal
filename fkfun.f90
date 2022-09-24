@@ -505,7 +505,7 @@ if(verbose.ge.3) then
 if(rank.eq.0)write(stdout,*)'fkfun:', iter, norma, q(1)
 endif
 
-if(isnan(norma))call endall ! finish job if a NaN is obtained
+if(isnan(norma))stop !call endall ! finish job if a NaN is obtained
 
 
 3333 continue

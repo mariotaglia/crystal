@@ -38,6 +38,7 @@ real*8 pro0(cuantas, maxcpp)
 real*8 entropy(dimx,dimy,dimz)
 character*5  title
 real*8 xtotalsum(dimx,dimy,dimz)
+real*8 PDBcharge
  
 ! MPI
 integer stat(MPI_STATUS_SIZE) 
@@ -477,13 +478,16 @@ endif
 
       Free_Energy = Free_Energy + F_eps
 
-! 6. Chemical EQ PDB
+! 6. Chemical EQ PDB and charge
 
+      PDBcharge = 0.0
       F_pdb = 0.0
 
       do i = 1, naa
 
       if(zpdb(i).ne.0) then ! only charged
+
+      PDBcharge = PDBcharge + fdispdb(i)*float(zpdb(i))
 
       if(fdispdb(i).ne.0.0)F_pdb = F_pdb + fdispdb(i)*dlog(fdispdb(i))
       if(fdispdb(i).ne.1.0)F_pdb = F_pdb + (1.0-fdispdb(i))*dlog(1.0-fdispdb(i))
@@ -617,6 +621,7 @@ endif
          write(307,*)looped, F_Conf
          write(308,*)looped, F_Eq
          write(314,*)looped, F_pdb
+         write(315,*)looped, PDBcharge
          write(309,*)looped, F_vdW
          write(410,*)looped, F_eps
          write(311,*)looped, F_electro

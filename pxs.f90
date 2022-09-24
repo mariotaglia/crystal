@@ -20,6 +20,7 @@ real*8 v(3)
 integer testsystem
 integer testsystemr
 integer testsystemc
+integer testsystempdb
 real*8 maxx(3)
 integer flag
 integer aa
@@ -106,6 +107,17 @@ case (70)
          write(stdout,*) 'pxs: out-of-system'
          stop
        endif
+
+       if(testsystempdb(x).eq.-1) then ! if testsystem = -1,  there is a collision with all or one particle 
+         flag = -1
+         exit
+       endif
+
+       if(testsystempdb(x).eq.-2) then ! if testsystem = -2, the polymer goes out-of-system
+         write(stdout,*) 'pxs: out-of-system'
+         stop
+       endif
+
 
 case (2, 3, 4, 41, 42)
 
