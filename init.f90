@@ -67,12 +67,8 @@ if(rank.eq.0) then
        open(unit=311, file='F_electro.dat',  access='APPEND')
        open(unit=312, file='F_tot2.dat',  access='APPEND')
        open(unit=314, file='F_mixpos2.dat',  access='APPEND')
-       open(unit=315, file='PDBcharge.dat',  access='APPEND')
 endif
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Input-dependent variables
-!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 end subroutine
 
@@ -86,10 +82,14 @@ use chainsdat
 use inputtemp
 use mparameters_monomer
 use pdb
-use kaist
 implicit none
 integer im
 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Input-dependent variables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 vpol = vpol0/vsol ! vpol in units of vsol
@@ -129,6 +129,18 @@ expmupos = xposbulk /xsolbulk**vsalt
 expmuneg = xnegbulk /xsolbulk**vsalt
 expmuHplus = xHplusbulk /xsolbulk   ! vsol = vHplus 
 expmuOHmin = xOHminbulk /xsolbulk   ! vsol = vOHmin 
+
+
+do im = 1, naa
+      select case (zpdb(im))
+         case (-1) ! acid
+         K0pdb(im) = (Kapdb(im)*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant, Ka
+         case (1) ! base
+         K0pdb(im) = ((Kw/Kapdb(im))*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant, Kb
+      end select
+enddo
+
+
 
 end subroutine
 
@@ -419,7 +431,6 @@ enddo
 
 
 endsubroutine
-
 
 
 

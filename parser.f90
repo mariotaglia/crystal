@@ -52,7 +52,6 @@ sigmar = 0.0 ! random sigma
 ! Check validity of input
 !
 
-npH = ndi
 flagmkl = 0
 vscan = ndi
 scx = ndi
@@ -73,6 +72,7 @@ cutoff = ndr
 lseg = ndr
 nst = ndi
 dielS = ndr
+npH = ndi
 dielP = ndr
 delta = ndr
 dx = ndr
@@ -81,7 +81,7 @@ dz = ndr
 cdiva = ndr
 csalt = ndr
 
-vpol = ndr
+vpol0 = ndr
 fz=ndr !yamila
 
 vsol0 = ndr
@@ -310,6 +310,8 @@ do while (ios == 0)
    read(fh,*)kps(i)
    enddo
 
+   kp = 0
+
  case ('nst')
    read(buffer, *, iostat=ios) nst
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -318,6 +320,8 @@ do while (ios == 0)
    read(fh,*)sts(i)
    enddo 
 
+   st = sts(1)
+
  case ('npH')
    read(buffer, *, iostat=ios) npH
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -325,6 +329,8 @@ do while (ios == 0)
    do i = 1, npH
    read(fh,*)pHs(i)
    enddo 
+
+   pHbulk = pHs(1)
 
  case ('nsc')
    read(buffer, *, iostat=ios) nsc

@@ -9,6 +9,7 @@ use montecarlo
 use ematrix
 use kaist
 use mkl
+use inputtemp
 
 implicit none
 integer counter, counterr
@@ -25,7 +26,7 @@ logical flag
 character*10 filename
 integer j, i, ii, iii
 integer flagcrash
-real*8 stOK,kpOK, pHbulkok
+real*8 stok,kpok,pHbulkok
 real*8 time0, timeF
 
 stdout = 6
@@ -140,52 +141,47 @@ endif
 
 select case (vscan)
 
-case (1) ! scan kp
-
+case (1)
+pHbulk=pHs(1)
 st = sts(1)
 kp = 1.0d10+kps(1)
-pHbulk = pHs(1)
-
 do i = 1, nkp
  do while (kp.ne.kps(i))
   kp = kps(i)
-  if(rank.eq.0)write(stdout,*)'Switch to kp = ', kp
+  if(rank.eq.0)write(stdout,*)'switch to kp = ', kp
   flagcrash = 1
   do while(flagcrash.eq.1)
    flagcrash = 0
-   call CPU_TIME(time0)
+   call cpu_time(time0)
    call initbulk
    call solve(flagcrash)
-   call CPU_TIME(timeF)
-   if(rank.eq.0)print*,'Timer:',timeF-time0
+   call cpu_time(timef)
+   if(rank.eq.0)print*,'timer:',timef-time0
    if(flagcrash.eq.1) then
     if(i.eq.1)stop
-    kp = (kp + kpOK)/2.0
-    if(rank.eq.0)write(stdout,*)'Error, switch to kp = ', kp
+    kp = (kp + kpok)/2.0
+    if(rank.eq.0)write(stdout,*)'error, switch to kp = ', kp
    endif
   enddo
 
-  kpOK = kp ! last st solved OK
-  if(rank.eq.0)write(stdout,*) 'Solved OK, kp: ', kpOK
+  kpok = kp ! last st solved ok
+  if(rank.eq.0)write(stdout,*) 'solved ok, kp: ', kpok
  
  enddo
 
  counterr = counter + i + ii  - 1
- call Free_Energy_Calc(counterr)
- if(rank.eq.0)write(stdout,*) 'Free energy after solving', free_energy
+ call free_energy_calc(counterr)
+ if(rank.eq.0)write(stdout,*) 'free energy after solving', free_energy
  call savedata(counterr)
- if(rank.eq.0)write(stdout,*) 'Save OK'
+ if(rank.eq.0)write(stdout,*) 'save ok'
  call store2disk(counterr)
 
 enddo
 
-case (2) ! scan st
-
+case (2)
+pHbulk=pHs(1)
 kp = 0
 st = 1.0d10+sts(1)
-pHbulk = pHs(1)
-
-
 do i = 1, nst
  do while (st.ne.sts(i))
   st = sts(i)
@@ -216,38 +212,39 @@ do i = 1, nst
 
 enddo
 
-case (3) ! scan pH
-
-kp = 0
+case (3)
+kp = 0.0
+st= sts(1)
 pHbulk = 1.0d10+pHs(1)
-st = sts(1)
-
 do i = 1, npH
  do while (pHbulk.ne.pHs(i))
   pHbulk = pHs(i)
-  if(rank.eq.0)write(stdout,*)'Switch to pH = ', pHbulk
+  if(rank.eq.0)write(stdout,*)'switch to pH = ', pHbulk
   flagcrash = 1
   do while(flagcrash.eq.1)
    flagcrash = 0
+   call cpu_time(time0)
    call initbulk
    call solve(flagcrash)
+   call cpu_time(timef)
+   if(rank.eq.0)print*,'timer:',timef-time0
    if(flagcrash.eq.1) then
     if(i.eq.1)stop
-    pHbulk = (pHbulk + pHbulkOK)/2.0
-    if(rank.eq.0)write(stdout,*)'Error, switch to pH = ', pHbulk
+    pHbulk = (pHbulk + pHbulkok)/2.0
+    if(rank.eq.0)write(stdout,*)'error, switch to pH = ', pHbulk
    endif
   enddo
 
-  pHbulkOK = pHbulk ! last st solved OK
-  if(rank.eq.0)write(stdout,*) 'Solved OK, pH: ', pHbulkOK
-
+  pHbulkok = pHbulk ! last st solved ok
+  if(rank.eq.0)write(stdout,*) 'solved ok, pH: ', pHbulkok
+ 
  enddo
 
  counterr = counter + i + ii  - 1
- call Free_Energy_Calc(counterr)
- if(rank.eq.0)write(stdout,*) 'Free energy after solving', free_energy
+ call free_energy_calc(counterr)
+ if(rank.eq.0)write(stdout,*) 'free energy after solving', free_energy
  call savedata(counterr)
- if(rank.eq.0)write(stdout,*) 'Save OK'
+ if(rank.eq.0)write(stdout,*) 'save ok'
  call store2disk(counterr)
 
 enddo

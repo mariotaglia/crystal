@@ -240,13 +240,6 @@ implicit none
       radiuspdb(i) = (radiuspdb(i)*(1.0d21/6.02d23)/(4.0/3.0*pi))**(1.0/3.0)
 
       Kapdb(i)=10**(-pKapdb(i)) ! calculate thermodynamic equilibrium constants
-      select case (zpdb(i))
-         case (-1) ! acid
-         K0pdb(i) = (Kapdb(i)*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant, Ka
-         case (1) ! base
-         K0pdb(i) = ((Kw/Kapdb(i))*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant, Kb
-      end select
-
 
 
 

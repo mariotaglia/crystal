@@ -156,11 +156,11 @@ real*8 sts(100)
 
 integer npH
 real*8 pHs(100)
-real*8 pHbulk
 
 integer nsc
 real*8 sc
 real*8 scs(100)
+
 endmodule
 
 module fields_fkfun
@@ -267,6 +267,7 @@ end module
 
 module inputtemp
 real*8 xsalt
+real*8 pHbulk
 real*8 pOHbulk
 real*8 csalt
 real*8 cHplus, cOHmin

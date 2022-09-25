@@ -57,8 +57,16 @@ endif
 
 if (testsystem.eq.0) then ! saves some time
 
-! (deleted some lines that were unnecesary, check when merging)
-
+!do i = 1, 3 ! put into cell
+!if(v(i).lt.0.0) then
+!   if(PBC(2*i-1).eq.1)v(i) = PBCSYMR(v(i),maxx(i))
+!   if(PBC(2*i-1).eq.3)v(i) = PBCREFR(v(i),maxx(i))
+!endif
+!if(v(i).gt.dims(i)) then
+!   if(PBC(2*i).eq.1)v(i) = PBCSYMR(v(i),maxx(i))
+!   if(PBC(2*i).eq.3)v(i) = PBCREFR(v(i),maxx(i))
+!endif
+!enddo
 
 ! collision with particles
 do j = 1, NNN
