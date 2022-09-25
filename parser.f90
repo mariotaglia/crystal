@@ -52,6 +52,7 @@ sigmar = 0.0 ! random sigma
 ! Check validity of input
 !
 
+npH = ndi
 flagmkl = 0
 vscan = ndi
 scx = ndi
@@ -72,7 +73,6 @@ cutoff = ndr
 lseg = ndr
 nst = ndi
 dielS = ndr
-pHbulk = ndr
 dielP = ndr
 delta = ndr
 dx = ndr
@@ -270,7 +270,7 @@ do while (ios == 0)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('vpol')
-   read(buffer, *, iostat=ios) vpol
+   read(buffer, *, iostat=ios) vpol0
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('vscan')
@@ -284,10 +284,6 @@ do while (ios == 0)
 
  case ('gama')
    read(buffer, *, iostat=ios) gama0
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
- case ('pHbulk')
-   read(buffer, *, iostat=ios) pHbulk
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('infile')
@@ -322,6 +318,13 @@ do while (ios == 0)
    read(fh,*)sts(i)
    enddo 
 
+ case ('npH')
+   read(buffer, *, iostat=ios) npH
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+  
+   do i = 1, npH
+   read(fh,*)pHs(i)
+   enddo 
 
  case ('nsc')
    read(buffer, *, iostat=ios) nsc
@@ -584,6 +587,7 @@ if(cutoff.eq.ndr)call stopundef('Xucutoff')
 if(readchains.eq.ndi)call stopundef('readchains')
 if(systemtype.eq.ndi)call stopundef('systemtype')
 if(nst.eq.ndi)call stopundef('nst')
+if(npH.eq.ndi)call stopundef('npH')
 
 if(delta.eq.ndr)call stopundef('delta')
 if(dx.eq.ndr)call stopundef('dx')
@@ -594,7 +598,6 @@ if(dielS.eq.ndr)call stopundef('dielS')
 if(dielP.eq.ndr)call stopundef('dielP')
 if(lseg.eq.ndr)call stopundef('lseg')
 if(csalt.eq.ndr)call stopundef('csalt')
-if(pHbulk.eq.ndr)call stopundef('pHbulk')
 if(vpol0.eq.ndr)call stopundef('vpol')
 if(vsol0.eq.ndr)call stopundef('vsol')
 if(benergy.eq.ndr)call stopundef('benergy')

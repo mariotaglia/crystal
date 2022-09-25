@@ -74,8 +74,25 @@ endif
 ! Input-dependent variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+end subroutine
 
-vpol = vpol/vsol ! vpol in units of vsol
+subroutine initbulk
+use molecules
+use const
+use bulk
+use MPI
+use ellipsoid
+use chainsdat
+use inputtemp
+use mparameters_monomer
+use pdb
+use kaist
+implicit none
+integer im
+
+
+
+vpol = vpol0/vsol ! vpol in units of vsol
 constqE = vpol/(2.0d0*constq)
 dielW = 78.54
 dielPr = dielP/dielW
