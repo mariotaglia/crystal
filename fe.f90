@@ -479,11 +479,14 @@ endif
 
 ! 6. Chemical EQ PDB
 
+      pdbcharge = 0.0
       F_pdb = 0.0
 
       do i = 1, naa
 
       if(zpdb(i).ne.0) then ! only charged
+
+      pdbcharge = pdbcharge + fdispdb(i)*float(zpdb(i))
 
       if(fdispdb(i).ne.0.0)F_pdb = F_pdb + fdispdb(i)*dlog(fdispdb(i))
       if(fdispdb(i).ne.1.0)F_pdb = F_pdb + (1.0-fdispdb(i))*dlog(1.0-fdispdb(i))
@@ -624,6 +627,7 @@ endif
          write(312,*)looped, Free_energy2
 
          write(313,*)looped, mupol
+         write(315,*)looped, pdbcharge
 
          endif
  
