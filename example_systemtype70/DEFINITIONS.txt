@@ -28,9 +28,15 @@ cdiva 1.0
 PBC 0 0 0 0 0 0
 
 !infile
-infile 0
-!what to scan: (hamiltonian inception parameter kp always scanned), 1, pH, 2, attraction strength st. If 1 then the system will use the first st value.
-vscan 1
+infile 2
+!what to scan: (hamiltonian inception parameter kp always scanned), 1, pH, 2, attraction strength st. If 1 then the system will use the first st value. 3: scan pH
+vscan 3
+
+npH 4
+10.0
+9.0
+8.0
+7.0
 
 !hamiltonian inception 
 !hguess: rotational symmetry, hring: initial attractive zone distance to the wall (in xy plane), oval: 3D shape of the growing zone 1 means spherical  
@@ -60,7 +66,6 @@ cuantas 50000
 
 !solution
 csalt 0.2
-pHbulk 10.0
 
 !volume
 vpol 0.11
@@ -69,7 +74,7 @@ vsol 0.03
 !output
 
 !save vtk?
-vtkflag 1
+vtkflag 0
 
 ! supercell
 scx 1
@@ -78,7 +83,7 @@ scz 1
 
 !dielectric
 dielP 78.54
-dielS 10.0
+dielS 78.54
 
 !systemtype
 systemtype 70
@@ -96,7 +101,7 @@ systemtype 70
 0.6
 0.8
 ! protein position in nm ! center at 20 20 25
-10.5 10.5 16.5
+10.5 10.5 15.9
 ! particle axis in nm
 1.0 1.0 1.0
 
