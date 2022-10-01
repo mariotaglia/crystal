@@ -479,7 +479,15 @@ endif
 
 ! 6. Chemical EQ PDB
 
+      pdbcom = 0.0
+      do i = 1, naa
+        pdbcom(:) = pdbcom(:) + aapos(:,i)
+      enddo
+      pdbcom = pdbcom / float(naa) ! position of the center 
+
+
       pdbcharge = 0.0
+      pdbmu = 0.0
       F_pdb = 0.0
 
       do i = 1, naa
@@ -487,6 +495,8 @@ endif
       if(zpdb(i).ne.0) then ! only charged
 
       pdbcharge = pdbcharge + fdispdb(i)*float(zpdb(i))
+
+      pdbmu(:) = pdbmu(:) + fdispdb(i)*float(zpdb(i))*(aapos(:,i)-pdbcom(:))
 
       if(fdispdb(i).ne.0.0)F_pdb = F_pdb + fdispdb(i)*dlog(fdispdb(i))
       if(fdispdb(i).ne.1.0)F_pdb = F_pdb + (1.0-fdispdb(i))*dlog(1.0-fdispdb(i))
@@ -610,24 +620,44 @@ endif
           if(rank.eq.0) then
 
          write(301,*)looped, Free_energy
-          flush(301)
+         flush(301)
          write(302,*)looped, F_Mix_s 
+         flush(302)
          write(303,*)looped, F_Mix_pos
+         flush(303)
          write(304,*)looped, F_Mix_neg
+         flush(304)
          write(305,*)looped, F_Mix_Hplus
+         flush(305)
          write(306,*)looped, F_Mix_OHmin
+         flush(306)
 	 write(3071,*)looped, F_gauche
+         flush(3071)
          write(307,*)looped, F_Conf
+         flush(307)
          write(308,*)looped, F_Eq
+         flush(308)
          write(314,*)looped, F_pdb
+         flush(314)
          write(309,*)looped, F_vdW
+         flush(309)
          write(410,*)looped, F_eps
+         flush(410)
          write(311,*)looped, F_electro
+         flush(311)
 
          write(312,*)looped, Free_energy2
+         flush(312)
 
          write(313,*)looped, mupol
+         flush(313)
+
          write(315,*)looped, pdbcharge
+         flush(315)
+         write(316,*)looped, pdbcom
+         flush(316)
+         write(317,*)looped, pdbmu
+         flush(317)
 
          endif
  

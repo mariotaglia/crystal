@@ -68,6 +68,8 @@ if(rank.eq.0) then
        open(unit=312, file='F_tot2.dat',  access='APPEND')
        open(unit=314, file='F_mixpos2.dat',  access='APPEND')
        open(unit=315, file='PDBCHARGE.dat',  access='APPEND')
+       open(unit=316, file='PDBCOM.dat',  access='APPEND')
+       open(unit=317, file='PDBMU.dat',  access='APPEND')
 endif
 
 

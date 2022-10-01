@@ -283,6 +283,9 @@ endmodule
 
 module pdb
 real*8 pdbcharge
+real*8 pdbcom(3)
+real*8 pdbmu(3)
+
 integer naa
 real*8, allocatable :: volpdb(:,:,:)
 real*8 sumvolpdb
