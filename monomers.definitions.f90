@@ -6,7 +6,7 @@ use mparameters_monomer
 implicit none
 integer i
 
-N_poorsol = 0 ! number of different kais
+N_poorsol = 1 ! number of different kais
 N_monomer = 1
 
 ALLOCATE (st_matrix(0:N_poorsol, 0:N_poorsol)) ! interaction between monomer types in fraction of st, scaled by st-scale during running....
@@ -17,13 +17,16 @@ ALLOCATE (pKa(N_monomer), Ka(N_monomer), K0(N_monomer))
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-st_matrix(0,0)=1.0
+st_matrix(0,0)=0.0
+st_matrix(1,0)=0.0
+st_matrix(0,1)=0.0
+st_matrix(1,1)=1.0
 
 ! Segment type 1 for NPC, positive base, hydrophilic
 
 i = 1
 zpol(i) = 0
-hydroph(i) = 0
+hydroph(i) = 1
 pKa(i) = 7.0
 
 
