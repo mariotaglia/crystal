@@ -35,6 +35,7 @@ real*8 MVV,MUU,MWW,MVU,MVW,MUW
 real*8 psivv,psiuu,psiww, psivu,psivw,psiuw
 real*8 psiv(3), epsv(3)
 real*8 xtotalsum(dimx,dimy,dimz)
+real*8 eta(dimx,dimy,dimz)
 
 integer, external :: PBCSYMI, PBCREFI
 
@@ -87,6 +88,8 @@ do ix=1,dimx
  do iy=1,dimy
   do iz=1,dimz
      xh(ix,iy,iz)=x(ix+dimx*(iy-1)+dimx*dimy*(iz-1))
+
+     eta(ix,iy,iz) = 1.0-xh(ix,iy,iz)
 
      do ip = 1, N_poorsol
       xtotal(ix,iy,iz,ip) = x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+ ip*ncells)
@@ -195,7 +198,8 @@ enddo
 
 ! Compute xtotal por ip = 0 from difference
 
-xtotal(:,:,:,0)=1.0-xh(:,:,:)-xpos(:,:,:)-xneg(:,:,:)-xHplus(:,:,:)-xOHmin(:,:,:)
+xtotal(:,:,:,0)=1.0-xh(:,:,:) !-xpos(:,:,:)-xneg(:,:,:)-xHplus(:,:,:)-xOHmin(:,:,:)
+!xtotal(:,:,:,0)=1.0-xh(:,:,:)-xpos(:,:,:)-xneg(:,:,:)-xHplus(:,:,:)-xOHmin(:,:,:)
 do ip = 1, N_poorsol
   xtotal(:,:,:,0) = xtotal(:,:,:,0)-xtotal(:,:,:,ip)
 enddo
@@ -256,7 +260,15 @@ do ix=1,dimx
      if(kp.eq.0.0)hfactor = 1.0
 
      fv = (1.0 - volprot(ix,iy,iz))
-     xpot(ix, iy, iz, im) = xh(ix,iy,iz)**vpol
+
+
+
+!     xpot(ix, iy, iz, im) = xh(ix,iy,iz)**vpol
+
+
+! LOCAL HS
+     xpot(ix, iy, iz, im) = exp(-(8.0*eta(ix,iy,iz)-(9.0*eta(ix,iy,iz)**2)+(3.0*eta(ix,iy,iz)**3))/(1.0-eta(ix,iy,iz)**3))
+
      xpot(ix, iy, iz, im) = xpot(ix,iy,iz, im)*dexp(voleps(ix,iy,iz))
 
 ! Electrostatics
@@ -439,9 +451,11 @@ do ix=1,dimx
 do iy=1,dimy
 do iz=1,dimz
 
-f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= xh(ix,iy,iz) + &
-      xneg(ix, iy, iz) + xpos(ix, iy, iz) + xHplus(ix, iy, iz) + &
-      xOHmin(ix, iy, iz) -1.000000d0
+!f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= xh(ix,iy,iz) + &
+!      xneg(ix, iy, iz) + xpos(ix, iy, iz) + xHplus(ix, iy, iz) + &
+!      xOHmin(ix, iy, iz) -1.000000d0
+
+f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= -eta(ix,iy,iz) 
 
  do im = 1, N_monomer
   f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) = f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) + avpol(ix,iy,iz,im)
