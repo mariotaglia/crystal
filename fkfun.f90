@@ -52,7 +52,7 @@ real*8 gradpsi2
 real*8 fv
 
 ! hamiltonian inception
-real*8 hfactor, hd
+real*8 hd
 real*8, allocatable :: hds(:)
 ALLOCATE(hds(100))
 hds = -1
@@ -256,10 +256,6 @@ do ix=1,dimx
 
      !end if
 
-     hfactor = mask(ix,iy,iz)
-
-     if(kp.eq.0.0)hfactor = 1.0
-
      fv = (1.0 - volprot(ix,iy,iz))
 
 
@@ -336,7 +332,7 @@ do ix=1,dimx
                 fv = (1.0-volprot(jx,jy,jz))
 
                do ip = 0, N_poorsol
-               protemp=protemp + hfactor*Xu(ax,ay,az)*st_matrix(hydroph(im),ip)*sttemp*xtotal(jx,jy,jz,ip)*fv
+               protemp=protemp + Xu(ax,ay,az)*st_matrix(hydroph(im),ip)*sttemp*xtotal(jx,jy,jz,ip)*fv
                enddo ! ip
 
             endif
@@ -359,7 +355,7 @@ do ix = 1, dimx
  do iy = 1, dimy
   do iz = 1, dimz
 
-   xh(ix,iy,iz) = exp(musolbulk)*vsol*(xpot(ix,iy,iz,1)**6)
+   xh(ix,iy,iz) = exp(kp*musolbulk)*vsol*(xpot(ix,iy,iz,1)**6)
 
   enddo
  enddo
