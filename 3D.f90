@@ -51,8 +51,8 @@ endif
 
 if(infile.eq.0) then
   do i=1,ncells
-    xg1(i)=xsolbulk
-    x1(i)=xsolbulk
+    xg1(i)=0.0 !xsolbulk
+    x1(i)=0.0 !xsolbulk
   enddo
 
   do i = ncells+1,(N_poorsol+1)*ncells

@@ -82,17 +82,17 @@ endif
 
 
 ! Recupera xh y psi desde x()
-
+eta = 0.0
 psi = 0.0
 do ix=1,dimx
  do iy=1,dimy
   do iz=1,dimz
-     xh(ix,iy,iz)=x(ix+dimx*(iy-1)+dimx*dimy*(iz-1))
-
-     eta(ix,iy,iz) = 1.0-xh(ix,iy,iz)
+     xtotal(ix,iy,iz,0)= 0.0 !x(ix+dimx*(iy-1)+dimx*dimy*(iz-1))
+     eta(ix,iy,iz) = xtotal(ix,iy,iz,0)           ! volume fraction of beads
 
      do ip = 1, N_poorsol
       xtotal(ix,iy,iz,ip) = x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+ ip*ncells)
+      eta(ix,iy,iz) = eta(ix,iy,iz) + xtotal(ix,iy,iz,ip)
      enddo
      if(electroflag.eq.1)psi(ix,iy,iz)=x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)   
 
@@ -175,19 +175,20 @@ endselect
 fdis = 0.0
 avpol = 0.0
 
+
 do ix=1,dimx
  do iy=1,dimy
   do iz=1,dimz
-    xpos(ix, iy, iz) = expmupos*(xh(ix, iy, iz)**vsalt)*dexp(-psi(ix, iy, iz)*zpos) ! ion plus volume fraction 
-    xneg(ix, iy, iz) = expmuneg*(xh(ix, iy, iz)**vsalt)*dexp(-psi(ix, iy, iz)*zneg) ! ion neg volume fraction
-    xHplus(ix, iy, iz) = expmuHplus*(xh(ix, iy, iz))*dexp(-psi(ix, iy, iz))           ! H+ volume fraction
-    xOHmin(ix, iy,iz) = expmuOHmin*(xh(ix,iy,iz))*dexp(+psi(ix,iy,iz))           ! OH-  volume fraction
+    xpos(ix, iy, iz) = expmupos*(xtotal(ix, iy, iz,0)**vsalt)*dexp(-psi(ix, iy, iz)*zpos) ! ion plus volume fraction 
+    xneg(ix, iy, iz) = expmuneg*(xtotal(ix, iy, iz, 0)**vsalt)*dexp(-psi(ix, iy, iz)*zneg) ! ion neg volume fraction
+    xHplus(ix, iy, iz) = expmuHplus*(xtotal(ix, iy, iz, 0))*dexp(-psi(ix, iy, iz))           ! H+ volume fraction
+    xOHmin(ix, iy,iz) = expmuOHmin*(xtotal(ix,iy,iz, 0))*dexp(+psi(ix,iy,iz))           ! OH-  volume fraction
 
      do im =1,N_monomer
         if (zpol(im).eq.1) then !BASE
-          fdis(ix,iy,iz,im) = 1.0 /(1.0 + xOHmin(ix,iy,iz)/(K0(im)*xh(ix,iy,iz)))
+          fdis(ix,iy,iz,im) = 1.0 /(1.0 + xOHmin(ix,iy,iz)/(K0(im)*xtotal(ix,iy,iz,0)))
         else if (zpol(im).eq.-1) then !ACID
-          fdis(ix,iy,iz,im) = 1.0 /(1.0 + xHplus(ix,iy,iz)/(K0(im)*xh(ix,iy,iz)))
+          fdis(ix,iy,iz,im) = 1.0 /(1.0 + xHplus(ix,iy,iz)/(K0(im)*xtotal(ix,iy,iz,0)))
         endif
      enddo
 
@@ -198,11 +199,13 @@ enddo
 
 ! Compute xtotal por ip = 0 from difference
 
-xtotal(:,:,:,0)=1.0-xh(:,:,:) !-xpos(:,:,:)-xneg(:,:,:)-xHplus(:,:,:)-xOHmin(:,:,:)
+!xtotal(:,:,:,0)=xh(:,:,:) !-xpos(:,:,:)-xneg(:,:,:)-xHplus(:,:,:)-xOHmin(:,:,:)
+
+
 !xtotal(:,:,:,0)=1.0-xh(:,:,:)-xpos(:,:,:)-xneg(:,:,:)-xHplus(:,:,:)-xOHmin(:,:,:)
-do ip = 1, N_poorsol
-  xtotal(:,:,:,0) = xtotal(:,:,:,0)-xtotal(:,:,:,ip)
-enddo
+!do ip = 1, N_poorsol
+!  xtotal(:,:,:,0) = xtotal(:,:,:,0)-xtotal(:,:,:,ip)
+!enddo
 
 ! Compute dielectric permitivity
 
@@ -268,23 +271,22 @@ do ix=1,dimx
 
 ! LOCAL HS
      xpot(ix, iy, iz, im) = exp(-(8.0*eta(ix,iy,iz)-(9.0*eta(ix,iy,iz)**2)+(3.0*eta(ix,iy,iz)**3))/(1.0-eta(ix,iy,iz)**3))
-
-     xpot(ix, iy, iz, im) = xpot(ix,iy,iz, im)*dexp(voleps(ix,iy,iz))
+!     xpot(ix, iy, iz, im) = xpot(ix,iy,iz, im)*dexp(voleps(ix,iy,iz))
 
 ! Electrostatics
 
-     if(zpol(im).ne.0.0) then
-         xpot(ix,iy,iz,im) =  xpot(ix,iy,iz,im)/fdis(ix,iy,iz,im)*dexp(-psi(ix,iy,iz)*zpol(im))
-     endif
+!     if(zpol(im).ne.0.0) then
+!         xpot(ix,iy,iz,im) =  xpot(ix,iy,iz,im)/fdis(ix,iy,iz,im)*dexp(-psi(ix,iy,iz)*zpol(im))
+!     endif
   
 ! Dielectrics
 
-     gradpsi2 = (psi(ix+1,iy,iz)-psi(ix,iy,iz))**2+(psi(ix,iy+1,iz)-psi(ix,iy,iz))**2+(psi(ix,iy,iz+1)-psi(ix,iy,iz))**2 
+!     gradpsi2 = (psi(ix+1,iy,iz)-psi(ix,iy,iz))**2+(psi(ix,iy+1,iz)-psi(ix,iy,iz))**2+(psi(ix,iy,iz+1)-psi(ix,iy,iz))**2 
 
 !     gradpsi2 = (psi(ix+1,iy,iz)-psi(ix-1,iy,iz))**2+(psi(ix,iy+1,iz)-psi(ix,iy-1,iz))**2+(psi(ix,iy,iz+1)-psi(ix,iy,iz-1))**2 
 !     xpot(ix, iy, iz) = xpot(ix,iy,iz)*exp(-Depsfcn(ix,iy,iz)*(gradpsi2)*constqE)
 
-     xpot(ix,iy,iz,im) = xpot(ix,iy,iz,im)*exp(Depsfcn(ix,iy,iz)*(gradpsi2)/constq/2.0*vpol/fv)
+!     xpot(ix,iy,iz,im) = xpot(ix,iy,iz,im)*exp(Depsfcn(ix,iy,iz)*(gradpsi2)/constq/2.0*vpol/fv)
 
 ! Poor solvent
 
@@ -354,6 +356,17 @@ do ix=1,dimx
 enddo !iz
 
 enddo ! N_monomer
+
+do ix = 1, dimx
+ do iy = 1, dimy
+  do iz = 1, dimz
+
+   xh(ix,iy,iz) = 0.0 ! exp(musolbulk)*vsol*(xpot(ix,iy,iz,1)**6)
+
+  enddo
+ enddo
+enddo
+
 
 avpol_tosend = 0.0
 q = 0.0
@@ -455,19 +468,13 @@ do iz=1,dimz
 !      xneg(ix, iy, iz) + xpos(ix, iy, iz) + xHplus(ix, iy, iz) + &
 !      xOHmin(ix, iy, iz) -1.000000d0
 
-f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= -eta(ix,iy,iz) 
-
- do im = 1, N_monomer
-  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) = f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) + avpol(ix,iy,iz,im)
- enddo
+f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= xh(ix,iy,iz)-xtotal(ix,iy,iz,0)
 
 enddo
 enddo
 enddo
 
 ! Poor solvent
-
-
 
 do ix=1,dimx
 do iy=1,dimy
@@ -545,6 +552,7 @@ psitemp = psitemp + DOT_PRODUCT(MATMUL(TMAT,epsv),MATMUL(TMAT,psiv))
 
 f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)=(psitemp + qtot(ix, iy, iz)*constq)/(-2.0)
 
+
 enddo
 enddo
 enddo
@@ -554,7 +562,7 @@ endif ! electroflag
 norma = 0.0
 
 do i = 1, eqs*ncells
-  norma = norma + (f(i))**2
+ norma = norma + (f(i))**2
 enddo
 
 iter = iter + 1

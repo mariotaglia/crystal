@@ -215,6 +215,7 @@ endmodule
 module bulk
 real*8 expmupos,expmuneg,expmuHplus,expmuOHmin
 real*8 xsolbulk, xposbulk, xnegbulk, xHplusbulk,xOHminbulk
+real*8 musolbulk
 endmodule
 
 

@@ -149,7 +149,7 @@ call fkinsetrin('SSTEP_TOL', scsteptol, ier)
 call fkinsetiin('MAX_NITER', max_niter, ier)
 
 do i = 1, ncells  !constraint vector
-   constr(i) = 2.0 ! xh > 0
+   constr(i) = 1.0 ! xh > 0
 enddo
 
 do i = ncells+1, (N_poorsol+1)*ncells

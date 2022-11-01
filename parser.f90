@@ -146,6 +146,10 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) seed2
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
+ case ('musolbulk')
+   read(buffer, *, iostat=ios) musolbulk
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
 
  case ('stdout')
    read(buffer, *, iostat=ios) stdout
