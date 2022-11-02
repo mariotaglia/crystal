@@ -80,7 +80,6 @@ dy = ndr
 dz = ndr
 cdiva = ndr
 csalt = ndr
-
 vpol = ndr
 
 
@@ -144,10 +143,6 @@ do while (ios == 0)
 
  case ('seed')
    read(buffer, *, iostat=ios) seed2
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
- case ('musolbulk')
-   read(buffer, *, iostat=ios) musolbulk
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
 

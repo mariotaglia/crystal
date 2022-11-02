@@ -23,7 +23,7 @@ implicit none
 integer*4 ier2
 integer ncells
 real*8 x(*),f(*)
-real*8 protemp
+real*8 protemp, temp
 integer i,j, ix, iy, iz, ii, ax, ay, az
 integer im, ip
 integer jx, jy, jz, jj
@@ -351,16 +351,24 @@ enddo !iz
 
 enddo ! N_monomer
 
+
+temp = 0.0
 do ix = 1, dimx
  do iy = 1, dimy
   do iz = 1, dimz
 
-   xh(ix,iy,iz) = exp(kp*musolbulk)*vsol*(xpot(ix,iy,iz,1)**6)
+   xh(ix,iy,iz) = xpot(ix,iy,iz,1)**6
+   temp = temp + xh(ix,iy,iz)*(1.0 - volprot(ix,iy,iz))
 
   enddo
  enddo
 enddo
 
+temp = temp/float(dimx*dimy*dimz) ! average xh
+
+xh = xh/temp*kp
+
+musolbulk = log(kp/temp)
 
 avpol_tosend = 0.0
 q = 0.0
@@ -462,10 +470,10 @@ do iz=1,dimz
 !      xneg(ix, iy, iz) + xpos(ix, iy, iz) + xHplus(ix, iy, iz) + &
 !      xOHmin(ix, iy, iz) -1.000000d0
 
-f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= eta(ix,iy,iz)-xh(ix,iy,iz)
+f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= -eta(ix,iy,iz)+xh(ix,iy,iz)
 
 do im = 1, N_monomer
-    f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) - avpol(ix,iy,iz,im)
+    f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) + avpol(ix,iy,iz,im)
 enddo ! im
 
 enddo
