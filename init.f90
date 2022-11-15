@@ -17,21 +17,26 @@ use ellipsoid
 use mparameters_monomer
 implicit none
 pi = acos(-1.0)
-lb = 0.714 ! bjerrum lenght in nm
-zpos = 1.0
-zneg = -1.0
+
+! ELECTRO
+!lb = 0.714 ! bjerrum lenght in nm
+!zpos = 1.0
+!zneg = -1.0
+!vsalt=((4.0/3.0)*pi*(0.2)**3)/vsol  ! volume salt in units of vsol 0.2=radius salt  
+!constq=delta*delta*4.0*pi*lb/vsol   ! multiplicative factor in poisson eq  
+!pKw = 14
+!Kw = 10**(-pKw)
+
 vsol = vsol0
-vsalt=((4.0/3.0)*pi*(0.2)**3)/vsol  ! volume salt in units of vsol 0.2=radius salt  
-constq=delta*delta*4.0*pi*lb/vsol   ! multiplicative factor in poisson eq  
-pKw = 14
-Kw = 10**(-pKw)
 error = 1e-4 ! para comparar con la norma...
 errel=1d-6
 itmax=200
 
-if(electroflag.eq.0)eqs=(1+N_poorsol)
-if(electroflag.eq.1)eqs=(2+N_poorsol)
+! ELECTRO
+!if(electroflag.eq.0)eqs=(1+N_poorsol)
+!if(electroflag.eq.1)eqs=(2+N_poorsol)
 
+eqs=(1+N_poorsol)
 end subroutine
 
 subroutine initall
@@ -41,7 +46,10 @@ use bulk
 use MPI
 use ellipsoid
 use chainsdat
-use inputtemp
+
+! ELECTRO
+!use inputtemp
+
 use mparameters_monomer
 implicit none
 integer im
@@ -51,18 +59,22 @@ integer im
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 
 if(rank.eq.0) then
-       open(unit=301, file='F_tot.dat', access='APPEND')
+
+! ELECTRO
+!       open(unit=303, file='F_mixpos.dat',  access='APPEND')
+!       open(unit=304, file='F_mixneg.dat',  access='APPEND')
+!       open(unit=305, file='F_mixH.dat',  access='APPEND')
+!       open(unit=306, file='F_mixOH.dat',  access='APPEND')
+!       open(unit=308, file='F_eq.dat',  access='APPEND')
+!       open(unit=311, file='F_electro.dat',  access='APPEND')
+! 
+
+open(unit=301, file='F_tot.dat', access='APPEND')
        open(unit=302, file='F_mixs.dat',  access='APPEND')
-       open(unit=303, file='F_mixpos.dat',  access='APPEND')
-       open(unit=304, file='F_mixneg.dat',  access='APPEND')
-       open(unit=305, file='F_mixH.dat',  access='APPEND')
-       open(unit=306, file='F_mixOH.dat',  access='APPEND')
-       open(unit=307, file='F_conf.dat',  access='APPEND')
+      open(unit=307, file='F_conf.dat',  access='APPEND')
        open(unit=3071, file='F_gauche.dat',  access='APPEND')
-       open(unit=308, file='F_eq.dat',  access='APPEND')
        open(unit=309, file='F_vdW.dat',  access='APPEND')
        open(unit=410, file='F_eps.dat',  access='APPEND')
-       open(unit=311, file='F_electro.dat',  access='APPEND')
        open(unit=312, file='F_tot2.dat',  access='APPEND')
        open(unit=314, file='F_mixpos2.dat',  access='APPEND')
 endif
@@ -71,45 +83,48 @@ endif
 ! Input-dependent variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
-vpol = vpol/vsol ! vpol in units of vsol
-constqE = vpol/(2.0d0*constq)
-dielW = 78.54
-dielPr = dielP/dielW
-dielSr = dielS/dielW
-
-
-cHplus = 10**(-pHbulk)    ! concentration H+ in bulk
-xHplusbulk = (cHplus*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
-pOHbulk= pKw -pHbulk
-cOHmin = 10**(-pOHbulk)   ! concentration OH- in bulk
-xOHminbulk = (cOHmin*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol  
-xsalt=(csalt*Na/(1.0d24))*(vsalt*vsol)   ! volume fraction salt,csalt in mol/l 
-if(pHbulk.le.7) then  ! pH<= 7
-  xposbulk=xsalt/zpos
-  xnegbulk=-xsalt/zneg+(xHplusbulk -xOHminbulk) *vsalt ! NaCl+ HCl  
-else                  ! pH >7 
-  xposbulk=xsalt/zpos +(xOHminbulk -xHplusbulk) *vsalt ! NaCl+ NaOH   
-  xnegbulk= -xsalt/zneg 
+if(vpol.ne.vsol) then
+        print*, 'For calculations with vacuum need vsol = vpol'
+        stop
 endif
+vpol = vpol/vsol ! vpol in units of vsol
 
-xsolbulk=1.0 -xHplusbulk -xOHminbulk -xnegbulk -xposbulk 
+! ELECTRO
+!constqE = vpol/(2.0d0*constq)
+!dielW = 78.54
+!dielPr = dielP/dielW
+!dielSr = dielS/dielW
+!cHplus = 10**(-pHbulk)    ! concentration H+ in bulk
+!xHplusbulk = (cHplus*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
+!pOHbulk= pKw -pHbulk
+!cOHmin = 10**(-pOHbulk)   ! concentration OH- in bulk
+!xOHminbulk = (cOHmin*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol  
+!xsalt=(csalt*Na/(1.0d24))*(vsalt*vsol)   ! volume fraction salt,csalt in mol/l 
+!if(pHbulk.le.7) then  ! pH<= 7
+!  xposbulk=xsalt/zpos
+!  xnegbulk=-xsalt/zneg+(xHplusbulk -xOHminbulk) *vsalt ! NaCl+ HCl  
+!else                  ! pH >7 
+!  xposbulk=xsalt/zpos +(xOHminbulk -xHplusbulk) *vsalt ! NaCl+ NaOH   
+!  xnegbulk= -xsalt/zneg 
+!endif
 
-do im = 1, N_monomer
-Ka(im)=10**(-pKa(im))
-select case (zpol(im))
-case (-1) ! acid
-K0(im) = (Ka(im)*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant, Ka
-case (1) ! base
-K0(im) = ((Kw/Ka(im))*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant, Kb 
-end select
-enddo
-
-expmupos = xposbulk /xsolbulk**vsalt
-expmuneg = xnegbulk /xsolbulk**vsalt
-expmuHplus = xHplusbulk /xsolbulk   ! vsol = vHplus 
-expmuOHmin = xOHminbulk /xsolbulk   ! vsol = vOHmin 
-
+!xsolbulk=1.0 -xHplusbulk -xOHminbulk -xnegbulk -xposbulk 
+!
+!do im = 1, N_monomer
+!Ka(im)=10**(-pKa(im))
+!select case (zpol(im))
+!case (-1) ! acid
+!K0(im) = (Ka(im)*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant, Ka
+!case (1) ! base
+!K0(im) = ((Kw/Ka(im))*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant, Kb 
+!end select
+!enddo
+!
+!expmupos = xposbulk /xsolbulk**vsalt
+!expmuneg = xnegbulk /xsolbulk**vsalt
+!expmuHplus = xHplusbulk /xsolbulk   ! vsol = vHplus 
+!expmuOHmin = xOHminbulk /xsolbulk   ! vsol = vOHmin 
+!
 end subroutine
 
 subroutine endall
@@ -120,18 +135,20 @@ implicit none
 ! Close common files
 !!!!!!!!!!!!!!!!!!!!!!
 
+! ELECTRO
+!close(303)
+!close(304)
+!close(305)
+!close(306)
+!close(308)
+!close(311)
+
 close(301)
 close(302)
-close(303)
-close(304)
-close(305)
-close(306)
 close(307)
 close(3071)
-close(308)
 close(309)
 close(310)
-close(311)
 close(312)
 close(313)
 
@@ -213,26 +230,28 @@ if(rank.eq.0) then ! solo el jefe escribe a disco....
 ! OH-
 !  title = 'avOHm'
 !  call savetodisk(xOHmin, title, cccc)
-! fdis
-  title = 'frdis'
-  temp(1:dimx,1:dimy, 1:dimz) = fdis(1:dimx,1:dimy, 1:dimz,1)
-  call savetodisk(temp, title, cccc)
 
 
-! Potencial electrostatico
-
-  temp(1:dimx,1:dimy, 1:dimz) = psi(1:dimx,1:dimy, 1:dimz)
-
-  title = 'poten'
-  call savetodisk(temp, title, cccc)
-
+!! ELECTRO
+!! fdis
+!  title = 'frdis'
+!  temp(1:dimx,1:dimy, 1:dimz) = fdis(1:dimx,1:dimy, 1:dimz,1)
+!  call savetodisk(temp, title, cccc)
+!
+!
+!! Potencial electrostatico
+!
+!  temp(1:dimx,1:dimy, 1:dimz) = psi(1:dimx,1:dimy, 1:dimz)
+!
+!  title = 'poten'
+!  call savetodisk(temp, title, cccc)
+!
 
 ! Particle
 !  title = 'avpar'
 !  call savetodisk(volprot, title, cccc)
 
 ! save volprot for supercell
-
 if(rank.eq.0) then
 open (unit=8, file='out.par', form='unformatted')
 do ix=1,dimx
@@ -258,11 +277,15 @@ endif
   write(310,*)'length seg  = ', lseg ! value see subroutine cadenas
   write(310,*)'delta       = ',delta
   write(310,*)'vsol        = ',vsol
-  write(310,*)'vsalt       = ',vsalt*vsol
   write(310,*)'vpol       = ',vpol*vsol
-  write(310,*)'pKw         = ',pKw
-  write(310,*)'zpos        = ',zpos
-  write(310,*)'zneg        = ',zneg
+
+  ! ELECTRO  
+  ! write(310,*)'vsalt       = ',vsalt*vsol
+  ! write(310,*)'pKw         = ',pKw
+  ! write(310,*)'zpos        = ',zpos
+  ! write(310,*)'zneg        = ',zneg
+
+
   write(310,*)'long        = ',long
   write(310,*)'iterations  = ',iter
   write(310,*)'sigma cad/nm2 = ',ncha/(dimx*dimy*delta*delta)
@@ -360,7 +383,9 @@ do ix=1,dimx
      xtotal(ix,iy,iz,ip) = xflag(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+ip*ncells)
      enddo
 
-     if(electroflag.eq.1)psi(ix,iy,iz)=xflag(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)
+! ELECTRO
+!     if(electroflag.eq.1)psi(ix,iy,iz)=xflag(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)
+
   enddo
  enddo
 enddo 
@@ -379,11 +404,12 @@ do ix=1,int(dimx/2)
        xtotal(dimx-ix,iy,iz,ip) = temp
      enddo
 
-     if(electroflag.eq.1) then
-     temp = psi(ix,iy,iz)
-     psi(ix,iy,iz) = psi(dimx-ix,iy,iz)
-     psi(dimx-ix,iy,iz) = temp
-     endif
+! ELECTRO
+!     if(electroflag.eq.1) then
+!     temp = psi(ix,iy,iz)
+!     psi(ix,iy,iz) = psi(dimx-ix,iy,iz)
+!     psi(dimx-ix,iy,iz) = temp
+!     endif
   
   enddo
  enddo
@@ -399,7 +425,8 @@ do ix=1,dimx
          xflag(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+ip*ncells) =  xtotal(ix,iy,iz,ip)
         enddo
 
-        if(electroflag.eq.1)xflag(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)= psi(ix,iy,iz)
+! ELECTRO
+!        if(electroflag.eq.1)xflag(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)= psi(ix,iy,iz)
       enddo
    enddo
 enddo

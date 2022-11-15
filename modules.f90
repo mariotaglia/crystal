@@ -2,9 +2,11 @@ module mparameters_monomer
 integer N_poorsol ! number of different kais
 integer N_monomer ! number of different monomer types
 real*8, allocatable :: st_matrix(:,:) ! interaction between monomer types in fraction of st, scaled by st-scale during running....
-integer, allocatable :: zpol(:)  ! charge of monomer segment: 1: base, -1: acid, 0:neutral
 integer, allocatable :: hydroph(:) ! 0: hydrophilic, 1 < x < N_poorsol, type of poor solvent
-real*8, allocatable ::  pKa(:), Ka(:), K0(:)
+
+! ELECTRO
+!integer, allocatable :: zpol(:)  ! charge of monomer segment: 1: base, -1: acid, 0:neutral
+!real*8, allocatable ::  pKa(:), Ka(:), K0(:)
 endmodule mparameters_monomer
 
 module branches
@@ -26,7 +28,10 @@ integer  dimy
 integer  dimz 
 integer PBC(6)
 integer vtkflag
-integer electroflag
+
+! ELECTRO
+!integer electroflag
+
 integer eqs ! number of set of equations 
 endmodule
 
@@ -103,7 +108,10 @@ real*8 vpol
 real*8 vpol0
 real*8 vsol0
 real*8 vsalt
-real*8 zpos,zneg
+
+! ELECTRO
+!real*8 zpos,zneg
+
 real*8 benergy
 endmodule
 
@@ -140,7 +148,10 @@ module fields_fkfun
 use system
 use chainsdat
 real*8, allocatable :: xtotal(:, :, :, :) ! xtotal para poor solvent
-real*8, allocatable :: psi(:, :, :) 
+
+! ELECTRO
+!real*8, allocatable :: psi(:, :, :) 
+
 real*8, allocatable :: q(:)
 real*8, allocatable :: sumgauche(:)
 real*8, allocatable :: pro(:,:)
@@ -172,14 +183,16 @@ real*8, ALLOCATABLE :: xpar(:)
 endmodule
 
 module const
-real*8 dielW, dielP, dielS
-real*8 constqE
-real*8 dielPr, dielSr
-real*8 pKw, Kw
+! ELECTRO
+!real*8 dielW, dielP, dielS
+!real*8 constqE
+!real*8 dielPr, dielSr
+!real*8 constq
+!real*8 lb
+!real*8 pKw, Kw
+
 real*8 pi 
 real*8, parameter :: Na = 6.02d23 
-real*8 constq
-real*8 lb
 integer seed
 integer seed2
 real*8 error  ! para comparar con la norma...
@@ -202,19 +215,23 @@ endmodule
 module results
 use system
 real*8, allocatable :: avpol(:,:,:,:) ! avpol ix iy iz im
-real*8, allocatable :: epsfcn(:,:,:)
-real*8, allocatable :: Depsfcn(:,:,:)
-real*8, allocatable :: xpos(:,:,:) ! pos ion
-real*8, allocatable :: xneg(:,:,:) ! neg ioni
-real*8, allocatable :: qtot(:,:,:) ! Carga total
-real*8, allocatable :: xHplus(:,:,:) ! H+
-real*8, allocatable :: xOHmin(:,:,:) ! OH-
-real*8, allocatable :: fdis(:,:,:,:)
+
+! ELECTRO
+!real*8, allocatable :: epsfcn(:,:,:)
+!real*8, allocatable :: Depsfcn(:,:,:)
+!real*8, allocatable :: xpos(:,:,:) ! pos ion
+!real*8, allocatable :: xneg(:,:,:) ! neg ioni
+!real*8, allocatable :: qtot(:,:,:) ! Carga total
+!real*8, allocatable :: xHplus(:,:,:) ! H+
+!real*8, allocatable :: xOHmin(:,:,:) ! OH-
+!real*8, allocatable :: fdis(:,:,:,:)
 endmodule
 
 module bulk
-real*8 expmupos,expmuneg,expmuHplus,expmuOHmin
-real*8 xsolbulk, xposbulk, xnegbulk, xHplusbulk,xOHminbulk
+! ELECTRO
+!real*8 expmupos,expmuneg,expmuHplus,expmuOHmin
+! real*8 xposbulk, xnegbulk, xHplusbulk,xOHminbulk
+real*8 xsolbulk
 real*8 musolbulk
 endmodule
 
@@ -269,14 +286,15 @@ real*8, allocatable :: plane7(:,:)
 
 end module
 
-module inputtemp
-real*8 xsalt
-real*8 pHbulk
-real*8 pOHbulk
-real*8 csalt
-real*8 cHplus, cOHmin
-end module
-
+!! ELECTRO
+!module inputtemp
+!real*8 xsalt
+!real*8 pHbulk
+!real*8 pOHbulk
+!real*8 csalt
+!real*8 cHplus, cOHmin
+!end module
+!
 module transform
 real*8 gama0
 real*8 MAT(3,3)

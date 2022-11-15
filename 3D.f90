@@ -26,7 +26,9 @@ integer ncells
 
 ! Volumen fraction
 real*8 xh(dimx, dimy, dimz), xtotal(dimx,dimy,dimz,N_poorsol)
-real*8 psi(dimx, dimy, dimz) ! potencial
+
+!ELECTRO
+!real*8 psi(dimx, dimy, dimz) ! potencial
 real*8 temp
 
 ! MPI
@@ -60,14 +62,14 @@ if(infile.eq.0) then
     x1(i)=0.0
   enddo
 
-if(electroflag.eq.1) then
+! ELECTRO
+!if(electroflag.eq.1) then
+!  do i=(N_poorsol+1)*ncells+1, (N_poorsol+2)*ncells
+!    xg1(i)=0.0d0
+!    x1(i)=0.0d0
+!  enddo
+!endif ! electroflag
 
-  do i=(N_poorsol+1)*ncells+1, (N_poorsol+2)*ncells
-    xg1(i)=0.0d0
-    x1(i)=0.0d0
-  enddo
-
-endif ! electroflag
 endif ! infile
 
 !--------------------------------------------------------------
@@ -134,7 +136,8 @@ do ix=1,dimx
           xtotal(ix,iy,iz,ip)=x1(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+ip*ncells)
        enddo
 
-       if(electroflag.eq.1)psi(ix,iy,iz)=x1(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)
+! ELECTRO       
+!       if(electroflag.eq.1)psi(ix,iy,iz)=x1(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)
       enddo
    enddo  
 enddo

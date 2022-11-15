@@ -10,10 +10,12 @@ N_poorsol = 1 ! number of different kais
 N_monomer = 1
 
 ALLOCATE (st_matrix(0:N_poorsol, 0:N_poorsol)) ! interaction between monomer types in fraction of st, scaled by st-scale during running....
-
-ALLOCATE (zpol(N_monomer))    ! charge of monomer segment: 1: base, -1: acid, 0:neutral
 ALLOCATE (hydroph(N_monomer)) ! 0: hydrophilic, 1 < x < N_poorsol, type of poor solvent
-ALLOCATE (pKa(N_monomer), Ka(N_monomer), K0(N_monomer))
+
+
+! ELECTRO
+!ALLOCATE (zpol(N_monomer))    ! charge of monomer segment: 1: base, -1: acid, 0:neutral
+!ALLOCATE (pKa(N_monomer), Ka(N_monomer), K0(N_monomer))
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -25,9 +27,11 @@ st_matrix(1,1)=1.0
 ! Segment type 1 for NPC, positive base, hydrophilic
 
 i = 1
-zpol(i) = 0
 hydroph(i) = 1
-pKa(i) = 7.0
+
+! ELECTRO
+!zpol(i) = 0
+!pKa(i) = 7.0
 
 
 !i = 2

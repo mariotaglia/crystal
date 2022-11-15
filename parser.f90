@@ -6,7 +6,8 @@ use bulk
 use MPI
 use ellipsoid
 use chainsdat
-use inputtemp
+! ELECTRO
+!use inputtemp
 use transform
 use system
 use kai
@@ -42,7 +43,8 @@ ndr = -1.0d10
 verbose = 5
 stdout = 6
 
-electroflag = 1 ! system with electrostatics?
+! ELECTRO
+!electroflag = 1 ! system with electrostatics?
 
 branched = 0 ! branched chains?
 
@@ -52,6 +54,15 @@ sigmar = 0.0 ! random sigma
 !
 ! Check validity of input
 !
+
+
+
+! ELECTRO
+!dielS = ndr
+!pHbulk = ndr
+!dielP = ndr
+!csalt = ndr
+
 
 vscan = ndi
 scx = ndi
@@ -71,15 +82,11 @@ epstype = 0
 cutoff = ndr
 lseg = ndr
 nst = ndi
-dielS = ndr
-pHbulk = ndr
-dielP = ndr
 delta = ndr
 dx = ndr
 dy = ndr
 dz = ndr
 cdiva = ndr
-csalt = ndr
 vpol = ndr
 
 
@@ -154,9 +161,10 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) vtkflag
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
- case ('electroflag')
-   read(buffer, *, iostat=ios) electroflag
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+! ELECTRO   
+! case ('electroflag')
+!   read(buffer, *, iostat=ios) electroflag
+!   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('branched')
    read(buffer, *, iostat=ios) branched
@@ -261,19 +269,19 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) lseg
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
-
- case ('dielP')
-   read(buffer, *, iostat=ios) dielP
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
- case ('dielS')
-   read(buffer, *, iostat=ios) dielS
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
- case ('csalt')
-   read(buffer, *, iostat=ios) csalt
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
+! ELECTRO
+! case ('dielP')
+!   read(buffer, *, iostat=ios) dielP
+!   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+!
+! case ('dielS')
+!   read(buffer, *, iostat=ios) dielS
+!   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+!
+! case ('csalt')
+!   read(buffer, *, iostat=ios) csalt
+!   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+!
  case ('vsol')
    read(buffer, *, iostat=ios) vsol0
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -294,24 +302,13 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) sigmar
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
- case ('pHbulk')
-   read(buffer, *, iostat=ios) pHbulk
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+! ELECTRO  
+! case ('pHbulk')
+!   read(buffer, *, iostat=ios) pHbulk
+!   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('infile')
    read(buffer, *, iostat=ios) infile
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
- case ('hguess')
-   read(buffer, *, iostat=ios) hguess
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
- case ('hring')
-   read(buffer, *, iostat=ios) hring
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
- case ('oval')
-   read(buffer, *, iostat=ios) oval
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('nkp')
@@ -640,11 +637,14 @@ if(delta.eq.ndr)call stopundef('delta')
 if(dx.eq.ndr)call stopundef('dx')
 if(dy.eq.ndr)call stopundef('dy')
 if(dz.eq.ndr)call stopundef('dz')
-if(dielS.eq.ndr)call stopundef('dielS')
-if(dielP.eq.ndr)call stopundef('dielP')
-if(lseg.eq.ndr)call stopundef('lseg')
-if(csalt.eq.ndr)call stopundef('csalt')
-if(pHbulk.eq.ndr)call stopundef('pHbulk')
+
+! ELECTRO
+!if(dielS.eq.ndr)call stopundef('dielS')
+!if(dielP.eq.ndr)call stopundef('dielP')
+!if(lseg.eq.ndr)call stopundef('lseg')
+!if(csalt.eq.ndr)call stopundef('csalt')
+!if(pHbulk.eq.ndr)call stopundef('pHbulk')
+
 if(vpol0.eq.ndr)call stopundef('vpol')
 if(vsol0.eq.ndr)call stopundef('vsol')
 if(benergy.eq.ndr)call stopundef('benergy')
