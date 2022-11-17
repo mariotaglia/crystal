@@ -1,3 +1,15 @@
+module solventchains
+integer longsv
+integer cuantassv
+integer*2, allocatable :: pxsv(:,:)
+integer*2, allocatable :: pysv(:,:)
+integer*2, allocatable :: pzsv(:,:)
+integer*2, allocatable :: ngauchesv(:)
+integer ingsv ! number of gauches in current chain
+real*8, ALLOCATABLE :: in1sv(:,:)  ! segment positions 
+end module
+
+
 module mparameters_monomer
 integer N_poorsol ! number of different kais
 integer N_monomer ! number of different monomer types
@@ -91,7 +103,6 @@ integer long
 integer, allocatable :: segtype(:) ! sequence of the chain 
 integer ncha 
 real*8, ALLOCATABLE :: in1(:,:)  ! segment positions 
-integer ing ! number of gauches in current chain
 real*8, ALLOCATABLE :: posicion(:,:) ! posicion graft de la cadena ncha
 real*8, ALLOCATABLE :: ngpol(:) ! posicion graft de la cadena ncha
 integer, ALLOCATABLE :: cpp(:)
@@ -99,6 +110,7 @@ integer, ALLOCATABLE :: cppini(:)
 integer maxcpp
 real*8 lseg
 integer readchains
+integer ing ! number of gauches in current chain
 endmodule
 
 module molecules
@@ -153,8 +165,11 @@ real*8, allocatable :: xtotal(:, :, :, :) ! xtotal para poor solvent
 !real*8, allocatable :: psi(:, :, :) 
 
 real*8, allocatable :: q(:)
+real*8 qsv
 real*8, allocatable :: sumgauche(:)
+real*8 sumgauchesv
 real*8, allocatable :: pro(:,:)
+real*8 prosv 
 real*8, allocatable :: xh(:, :, :)
 real*8 shift
 endmodule

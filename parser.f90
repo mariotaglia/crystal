@@ -17,6 +17,7 @@ use channel
 use superellipse
 use branches
 use cube
+use solventchains
 implicit none
 
 ! Input related variables
@@ -74,7 +75,9 @@ dimx = ndi
 dimy = ndi
 dimz = ndi
 long = ndi
+longsv = ndi
 cuantas = ndi
+cuantassv = ndi
 readchains = ndi
 infile = ndi
 randominput = 0
@@ -261,9 +264,18 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) long
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
+ case ('longsv')
+   read(buffer, *, iostat=ios) longsv
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
  case ('cuantas')
    read(buffer, *, iostat=ios) cuantas
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+ case ('cuantassv')
+   read(buffer, *, iostat=ios) cuantassv
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
 
  case ('lseg')
    read(buffer, *, iostat=ios) lseg
@@ -626,7 +638,9 @@ if(dimy.eq.ndi)call stopundef('dimy')
 if(dimz.eq.ndi)call stopundef('dimz')
 if(ncha.eq.ndi)call stopundef('ncha')
 if(long.eq.ndi)call stopundef('long')
+if(longsv.eq.ndi)call stopundef('longsv')
 if(cuantas.eq.ndi)call stopundef('cuantas')
+if(cuantassv.eq.ndi)call stopundef('cuantassv')
 if(infile.eq.ndi)call stopundef('infile')
 if(cutoff.eq.ndr)call stopundef('Xucutoff')
 if(readchains.eq.ndi)call stopundef('readchains')

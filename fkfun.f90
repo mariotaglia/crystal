@@ -17,13 +17,15 @@ use transform
 use kaist
 use mparameters_monomer
 use mmask
-
+use solventchains
 implicit none
 
+
+real*8 temp
 integer*4 ier2
 integer ncells
 real*8 x(*),f(*)
-real*8 protemp, temp
+real*8 protemp
 integer i,j, ix, iy, iz, ii, ax, ay, az
 integer im, ip
 integer jx, jy, jz, jj
@@ -52,6 +54,8 @@ real*8 avpol_temp(dimx,dimy,dimz,N_monomer)
 real*8 q_tosend, sumgauche_tosend
 real*8 gradpsi2
 real*8 fv
+
+real*8 avsol(dimx,dimy,dimz)
 
 ! hamiltonian inception
 real*8 hd
@@ -337,21 +341,128 @@ enddo ! N_monomer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-temp = 0.0
+avsol = 0.0
+
+do i = 1, cuantassv ! loop over sv conformations
+
 do ix = 1, dimx
- do iy = 1, dimy
-  do iz = 1, dimz
+do iy = 1, dimy
+do iz = 1, dimz ! loop over position COM of solvent molecule
 
-   xh(ix,iy,iz) = xpot(ix,iy,iz,1)**6
-   temp = temp + xh(ix,iy,iz)*(1.0 - volprot(ix,iy,iz))
+prosv = exp(-benergy*ngauchesv(i)) ! energy of gauche bonds
 
-  enddo
- enddo
-enddo
+do j = 1, longsv ! loop over segment
 
-temp = temp/float(dimx*dimy*dimz) ! average xh
+            jx = ix+pxsv(i,j)
+            jy = iy+pysv(i,j)
+            jz = iz+pzsv(i,j)
 
-xh = xh/temp*kp
+! CHECK PBC
+
+            if(jx.lt.1) then
+            if(PBC(1).eq.1)jx = PBCSYMI(jx,dimx)
+            if(PBC(1).eq.3)jx = PBCREFI(jx,dimx)
+            endif
+
+            if(jx.gt.dimx) then
+            if(PBC(2).eq.1)jx = PBCSYMI(jx,dimx)
+            if(PBC(2).eq.3)jx = PBCREFI(jx,dimx)
+            endif
+
+            if(jy.lt.1) then
+            if(PBC(3).eq.1)jy = PBCSYMI(jy,dimy)
+            if(PBC(3).eq.3)jy = PBCREFI(jy,dimy)
+            endif
+
+            if(jy.gt.dimy) then
+            if(PBC(4).eq.1)jy = PBCSYMI(jy,dimy)
+            if(PBC(4).eq.3)jy = PBCREFI(jy,dimy)
+            endif
+
+
+            if(jz.lt.1) then
+            if(PBC(5).eq.1)jz = PBCSYMI(jz,dimz)
+            if(PBC(5).eq.3)jz = PBCREFI(jz,dimz)
+            endif
+
+            if(jz.gt.dimz) then
+            if(PBC(6).eq.1)jz = PBCSYMI(jz,dimz)
+            if(PBC(6).eq.3)jz = PBCREFI(jz,dimz)
+            endif
+
+
+            if((jx.ge.1).and.(jx.le.dimx)) then
+            if((jy.ge.1).and.(jy.le.dimy)) then
+            if((jz.ge.1).and.(jz.le.dimz)) then
+ 
+            prosv = prosv * xpot(jx, jy, jz, 1)
+
+            endif     
+            endif     
+            endif     
+            
+enddo ! j
+
+do j=1,long ! calculate avsol
+
+            jx = ix+pxsv(i,j)
+            jy = iy+pysv(i,j)
+            jz = iz+pzsv(i,j)
+
+! CHECK PBC
+
+            if(jx.lt.1) then
+            if(PBC(1).eq.1)jx = PBCSYMI(jx,dimx)
+            if(PBC(1).eq.3)jx = PBCREFI(jx,dimx)
+            endif
+
+            if(jx.gt.dimx) then
+            if(PBC(2).eq.1)jx = PBCSYMI(jx,dimx)
+            if(PBC(2).eq.3)jx = PBCREFI(jx,dimx)
+            endif
+
+            if(jy.lt.1) then
+            if(PBC(3).eq.1)jy = PBCSYMI(jy,dimy)
+            if(PBC(3).eq.3)jy = PBCREFI(jy,dimy)
+            endif
+
+            if(jy.gt.dimy) then
+            if(PBC(4).eq.1)jy = PBCSYMI(jy,dimy)
+            if(PBC(4).eq.3)jy = PBCREFI(jy,dimy)
+            endif
+
+
+            if(jz.lt.1) then
+            if(PBC(5).eq.1)jz = PBCSYMI(jz,dimz)
+            if(PBC(5).eq.3)jz = PBCREFI(jz,dimz)
+            endif
+
+            if(jz.gt.dimz) then
+            if(PBC(6).eq.1)jz = PBCSYMI(jz,dimz)
+            if(PBC(6).eq.3)jz = PBCREFI(jz,dimz)
+            endif
+
+            if((jx.ge.1).and.(jx.le.dimx)) then
+            if((jy.ge.1).and.(jy.le.dimy)) then
+            if((jz.ge.1).and.(jz.le.dimz)) then
+
+   fv = (1.0-volprot(jx,jy,jz))
+   avsol(jx,jy,jz) = avsol(jx,jy,jz) + prosv/fv
+
+            endif     
+            endif     
+            endif     
+enddo ! j
+
+enddo ! ix
+enddo ! iy 
+enddo ! iz
+
+enddo  ! i
+
+temp = sum(avsol)/float(dimx*dimy*dimz) ! average xh 
+
+xh = avsol/temp*kp
 
 musolbulk = log(kp/temp)
 

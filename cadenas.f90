@@ -6,6 +6,7 @@ use system
 use chainsdat
 use MPI
 use branches
+use solventchains
 implicit none
 integer i,il,ll
 integer j
@@ -17,8 +18,12 @@ integer iglobal
 integer nchas
 integer ii, jj
 
-indexncha = 1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!   LIGAND CONFORMATIONS
+!  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+indexncha = 1
 newcuantas = 0
 
 if((readchains.eq.-1).and.(rank.eq.0)) then
@@ -54,7 +59,7 @@ do while (il.lt.cuantas)
  select case (branched)
 
  case (0)
-  call cadenas72mr(chains,nchas,gauches)
+  call cadenas72mr(chains,nchas,gauches,long)
  case (1)
   call cadenas_b(chains,nchas,gauches) ! branched chains
  case (2)
@@ -65,7 +70,7 @@ endselect
 
   do i=1,nchas
       il=il+1
-      if(il.gt.cuantas) goto 100
+      if(il.gt.cuantas)exit
       ing = gauches(i)
       do j=1,long
          in1(j,2)=chains(2,j,i)
@@ -90,13 +95,43 @@ enddo
   write(9988,*)ii,newcuantas(ii)
 enddo
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!   SOLVENT CONFORMATIONS
+!  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+il=0
+
+do while (il.lt.cuantassv)
+
+  call cadenas72mr(chains,nchas,gauches,longsv)
+
+  do i=1,nchas
+      il=il+1
+      if(il.gt.cuantassv)exit
+      ingsv = gauches(i)
+      do j=1,longsv
+         in1sv(j,2)=chains(2,j,i)
+         in1sv(j,3)=chains(3,j,i)
+         in1sv(j,1)=chains(1,j,i)
+      enddo
+         call pxssv(il)
+  enddo ! i
+enddo ! il
+
+! do il = 1, ncha
+! write(stdout,*) 'creador:', il, newcuantas(il)
+! enddo
+! stop
+
 return
 end
 
-subroutine cadenas72mr(chains,nchas,gauches)
-use chainsdat
-use const     
+subroutine cadenas72mr(chains,nchas,gauches,long)
+use const  
+use chainsdat, only : lseg
 implicit none
+integer long
 real*8 chains(3,200,100), gauches(100)
 integer i,state,ii,j,ive,jve
 real*8 rn,state1,sitheta,cotheta,dista

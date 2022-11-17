@@ -13,6 +13,7 @@ use MPI
 use kai
 use mparameters_monomer
 use mmask
+use solventchains
 implicit none
 
 
@@ -56,6 +57,7 @@ ALLOCATE (pp(eqs*dimx*dimy*dimz))
 
 ! chainsdat
 allocate(in1(long,3))
+allocate(in1sv(longsv,3))
 allocate(cpp(size))
 allocate(cppini(size))
 end subroutine

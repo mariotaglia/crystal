@@ -4,6 +4,7 @@ use fields_fkfun
 use chainsdat
 use conformations
 use rotchain
+use solventchains
 implicit none
 
 ! fields_fkfun
@@ -15,5 +16,8 @@ ALLOCATE(ngauche(cuantas,ncha))
 allocate(posicion(ncha,3))
 allocate(ngpol(ncha))
 allocate(newcuantas(ncha))
+
+! solventchains
+ALLOCATE(ngauchesv(cuantassv))
 
 end subroutine
