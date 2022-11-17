@@ -268,7 +268,7 @@ do while (nchas.eq.0)
  enddo
 
 
- do i=1,300
+ do i=1,12
          test='S'
          call rota36(xend,xendr,long,test)
          if (test.eq.'N')cycle

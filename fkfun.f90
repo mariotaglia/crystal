@@ -403,7 +403,7 @@ do j = 1, longsv ! loop over segment
             
 enddo ! j
 
-do j=1,long ! calculate avsol
+do j=1,longsv ! calculate avsol
 
             jx = ix+pxsv(i,j)
             jy = iy+pysv(i,j)
