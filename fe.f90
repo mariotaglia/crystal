@@ -479,6 +479,8 @@ endif
 
 ! 6. Chemical EQ PDB
 
+
+if(systemtype.eq.70) then
       pdbcom = 0.0
       do i = 1, naa
         pdbcom(:) = pdbcom(:) + aapos(:,i)
@@ -514,6 +516,8 @@ endif
       enddo ! i
 
       Free_Energy = Free_Energy + F_pdb
+endif
+
 
       if (verbose.ge.1) then
       write(stdout,*) 'Free_Energy_Calc: Free energy(1) = ', Free_energy
@@ -569,7 +573,7 @@ endif
 
 ! charge protein
 
-
+if (systemtype.eq.70) then
       do im = 1, naa
        if(zpdb(im).ne.0) then
 
@@ -584,7 +588,7 @@ endif
 
        endif ! zpol
       enddo ! im
-
+endif
 
          
          sumpi = (delta**3/vsol)*sumpi
@@ -637,12 +641,18 @@ endif
          flush(307)
          write(308,*)looped, F_Eq
          flush(308)
+         
+         if(systemtype.eq.70) then
          write(314,*)looped, F_pdb
          flush(314)
+         endif
+
          write(309,*)looped, F_vdW
          flush(309)
+
          write(410,*)looped, F_eps
          flush(410)
+
          write(311,*)looped, F_electro
          flush(311)
 
@@ -654,8 +664,10 @@ endif
 
          write(315,*)looped, pdbcharge
          flush(315)
+
          write(316,*)looped, pdbcom
          flush(316)
+
          write(317,*)looped, pdbmu
          flush(317)
 

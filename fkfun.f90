@@ -169,7 +169,6 @@ endselect
 
 fdis = 0.0
 avpol = 0.0
-fdispdb = 0.0
 
 do ix=1,dimx
  do iy=1,dimy
@@ -191,6 +190,8 @@ do ix=1,dimx
  enddo  
 enddo
 
+if (systemtype.eq.70) then
+fdispdb = 0.0
 do im = 1, naa
 select case (zpdb(im))
   case (1)
@@ -201,6 +202,7 @@ select case (zpdb(im))
    /(K0pdb(im)*xh(xxpdb(im),yypdb(im), zzpdb(im))))
 endselect
 enddo
+endif
 
 ! Compute dielectric permitivity
 
@@ -380,14 +382,15 @@ enddo
 enddo
 enddo
 
+if(systemtype.eq.70) then
 do im = 1, naa
   ix = xxpdb(im)
   iy = yypdb(im)
   iz = zzpdb(im)
   qtot(ix,iy,iz) = qtot(ix,iy,iz) + float(zpdb(im))*fdispdb(im)*vsol/(delta**3)
 !  print*, im, float(zpdb(im))*fdispdb(im)*vsol, zpdb(im), fdispdb(im)
-
 enddo
+endif
 
 
 
