@@ -65,7 +65,7 @@ hds = -1
 !-----------------------------------------------------
 ! Common variables
 
-shift = 1.0
+shift = 1.0d100
 
 ncells = dimx*dimy*dimz ! numero de celdas
 
@@ -95,7 +95,7 @@ xtotalsum = 0.0
 do ix=1,dimx
  do iy=1,dimy
   do iz=1,dimz
-     xtotalsum(ix,iy,iz)= 1.0-x(ix+dimx*(iy-1)+dimx*dimy*(iz-1))  ! xtotalsum is the sum of polymers (ip >= 1) and solvent (ip = 0)
+     xtotalsum(ix,iy,iz)= 1.0-exp(-x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)))  ! xtotalsum is the sum of polymers (ip >= 1) and solvent (ip = 0)
 
      do ip = 1, N_poorsol
       xtotal(ix,iy,iz,ip) = x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+ ip*ncells) ! input, xtotal for polymers
@@ -253,7 +253,7 @@ do ix=1,dimx
 
 ! LOCAL HS
      eta = xtotalsum(ix,iy,iz)
-     xpot(ix, iy, iz, im) = exp(-(8.0*eta-(9.0*(eta**2))+(3.0*(eta**3))) &
+              xpot(ix, iy, iz, im) = (-(8.0*eta-(9.0*(eta**2))+(3.0*(eta**3))) &
               /((1.0-eta)**3))
 
 ! ELECTRO
@@ -329,7 +329,8 @@ do ix=1,dimx
       enddo
      enddo
 
-     xpot(ix,iy,iz,im) =xpot(ix,iy,iz,im)*dexp(protemp)
+     xpot(ix,iy,iz,im) =xpot(ix,iy,iz,im) + protemp
+     xpot(ix,iy,iz,im) = dexp(xpot(ix,iy,iz,im))
 
    enddo ! ix
   enddo ! iy
@@ -349,7 +350,7 @@ do ix = 1, dimx
 do iy = 1, dimy
 do iz = 1, dimz ! loop over position COM of solvent molecule
 
-prosv = exp(-benergy*ngauchesv(i)) ! energy of gauche bonds
+prosv = dexp(-benergy*ngauchesv(i)) ! energy of gauche bonds
 
 do j = 1, longsv ! loop over segment
 
@@ -395,7 +396,7 @@ do j = 1, longsv ! loop over segment
             if((jy.ge.1).and.(jy.le.dimy)) then
             if((jz.ge.1).and.(jz.le.dimz)) then
  
-            prosv = prosv * xpot(jx, jy, jz, 1)
+            prosv = prosv*xpot(jx, jy, jz, 1)
 
             endif     
             endif     
@@ -447,7 +448,7 @@ do j=1,longsv ! calculate avsol
             if((jz.ge.1).and.(jz.le.dimz)) then
 
    fv = (1.0-volprot(jx,jy,jz))
-   avsol(jx,jy,jz) = avsol(jx,jy,jz) + prosv/fv
+   avsol(jx,jy,jz) = avsol(jx,jy,jz) + dexp(-prosv)/fv
 
             endif     
             endif     
@@ -489,6 +490,7 @@ do jj = 1, cpp(rank+1)
     ay = py(i, j, jj)
     az = pz(i, j, jj)         
     pro(i, jj) = pro(i, jj) * xpot(ax, ay, az, segtype(j))
+
    enddo
     pro(i,jj) = pro(i,jj)*exp(-benergy*ngauche(i,ii)) ! energy of gauche bonds
 
