@@ -20,7 +20,7 @@ use mmask
 use solventchains
 implicit none
 
-
+real*8 eta
 real*8 temp
 integer*4 ier2
 integer ncells
@@ -39,7 +39,6 @@ real*8 MVV,MUU,MWW,MVU,MVW,MUW
 !real*8 psivv,psiuu,psiww, psivu,psivw,psiuw
 
 real*8 psiv(3), epsv(3)
-real*8 xtotalsum(dimx,dimy,dimz)
 
 integer, external :: PBCSYMI, PBCREFI
 
@@ -66,7 +65,7 @@ hds = -1
 !-----------------------------------------------------
 ! Common variables
 
-shift = 1.0d-100
+shift = 1.0
 
 ncells = dimx*dimy*dimz ! numero de celdas
 
@@ -239,7 +238,7 @@ enddo
 
 ! Calcula xpot
 
-sttemp = st/(vpol*vsol) 
+sttemp = st/vsol
 
 do im = 1, N_monomer ! loop over different monomer types
 
@@ -253,8 +252,9 @@ do ix=1,dimx
 
 
 ! LOCAL HS
-     xpot(ix, iy, iz, im) = exp(-(8.0*xtotalsum(ix,iy,iz)-(9.0*xtotalsum(ix,iy,iz)**2)+(3.0*xtotalsum(ix,iy,iz)**3)) &
-              /(1.0-xtotalsum(ix,iy,iz)**3))
+     eta = xtotalsum(ix,iy,iz)
+     xpot(ix, iy, iz, im) = exp(-(8.0*eta-(9.0*(eta**2))+(3.0*(eta**3))) &
+              /((1.0-eta)**3))
 
 ! ELECTRO
 !     if(zpol(im).ne.0.0) then
@@ -496,7 +496,7 @@ do jj = 1, cpp(rank+1)
    fv = (1.0-volprot(px(i,j, jj),py(i,j, jj),pz(i,j, jj)))
    im = segtype(j)
     avpol_temp(px(i,j, jj),py(i,j, jj),pz(i,j, jj), im)= &
-    avpol_temp(px(i,j, jj),py(i,j, jj),pz(i,j, jj), im)+pro(i, jj)*vpol*vsol/(delta**3)/fv* &
+    avpol_temp(px(i,j, jj),py(i,j, jj),pz(i,j, jj), im)+pro(i, jj)*vsol/(delta**3)/fv* &
     ngpol(ii)*sc ! ngpol(ii) has the number of chains grafted to the point ii
    enddo
 

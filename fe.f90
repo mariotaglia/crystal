@@ -29,14 +29,14 @@ real*8  q0(ncha), sumgauche0(ncha)
 integer newcuantas0(ncha)
 real*8 F_Mix_s, F_Mix_pos
 real*8 F_Mix_neg, F_Mix_Hplus
-real*8 Free_energy2, sumpi, sumrho, sumel, sumdiel, suma, mupol
+real*8 Free_energy2, sumpi, sumrho, sumel, sumdiel, suma, mupol, sumHS
 real*8 temp
-real*8 F_Mix_OHmin, F_gauche, F_Conf, F_Eq, F_vdW, F_eps, F_electro
+real*8 F_Mix_OHmin, F_gauche, F_Conf, F_Eq, F_vdW, F_eps, F_electro, F_HS
 real*8 pro0(cuantas, maxcpp)
 real*8 entropy(dimx,dimy,dimz)
 character*5  title
-real*8 xtotalsum(dimx,dimy,dimz)
- 
+real*8 eta
+
 ! MPI
 integer stat(MPI_STATUS_SIZE) 
 integer source
@@ -106,17 +106,17 @@ endif
 
       F_Mix_s = 0.0 
 
-      do ix = 1, dimx
-      do iy = 1, dimy
-      do iz = 1, dimz
-      fv=(1.0-volprot(ix,iy,iz))
-      F_Mix_s = F_Mix_s + xh(ix, iy,iz)*(dlog(xh(ix, iy, iz))-1.0)*fv
-      F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*fv
-      enddo      
-      enddo      
-      enddo      
-      F_Mix_s = F_Mix_s * delta**3/vsol
-      Free_Energy = Free_Energy + F_Mix_s
+!      do ix = 1, dimx
+!      do iy = 1, dimy
+!      do iz = 1, dimz
+!      fv=(1.0-volprot(ix,iy,iz))
+!      F_Mix_s = F_Mix_s + xh(ix, iy,iz)*(dlog(xh(ix, iy, iz))-1.0)*fv
+!      F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*fv
+!      enddo      
+!      enddo      
+!      enddo      
+!      F_Mix_s = F_Mix_s * delta**3/vsol
+!      Free_Energy = Free_Energy + F_Mix_s
 
 
 !! ELECTRO      
@@ -407,7 +407,7 @@ endif
             do ipp = 0, N_poorsol
  
                 F_vdW = F_vdW - 0.5000*delta**3*xtotal(ix,iy,iz,ip) &
-        *xtotal(jx,jy,jz,ipp)*Xu(ax, ay, az)*st*st_matrix(ip,ipp)*fv*fv2/(vpol*vpol*vsol*vsol)
+        *xtotal(jx,jy,jz,ipp)*Xu(ax, ay, az)*st*st_matrix(ip,ipp)*fv*fv2/(vsol*vsol)
  
             enddo ! ip
             enddo ! ipp
@@ -455,7 +455,7 @@ endif
       do iz = 1, dimz
       fv=(1.0-volprot(ix,iy,iz))
       do im = 1, N_monomer
-      F_eps = F_eps - avpol(ix,iy,iz,im)*voleps(ix,iy,iz)*(delta**3)/vpol/vsol*fv
+      F_eps = F_eps - avpol(ix,iy,iz,im)*voleps(ix,iy,iz)*(delta**3)/vsol*fv
       enddo
       enddo
       enddo
@@ -463,22 +463,33 @@ endif
 
       Free_Energy = Free_Energy + F_eps
 
+! 10 HS contribution
+
+      F_HS = 0.0
+      do ix = 1, dimx
+      do iy = 1, dimy
+      do iz = 1, dimz
+         fv=(1.0-volprot(ix,iy,iz))
+         eta = xtotalsum(ix,iy,iz)
+         F_HS = F_HS + eta*(4.-3.*eta)/((1.-eta)**2)*eta*(delta**3)/vsol*fv
+      enddo
+      enddo
+      enddo
+
+      Free_Energy = Free_Energy + F_HS
+
       if (verbose.ge.1) then
       write(stdout,*) 'Free_Energy_Calc: Free energy(1) = ', Free_energy
       endif
+
 
 ! minimal F
 
       Free_Energy2 = 0.0
 
-      xtotalsum = 0.0
-      do ip = 0, N_poorsol
-      xtotalsum(:,:,:)= xtotalsum(:,:,:)+xtotal(:,:,:,ip)
-      enddo
-
-
-        sumpi = 0.0
-        sumrho=0.0
+!      sumpi = 0.0
+      sumrho=0.0
+      sumHS = 0.0 
 
 ! ELECTRO
 !        sumel=0.0
@@ -490,8 +501,8 @@ endif
 
       fv=(1.0-volprot(ix,iy,iz))
 
-           sumpi = sumpi+dlog(xh(ix, iy, iz))*fv     
-           sumpi = sumpi-dlog(xsolbulk)*fv
+!           sumpi = sumpi+dlog(xh(ix, iy, iz))*fv     
+!           sumpi = sumpi-dlog(xsolbulk)*fv
 
 ! ELECTRO 
 !           sumrho = sumrho + ( - xh(ix, iy, iz) -xHplus(ix, iy, iz) &
@@ -500,8 +511,8 @@ endif
 !           sumrho = sumrho - ( - xsolbulk -xHplusbulk &
 !       -xOHminbulk - (xposbulk+xnegbulk)/vsalt)*fv ! sum over  rho_i i=+,-,s
      
-           sumrho = sumrho + ( - xh(ix, iy, iz))*fv! sum over  rho_i i=+,-,s
-           sumrho = sumrho - ( - xsolbulk)*fv ! sum over  rho_i i=+,-,s
+!          sumrho = sumrho + ( - xh(ix, iy, iz))*fv! sum over  rho_i i=+,-,s
+!           sumrho = sumrho - ( - xsolbulk)*fv ! sum over  rho_i i=+,-,s
 
 ! ELECTRO           
 !         sumel = sumel - qtot(ix, iy, iz)*psi(ix, iy, iz)/2.0     
@@ -515,12 +526,19 @@ endif
 !         gradpsi2 = DOT_PRODUCT(MATMUL(TMAT, psiv), MATMUL(TMAT, psiv))
 !         sumdiel = sumdiel + 0.5/constq*xtotalsum(ix,iy,iz)*gradpsi2*Depsfcn(ix,iy,iz)
 !
+         eta = xtotalsum(ix,iy,iz)
+
+         sumHS = sumHS + (-4.*eta + 2.*eta**2)/((1.-eta)**3) * fv * eta 
+
          enddo
          enddo
          enddo
          
-         sumpi = (delta**3/vsol)*sumpi
-         sumrho = (delta**3/vsol)*sumrho
+ !        sumpi = (delta**3/vsol)*sumpi
+ !        sumrho = (delta**3/vsol)*sumrho
+         sumHS = (delta**3/vsol)*sumHS
+
+         print*, sumHS
 
 ! ELECTRO
 !         sumel = (delta**3/vsol)*sumel
@@ -528,8 +546,8 @@ endif
 !         suma = sumpi + sumrho + sumel + sumdiel
 
 
-         suma = sumpi + sumrho
-
+!         suma = sumpi + sumrho
+         suma = sumHS
 
          do ii = 1, ncha
          Free_Energy2 = Free_Energy2-dlog(q0(ii)/shift)*ngpol(ii) 
@@ -570,8 +588,9 @@ endif
          write(3071,*)looped, F_gauche
          write(307,*)looped, F_Conf
          write(309,*)looped, F_vdW
+         write(311,*)looped, F_HS
          write(410,*)looped, F_eps
-
+ 
          write(312,*)looped, Free_energy2
 
          write(313,*)looped, mupol

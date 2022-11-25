@@ -230,6 +230,7 @@ endmodule
 module results
 use system
 real*8, allocatable :: avpol(:,:,:,:) ! avpol ix iy iz im
+real*8, allocatable :: xtotalsum(:,:,:)
 
 ! ELECTRO
 !real*8, allocatable :: epsfcn(:,:,:)

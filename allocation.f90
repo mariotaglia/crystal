@@ -33,6 +33,7 @@ ALLOCATE (xpar(dimx*dimy*dimz))
 
 ! results
 ALLOCATE (avpol(dimx, dimy, dimz, N_monomer))
+ALLOCATE (xtotalsum(dimx, dimy, dimz))
 
 
 ! ELECTRO
