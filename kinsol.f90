@@ -147,7 +147,7 @@ if (ier .ne. 0) then
 call fkinsetiin('MAX_SETUPS', msbpre, ier)  ! Additional input information
 call fkinsetrin('FNORM_TOL', fnormtol, ier)
 call fkinsetrin('SSTEP_TOL', scsteptol, ier)
-call fkinsetiin('MAX_NITER', max_niter, ier)
+call fkinsetiin('MAX_NITERS', max_niter, ier)
 
 do i = 1, ncells  !constraint vector
    constr(i) = 1.0 ! xh > 0
