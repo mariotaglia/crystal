@@ -19,7 +19,7 @@ use mparameters_monomer
 use mmask
 use solventchains
 implicit none
-
+real*8 nchains
 real*8 eta
 real*8 temp
 integer*4 ier2
@@ -52,7 +52,7 @@ real*8 avpol_tosend(dimx,dimy,dimz,N_monomer)
 real*8 avpol_temp(dimx,dimy,dimz,N_monomer)
 real*8 q_tosend, sumgauche_tosend
 real*8 gradpsi2
-real*8 fv
+real*8 fv, fv2
 
 real*8 xhtemp(dimx,dimy,dimz)
 real*8 rhosvtemp(dimx,dimy,dimz)
@@ -413,6 +413,40 @@ enddo ! j
    sumprolnpro(ix,iy,iz) = sumprolnpro(ix,iy,iz) + prosv*dlog(prosv)
    sumprogauche(ix,iy,iz) = sumprogauche(ix,iy,iz) + prosv*ngauchesv(i)
 
+enddo ! ix
+enddo ! iy 
+enddo ! iz
+
+enddo  ! i
+
+!!!! Calculate number of chains in the system !!!!
+! kp = average volume fraction 
+
+
+nchains = kp*(delta**3)*float(dimx*dimy*dimz)/vsol/float(longsv)
+
+!!!! Normalize rhosv to have nchains
+
+rhosvtemp = qsv  
+temp = 0.0
+
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+  fv = (1.0-volprot(ix,iy,iz))
+  temp = temp + fv*rhosvtemp(ix,iy,iz)*fv
+enddo
+enddo
+enddo
+
+rhosv = rhosvtemp/temp*nchains
+
+!!!! Obtain xh from rhosv
+
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+ 
 do j=1,longsv ! calculate xhtemp
 
             jx = ix+pxsv(i,j)
@@ -441,7 +475,6 @@ do j=1,longsv ! calculate xhtemp
             if(PBC(4).eq.3)jy = PBCREFI(jy,dimy)
             endif
 
-
             if(jz.lt.1) then
             if(PBC(5).eq.1)jz = PBCSYMI(jz,dimz)
             if(PBC(5).eq.3)jz = PBCREFI(jz,dimz)
@@ -457,84 +490,67 @@ do j=1,longsv ! calculate xhtemp
             if((jz.ge.1).and.(jz.le.dimz)) then
 
    fv = (1.0-volprot(jx,jy,jz))
-   xhtemp(jx,jy,jz) = xhtemp(jx,jy,jz) + prosv/fv*vsol
-            endif     
-            endif     
-            endif     
-enddo ! j
+   fv2 = (1.0-volprot(ix,iy,iz))
 
+   xh(jx,jy,jz) = xh(jx,jy,jz) + rhosv(ix,iy,iz)*fv2/fv*vsol
+            endif     
+            endif     
+            endif     
+            
+enddo ! j
 enddo ! ix
-enddo ! iy 
+enddo ! iy
 enddo ! iz
 
-enddo  ! i
-
-rhosvtemp = qsv  
-
-temp = 0.0
-do ix = 1, dimx
-do iy = 1, dimy
-do iz = 1, dimz
-  fv = (1.0-volprot(ix,iy,iz))
-  temp = temp + fv*xhtemp(ix,iy,iz)
-enddo
-enddo
-enddo
-
-temp = temp/float(dimx*dimy*dimz) ! average xh 
-
-xh = xhtemp/temp*kp
-rhosv = rhosvtemp/temp*kp
-
-musolv = dlog(kp/temp*vsol) ! see notes
+musolv = dlog(rhosv(1,1,1)*vsol/qsv(1,1,1)) ! see notes
 
 
 !! CHECK MUSOLV
 
-!do ix = 1, dimx
-!do iy = 1, dimy
-!do iz = 1, dimz
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
 
-!print*, musolv, dlog(rhosv(ix,iy,iz)*vsol/qsv(ix,iy,iz))
+print*, musolv, dlog(rhosv(ix,iy,iz)*vsol/qsv(ix,iy,iz))
 
-!enddo
-!enddo
-!enddo
+enddo
+enddo
+enddo
 !stop
 
 !! CHECK AVERAGE SOLV DENSITY
 
-!if(rank.eq.0)write(stdout,*)'Target kp', kp
+if(rank.eq.0)write(stdout,*)'Target kp', kp
 
 ! FROM XH
-!temp = 0.0
-!do ix = 1,dimx
-!do iy = 1,dimy
-!do iz = 1,dimz
-!  fv = (1.0-volprot(ix,iy,iz))
-!  temp = temp + fv*xh(ix,iy,iz)
-!enddo
-!enddo
-!enddo
-!temp = temp/float(dimx*dimy*dimz) ! average xh 
+temp = 0.0
+do ix = 1,dimx
+do iy = 1,dimy
+do iz = 1,dimz
+  fv = (1.0-volprot(ix,iy,iz))
+  temp = temp + fv*xh(ix,iy,iz)
+enddo
+enddo
+enddo
+temp = temp/float(dimx*dimy*dimz) ! average xh 
 
-!if(rank.eq.0)write(stdout,*)'kp from xh', temp
+if(rank.eq.0)write(stdout,*)'kp from xh', temp
 
 !! FROM RHOSV
-!temp = 0.0
-!do ix = 1,dimx
-!do iy = 1,dimy
-!do iz = 1,dimz
-!  fv = (1.0-volprot(ix,iy,iz))
-!  temp = temp + fv*rhosv(ix,iy,iz)
-!enddo
-!enddo
-!enddo
-!temp = temp*longsv*vsol/float(dimx*dimy*dimz) ! average xh 
+temp = 0.0
+do ix = 1,dimx
+do iy = 1,dimy
+do iz = 1,dimz
+  fv = (1.0-volprot(ix,iy,iz))
+  temp = temp + fv*rhosv(ix,iy,iz)
+enddo
+enddo
+enddo
+temp = temp*float(longsv)*vsol/float(dimx*dimy*dimz) ! average xh 
 
-!if(rank.eq.0)write(stdout,*)'kp from rhosv', temp
+if(rank.eq.0)write(stdout,*)'kp from rhosv', temp
 
-!stop
+stop
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! CALCULATE POLYMER VOLUME FRACTION
