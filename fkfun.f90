@@ -486,7 +486,21 @@ temp = temp/float(dimx*dimy*dimz) ! average xh
 xh = xhtemp/temp*kp
 rhosv = rhosvtemp/temp*kp
 
-musolv = dlog(kp/temp) ! see notes
+musolv = dlog(kp/temp*vsol) ! see notes
+
+
+!! CHECK MUSOLV
+
+!do ix = 1, dimx
+!do iy = 1, dimy
+!do iz = 1, dimz
+
+!print*, musolv, dlog(rhosv(ix,iy,iz)*vsol/qsv(ix,iy,iz))
+
+!enddo
+!enddo
+!enddo
+!stop
 
 !! CHECK AVERAGE SOLV DENSITY
 

@@ -103,6 +103,10 @@ endif
       Free_Energy = 0.0
       Free_Energy2 = 0.0
 
+!!!!!!!!!!!!!!!!!!! ONLY CALCULATE SOLVENT CONTRIBUTIONS IF KP != 0 !!!!!!!!!!!!!!!!
+if(kp.ne.0.0) then 
+
+
 ! 1. Mezcla solvente
 
       F_Mix_s = 0.0 
@@ -111,13 +115,16 @@ endif
       do iy = 1, dimy
       do iz = 1, dimz
       fv=(1.0-volprot(ix,iy,iz))
-      F_Mix_s = F_Mix_s + xh(ix, iy,iz)*(dlog(xh(ix, iy, iz))-1.0)*fv
+      F_Mix_s = F_Mix_s + rhosv(ix,iy,iz)*(dlog(rhosv(ix, iy, iz)*vsol)-1.0-musolv)*fv
 !      F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*fv
       enddo      
       enddo      
       enddo      
-      F_Mix_s = F_Mix_s * delta**3/vsol
+      F_Mix_s = F_Mix_s * delta**3
       Free_Energy = Free_Energy + F_Mix_s
+      
+endif ! solvent
+
 
 
 !! ELECTRO      
@@ -273,6 +280,10 @@ if(rank.eq.0) then
       close(8)
 endif
 
+
+!!!!!!!!!!!!!!!!!!! ONLY CALCULATE SOLVENT CONTRIBUTIONS IF KP != 0 !!!!!!!!!!!!!!!!
+if(kp.ne.0.0) then 
+
 ! 6-bis
 
 ! Conformational entropy of the solvent
@@ -284,7 +295,7 @@ do iy = 1, dimy
 do iz = 1, dimz
 
 fv=(1.0-volprot(ix,iy,iz))
-F_conf = F_conf + (sumprolnpro(ix,iy,iz)/qsv(ix,iy,iz) - dlog(qsv(ix,iy,iz)))*rhosv(ix,iy,iz)*fv
+F_conf_sv = F_conf_sv + (sumprolnpro(ix,iy,iz)/qsv(ix,iy,iz) - dlog(qsv(ix,iy,iz)))*rhosv(ix,iy,iz)*fv
 
 
 enddo
@@ -294,6 +305,7 @@ enddo
 F_conf_sv = F_conf_sv*(delta**3)
 Free_Energy = Free_Energy + F_conf_sv 
 
+endif ! kp =! 0
 
 ! 6.5 Energy of gauche bonds
 
@@ -329,6 +341,9 @@ if(rank.eq.0) then
       close(8)
 endif
 
+!!!!!!!!!!!!!!!!!!! ONLY CALCULATE SOLVENT CONTRIBUTIONS IF KP != 0 !!!!!!!!!!!!!!!!
+if(kp.ne.0.0) then 
+
 ! 6.5 bis
 
 ! Gauche energy solvent
@@ -350,7 +365,7 @@ enddo
 F_gauche_sv = F_gauche_sv*(delta**3)
 Free_Energy = Free_Energy + F_gauche_sv 
 
-
+endif ! solvent
 
 
 
@@ -547,7 +562,8 @@ Free_Energy = Free_Energy + F_gauche_sv
         do iy=1,dimy
         do iz=1,dimz
 
-      fv=(1.0-volprot(ix,iy,iz))
+        fv=(1.0-volprot(ix,iy,iz))
+        sumrho = sumrho - rhosv(ix, iy, iz)*fv
 
 !           sumpi = sumpi+dlog(xh(ix, iy, iz))*fv     
 !           sumpi = sumpi-dlog(xsolbulk)*fv
@@ -583,10 +599,12 @@ Free_Energy = Free_Energy + F_gauche_sv
          enddo
          
  !        sumpi = (delta**3/vsol)*sumpi
- !        sumrho = (delta**3/vsol)*sumrho
-         sumHS = (delta**3/vsol)*sumHS
+         sumrho = (delta**3)*sumrho
 
-         print*, sumHS
+         print*, 'sumrho', sumrho
+
+
+         sumHS = (delta**3/vsol)*sumHS
 
 ! ELECTRO
 !         sumel = (delta**3/vsol)*sumel
@@ -595,7 +613,7 @@ Free_Energy = Free_Energy + F_gauche_sv
 
 
 !         suma = sumpi + sumrho
-         suma = sumHS
+         suma = sumHS + sumrho
 
          do ii = 1, ncha
          Free_Energy2 = Free_Energy2-dlog(q0(ii)/shift)*ngpol(ii) 
