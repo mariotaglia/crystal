@@ -163,9 +163,12 @@ real*8, allocatable :: xtotal(:, :, :, :) ! xtotal para poor solvent
 
 ! ELECTRO
 !real*8, allocatable :: psi(:, :, :) 
-
+real*8 musolv ! solvent chem pot
 real*8, allocatable :: q(:)
-real*8 qsv
+real*8, allocatable :: qsv(:,:,:)
+real*8, allocatable :: sumprolnpro(:,:,:) ! for fe calc
+real*8, allocatable :: sumprogauche(:,:,:) ! for fe calc
+real*8, allocatable :: rhosv(:,:,:) 
 real*8, allocatable :: sumgauche(:)
 real*8 sumgauchesv
 real*8, allocatable :: pro(:,:)
@@ -241,14 +244,6 @@ real*8, allocatable :: xtotalsum(:,:,:)
 !real*8, allocatable :: xHplus(:,:,:) ! H+
 !real*8, allocatable :: xOHmin(:,:,:) ! OH-
 !real*8, allocatable :: fdis(:,:,:,:)
-endmodule
-
-module bulk
-! ELECTRO
-!real*8 expmupos,expmuneg,expmuHplus,expmuOHmin
-! real*8 xposbulk, xnegbulk, xHplusbulk,xOHminbulk
-real*8 xsolbulk
-real*8 musolbulk
 endmodule
 
 

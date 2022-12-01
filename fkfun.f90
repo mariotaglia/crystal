@@ -54,7 +54,8 @@ real*8 q_tosend, sumgauche_tosend
 real*8 gradpsi2
 real*8 fv
 
-real*8 avsol(dimx,dimy,dimz)
+real*8 xhtemp(dimx,dimy,dimz)
+real*8 rhosvtemp(dimx,dimy,dimz)
 
 ! hamiltonian inception
 real*8 hd
@@ -342,7 +343,11 @@ enddo ! N_monomer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-avsol = 0.0
+xhtemp = 0.0
+qsv = 0.0
+sumprolnpro = 0.0
+rhosv = 0.0
+sumprogauche = 0.0
 
 do i = 1, cuantassv ! loop over sv conformations
 
@@ -404,7 +409,11 @@ do j = 1, longsv ! loop over segment
             
 enddo ! j
 
-do j=1,longsv ! calculate avsol
+   qsv(ix,iy,iz) = qsv(ix,iy,iz) + prosv
+   sumprolnpro(ix,iy,iz) = sumprolnpro(ix,iy,iz) + prosv*dlog(prosv)
+   sumprogauche(ix,iy,iz) = sumprogauche(ix,iy,iz) + prosv*ngauchesv(i)
+
+do j=1,longsv ! calculate xhtemp
 
             jx = ix+pxsv(i,j)
             jy = iy+pysv(i,j)
@@ -448,8 +457,7 @@ do j=1,longsv ! calculate avsol
             if((jz.ge.1).and.(jz.le.dimz)) then
 
    fv = (1.0-volprot(jx,jy,jz))
-   avsol(jx,jy,jz) = avsol(jx,jy,jz) + dexp(-prosv)/fv
-
+   xhtemp(jx,jy,jz) = xhtemp(jx,jy,jz) + prosv/fv*vsol
             endif     
             endif     
             endif     
@@ -461,11 +469,58 @@ enddo ! iz
 
 enddo  ! i
 
-temp = sum(avsol)/float(dimx*dimy*dimz) ! average xh 
+rhosvtemp = qsv  
 
-xh = avsol/temp*kp
+temp = 0.0
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+  fv = (1.0-volprot(ix,iy,iz))
+  temp = temp + fv*xhtemp(ix,iy,iz)
+enddo
+enddo
+enddo
 
-musolbulk = log(kp/temp)
+temp = temp/float(dimx*dimy*dimz) ! average xh 
+
+xh = xhtemp/temp*kp
+rhosv = rhosvtemp/temp*kp
+
+musolv = dlog(kp/temp) ! see notes
+
+!! CHECK AVERAGE SOLV DENSITY
+
+!if(rank.eq.0)write(stdout,*)'Target kp', kp
+
+! FROM XH
+!temp = 0.0
+!do ix = 1,dimx
+!do iy = 1,dimy
+!do iz = 1,dimz
+!  fv = (1.0-volprot(ix,iy,iz))
+!  temp = temp + fv*xh(ix,iy,iz)
+!enddo
+!enddo
+!enddo
+!temp = temp/float(dimx*dimy*dimz) ! average xh 
+
+!if(rank.eq.0)write(stdout,*)'kp from xh', temp
+
+!! FROM RHOSV
+!temp = 0.0
+!do ix = 1,dimx
+!do iy = 1,dimy
+!do iz = 1,dimz
+!  fv = (1.0-volprot(ix,iy,iz))
+!  temp = temp + fv*rhosv(ix,iy,iz)
+!enddo
+!enddo
+!enddo
+!temp = temp*longsv*vsol/float(dimx*dimy*dimz) ! average xh 
+
+!if(rank.eq.0)write(stdout,*)'kp from rhosv', temp
+
+!stop
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! CALCULATE POLYMER VOLUME FRACTION

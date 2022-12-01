@@ -78,6 +78,8 @@ open(unit=301, file='F_tot.dat', access='APPEND')
        open(unit=410, file='F_eps.dat',  access='APPEND')
        open(unit=312, file='F_tot2.dat',  access='APPEND')
        open(unit=314, file='F_mixpos2.dat',  access='APPEND')
+       open(unit=315, file='F_gauche_sv.dat',  access='APPEND')
+       open(unit=316, file='F_conf_sv.dat',  access='APPEND')
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -153,6 +155,8 @@ close(310)
 close(311)
 close(312)
 close(313)
+close(315)
+close(316)
 
 call MPI_FINALIZE(ierr) ! finaliza MPI    
 stop
@@ -292,7 +296,7 @@ endif
   write(310,*)'iterations  = ',iter
   write(310,*)'sigma cad/nm2 = ',ncha/(dimx*dimy*delta*delta)
   write(310,*)'kai =          ', Xu
-  write(310,*)'musolbulk =    ', musolbulk
+  write(310,*)'musolv =    ', musolv
   write(310,*)'phivol =       ', Kp
   write(310,*)'GIT version = ', _VERSION
 

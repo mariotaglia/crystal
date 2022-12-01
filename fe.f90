@@ -32,6 +32,7 @@ real*8 F_Mix_neg, F_Mix_Hplus
 real*8 Free_energy2, sumpi, sumrho, sumel, sumdiel, suma, mupol, sumHS
 real*8 temp
 real*8 F_Mix_OHmin, F_gauche, F_Conf, F_Eq, F_vdW, F_eps, F_electro, F_HS
+real*8 F_conf_sv, F_gauche_sv
 real*8 pro0(cuantas, maxcpp)
 real*8 entropy(dimx,dimy,dimz)
 character*5  title
@@ -106,17 +107,17 @@ endif
 
       F_Mix_s = 0.0 
 
-!      do ix = 1, dimx
-!      do iy = 1, dimy
-!      do iz = 1, dimz
-!      fv=(1.0-volprot(ix,iy,iz))
-!      F_Mix_s = F_Mix_s + xh(ix, iy,iz)*(dlog(xh(ix, iy, iz))-1.0)*fv
+      do ix = 1, dimx
+      do iy = 1, dimy
+      do iz = 1, dimz
+      fv=(1.0-volprot(ix,iy,iz))
+      F_Mix_s = F_Mix_s + xh(ix, iy,iz)*(dlog(xh(ix, iy, iz))-1.0)*fv
 !      F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*fv
-!      enddo      
-!      enddo      
-!      enddo      
-!      F_Mix_s = F_Mix_s * delta**3/vsol
-!      Free_Energy = Free_Energy + F_Mix_s
+      enddo      
+      enddo      
+      enddo      
+      F_Mix_s = F_Mix_s * delta**3/vsol
+      Free_Energy = Free_Energy + F_Mix_s
 
 
 !! ELECTRO      
@@ -272,6 +273,28 @@ if(rank.eq.0) then
       close(8)
 endif
 
+! 6-bis
+
+! Conformational entropy of the solvent
+
+F_conf_sv = 0.0
+
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+
+fv=(1.0-volprot(ix,iy,iz))
+F_conf = F_conf + (sumprolnpro(ix,iy,iz)/qsv(ix,iy,iz) - dlog(qsv(ix,iy,iz)))*rhosv(ix,iy,iz)*fv
+
+
+enddo
+enddo
+enddo
+
+F_conf_sv = F_conf_sv*(delta**3)
+Free_Energy = Free_Energy + F_conf_sv 
+
+
 ! 6.5 Energy of gauche bonds
 
       F_gauche = 0.0
@@ -306,7 +329,32 @@ if(rank.eq.0) then
       close(8)
 endif
 
-     
+! 6.5 bis
+
+! Gauche energy solvent
+
+F_gauche_sv = 0.0
+
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+
+fv=(1.0-volprot(ix,iy,iz))
+F_gauche_sv = F_gauche_sv + sumprogauche(ix,iy,iz)/qsv(ix,iy,iz)*rhosv(ix,iy,iz)*fv
+
+enddo
+enddo
+enddo
+
+
+F_gauche_sv = F_gauche_sv*(delta**3)
+Free_Energy = Free_Energy + F_gauche_sv 
+
+
+
+
+
+!      
 !! ELECTRO
 !! 7. Chemical Equilibrium
 !      F_Eq = 0.0 
@@ -586,6 +634,10 @@ endif
 
 
          write(3071,*)looped, F_gauche
+         write(315,*)looped, F_gauche_sv
+         write(316,*)looped, F_conf_sv
+
+
          write(307,*)looped, F_Conf
          write(309,*)looped, F_vdW
          write(311,*)looped, F_HS
