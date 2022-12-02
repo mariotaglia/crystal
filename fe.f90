@@ -355,7 +355,7 @@ do iy = 1, dimy
 do iz = 1, dimz
 
 fv=(1.0-volprot(ix,iy,iz))
-F_gauche_sv = F_gauche_sv + sumprogauche(ix,iy,iz)/qsv(ix,iy,iz)*rhosv(ix,iy,iz)*fv
+F_gauche_sv = F_gauche_sv + sumprogauche(ix,iy,iz)/qsv(ix,iy,iz)*rhosv(ix,iy,iz)*fv*benergy
 
 enddo
 enddo
@@ -601,7 +601,7 @@ endif ! solvent
  !        sumpi = (delta**3/vsol)*sumpi
          sumrho = (delta**3)*sumrho
 
-         print*, 'sumrho', sumrho
+!         print*, 'sumrho', sumrho
 
 
          sumHS = (delta**3/vsol)*sumHS
