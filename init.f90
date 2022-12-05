@@ -295,8 +295,9 @@ endif
   write(310,*)'long        = ',long
   write(310,*)'iterations  = ',iter
   write(310,*)'sigma cad/nm2 = ',ncha/(dimx*dimy*delta*delta)
-  write(310,*)'kai =          ', Xu
+!  write(310,*)'kai =          ', Xu
   write(310,*)'musolv =    ', musolv
+  write(310,*)'phisolv =    ', phisolv
   write(310,*)'phivol =       ', Kp
   write(310,*)'GIT version = ', _VERSION
 

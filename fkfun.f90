@@ -574,6 +574,19 @@ musolv = dlog(kp/phisolvtemp*vsol)
 
 xh = xh/phisolvtemp*kp
 
+!!!! phisolv
+
+phisolv = 0.0
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+fv = (1.0-volprot(ix,iy,iz))
+phisolv = phisolv + xh(ix,iy,iz)*fv
+enddo
+enddo
+enddo
+phisolv = phisolv/float(dimx*dimy*dimz) 
+
 !! CHECK MUSOLV
 
 !do ix = 1, dimx
