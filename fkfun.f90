@@ -337,6 +337,19 @@ do ix=1,dimx
 enddo !iz
 enddo ! N_monomer
 
+! BIAS
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+temp = sqrt((float(ix-25))**2.+(float(iy-25))**2.+(float(iz-25))**2.)
+xpot(ix,iy,iz,:) = xpot(ix,iy,iz,:)  *  (1.0 + exp(-(temp/25.0)**2)*0.)
+
+enddo
+enddo
+enddo
+
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! CALCULATE SOLVENT VOLUME FRACTION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -754,6 +767,11 @@ if(isnan(norma)) then
     if(rank.eq.0)write(stdout,*)'Norma is NaN, stop'
     f(1:eqs*ncells) = 0.0
 endif
+if(iter.gt.maxiters) then
+    if(rank.eq.0)write(stdout,*)'Iter > Maxiters, stop'
+    f(1:eqs*ncells) = 0.0
+endif
+
 
        
      

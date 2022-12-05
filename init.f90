@@ -362,6 +362,7 @@ open (unit=8, file='in.in', form='unformatted')
 read(8)counter
 read(8)free_energy
 read(8)xflag
+counter = 0
 close(8)
 end subroutine
 
