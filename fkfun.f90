@@ -568,13 +568,9 @@ enddo
 enddo
 
 phisolvtemp = phisolvtemp/float(dimx*dimy*dimz)
+musolv = dlog(kp/phisolvtemp*vsol) 
 
-!!!! Normalize rhosv to have nchains
-
-!rhosv = qsv/phisolvtemp*kp
-!musolv = dlog(rhosv(1,1,1)*vsol/qsv(1,1,1)) ! see notes
-
-!!!!! Normalize xh
+!!!! Normalize xh
 
 xh = xh/phisolvtemp*kp
 

@@ -58,12 +58,16 @@ real*8 psiv(3)
 
 integer, external :: PBCSYMI, PBCREFI
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
-!
-!  Recupera pro(i) de todos los procesos para calculo de F
-!
+! Solvent data for F_conf
+real*8 qsv0(dimx,dimy,dimz)
+real*8 sumprolnpro0(dimx,dimy,dimz)
+real*8 sumprogauche0(dimx,dimy,dimz)
 
-! Subordinados
+
+!!!!!!!!!!!!!!!!!!!!!!!!! MPI !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Polymer
+!
 
 entropy = 0.0
 q0 = 0.0
@@ -88,42 +92,28 @@ if(rank.ne.0) then
         CALL MPI_SEND(pro, cuantas*cpp(rank+1) , MPI_DOUBLE_PRECISION, dest, tag, MPI_COMM_WORLD,err)
 
 ! sum gauche
-
        do jj = 1, cpp(rank+1)
        iii = cppini(rank+1)+jj
        sumgauche_tosend(iii) = sumgauche(iii)
        enddo
-
         call MPI_REDUCE(sumgauche_tosend, sumgauche0, ncha, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 
 
-      goto 888
+!!!!! Solvent
+
+      call MPI_REDUCE(qsv, qsv0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+      call MPI_REDUCE(sumprolnpro, sumprolnpro0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+      call MPI_REDUCE(sumprogauche, sumprogauche0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+
+      goto 888 !!!! PROCESSORS NOT EQ 1 GO TO THE END 
+
 endif
 
-      Free_Energy = 0.0
-      Free_Energy2 = 0.0
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!!!!!!!!!!!!!!!!!!! ONLY CALCULATE SOLVENT CONTRIBUTIONS IF KP != 0 !!!!!!!!!!!!!!!!
-if(kp.ne.0.0) then 
+Free_Energy = 0.0
+Free_Energy2 = 0.0
 
-
-! 1. Mezcla solvente
-
-      F_Mix_s = 0.0 
-
-      do ix = 1, dimx
-      do iy = 1, dimy
-      do iz = 1, dimz
-      fv=(1.0-volprot(ix,iy,iz))
-      F_Mix_s = F_Mix_s + rhosv(ix,iy,iz)*(dlog(rhosv(ix, iy, iz)*vsol)-1.0-musolv)*fv
-!      F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*fv
-      enddo      
-      enddo      
-      enddo      
-      F_Mix_s = F_Mix_s * delta**3
-      Free_Energy = Free_Energy + F_Mix_s
-      
-endif ! solvent
 
 
 
@@ -281,39 +271,13 @@ if(rank.eq.0) then
 endif
 
 
-!!!!!!!!!!!!!!!!!!! ONLY CALCULATE SOLVENT CONTRIBUTIONS IF KP != 0 !!!!!!!!!!!!!!!!
-if(kp.ne.0.0) then 
-
-! 6-bis
-
-! Conformational entropy of the solvent
-
-F_conf_sv = 0.0
-
-do ix = 1, dimx
-do iy = 1, dimy
-do iz = 1, dimz
-
-fv=(1.0-volprot(ix,iy,iz))
-F_conf_sv = F_conf_sv + (sumprolnpro(ix,iy,iz)/qsv(ix,iy,iz) - dlog(qsv(ix,iy,iz)))*rhosv(ix,iy,iz)*fv
-
-
-enddo
-enddo
-enddo
-
-F_conf_sv = F_conf_sv*(delta**3)
-Free_Energy = Free_Energy + F_conf_sv 
-
-endif ! kp =! 0
-
 ! 6.5 Energy of gauche bonds
 
       F_gauche = 0.0
 
 ! Jefe
 
-       if (rank.eq.0) then ! Igual tiene que serlo, ver arriba
+if (rank.eq.0) then ! Igual tiene que serlo, ver arriba
 
        do jj = 1, cpp(rank+1) ! sumgauche in rank 0
        iii = jj
@@ -341,8 +305,63 @@ if(rank.eq.0) then
       close(8)
 endif
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Solvent (processor #0)
+
+
+qsv0 = 0.0
+sumprolnpro0 = 0.0
+sumgauche0 = 0.0
+
+if (rank.eq.0) then 
+call MPI_REDUCE(qsv, qsv0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+call MPI_REDUCE(sumprolnpro, sumprolnpro0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+call MPI_REDUCE(sumprogauche, sumprogauche0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+endif
+
+rhosv = qsv0*dexp(musolv)/vsol 
+
 !!!!!!!!!!!!!!!!!!! ONLY CALCULATE SOLVENT CONTRIBUTIONS IF KP != 0 !!!!!!!!!!!!!!!!
 if(kp.ne.0.0) then 
+
+! 1. Mezcla solvente
+
+F_Mix_s = 0.0 
+
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+   fv=(1.0-volprot(ix,iy,iz))
+   F_Mix_s = F_Mix_s + rhosv(ix,iy,iz)*(dlog(rhosv(ix, iy, iz)*vsol)-1.0-musolv)*fv
+!      F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*fv
+enddo      
+enddo      
+enddo      
+
+F_Mix_s = F_Mix_s * delta**3
+Free_Energy = Free_Energy + F_Mix_s
+      
+
+! 6-bis
+
+! Conformational entropy of the solvent
+
+F_conf_sv = 0.0
+
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+
+fv=(1.0-volprot(ix,iy,iz))
+F_conf_sv = F_conf_sv + (sumprolnpro0(ix,iy,iz)/qsv0(ix,iy,iz) - dlog(qsv0(ix,iy,iz)))*rhosv(ix,iy,iz)*fv
+
+
+enddo
+enddo
+enddo
+
+F_conf_sv = F_conf_sv*(delta**3)
+Free_Energy = Free_Energy + F_conf_sv 
 
 ! 6.5 bis
 
@@ -355,7 +374,7 @@ do iy = 1, dimy
 do iz = 1, dimz
 
 fv=(1.0-volprot(ix,iy,iz))
-F_gauche_sv = F_gauche_sv + sumprogauche(ix,iy,iz)/qsv(ix,iy,iz)*rhosv(ix,iy,iz)*fv*benergy
+F_gauche_sv = F_gauche_sv + sumprogauche0(ix,iy,iz)/qsv0(ix,iy,iz)*rhosv(ix,iy,iz)*fv*benergy
 
 enddo
 enddo
@@ -367,6 +386,7 @@ Free_Energy = Free_Energy + F_gauche_sv
 
 endif ! solvent
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 !      
