@@ -492,6 +492,7 @@ enddo ! ix
 enddo ! iy 
 enddo ! iz
 
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! CALCULATE POLYMER VOLUME FRACTION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -556,7 +557,17 @@ endif
 
 !!!!!!!!!!!!!!!!!!!!!!! Normalize solvent !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-phisolvtemp = sum(xh)/float(dimx*dimy*dimz)
+phisolvtemp = 0.0
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+fv = (1.0-volprot(ix,iy,iz))
+phisolvtemp = phisolvtemp + xh(ix,iy,iz)*fv
+enddo
+enddo
+enddo
+
+phisolvtemp = phisolvtemp/float(dimx*dimy*dimz)
 
 !!!! Normalize rhosv to have nchains
 
