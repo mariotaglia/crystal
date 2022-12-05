@@ -19,7 +19,7 @@ use mparameters_monomer
 use mmask
 use solventchains
 implicit none
-real*8 nchains, nchainstemp
+real*8 phisolvtemp
 real*8 eta
 real*8 temp
 integer*4 ier2
@@ -30,10 +30,11 @@ integer i,j, ix, iy, iz, ii, ax, ay, az
 integer im, ip
 integer jx, jy, jz, jj
 real*8 xpot(dimx, dimy, dimz, N_monomer)
+real*8 xh_tosend(dimx,dimy,dimz)
 ! Charge
 real*8 MV(3),MU(3),MW(3)
 real*8 MVV,MUU,MWW,MVU,MVW,MUW
-
+integer iii
 ! ELECTRO
 !real*8 psitemp
 !real*8 psivv,psiuu,psiww, psivu,psivw,psiuw
@@ -356,20 +357,20 @@ enddo
 
 
 xh = 0.0
+xh_tosend = 0.0
 qsv = 0.0
 sumprolnpro = 0.0
 rhosv = 0.0
 sumprogauche = 0.0
 
 
-!!!! Calculate number of chains in the system !!!!
-! kp = average volume fraction 
-nchains = kp*(delta**3)*float(dimx*dimy*dimz)/vsol/float(longsv)
-nchainstemp = 0.0
-
 do ix = 1, dimx
 do iy = 1, dimy
 do iz = 1, dimz ! loop over position COM of solvent molecule
+
+iii = ix+dimx*(iy-1)+dimx*dimy*(iz-1)     ! number of cell
+
+if (mod(iii,size).eq.rank) then ! each processor runs on different cells
 
 do i = 1, cuantassv ! loop over sv conformations
 prosv = dexp(-benergy*ngauchesv(i)) ! energy of gauche bonds
@@ -429,7 +430,6 @@ enddo ! j
    sumprogauche(ix,iy,iz) = sumprogauche(ix,iy,iz) + prosv*ngauchesv(i)
 
    fv = (1.0-volprot(ix,iy,iz))
-   nchainstemp = nchainstemp + fv*prosv
 
 !!!! Obtain xh from qsv
 do j=1,longsv ! calculate xhtemp
@@ -477,76 +477,20 @@ do j=1,longsv ! calculate xhtemp
               fv = (1.0-volprot(jx,jy,jz))
               fv2 = (1.0-volprot(ix,iy,iz))
 
-              xh(jx,jy,jz) = xh(jx,jy,jz) + prosv*fv2/fv*vsol
+              xh_tosend(jx,jy,jz) = xh_tosend(jx,jy,jz) + prosv*fv2/fv*vsol
             endif     
             endif     
             endif     
             
 enddo ! j
 
+enddo  ! i
+
+endif ! processor
+
 enddo ! ix
 enddo ! iy 
 enddo ! iz
-
-enddo  ! i
-
-!!!! Normalize rhosv to have nchains
-
-nchainstemp = nchainstemp*(delta**3)
-
-rhosv = qsv/nchainstemp*nchains
-
-!!!!! Normalize xh
-
-xh = xh/nchainstemp*nchains
-musolv = dlog(rhosv(1,1,1)*vsol/qsv(1,1,1)) ! see notes
-
-!! CHECK MUSOLV
-
-!do ix = 1, dimx
-!do iy = 1, dimy
-!do iz = 1, dimz
-
-!print*, musolv, dlog(rhosv(ix,iy,iz)*vsol/qsv(ix,iy,iz))
-
-!enddo
-!enddo
-!enddo
-!stop
-
-!! CHECK AVERAGE SOLV DENSITY
-
-!if(rank.eq.0)write(stdout,*)'Target kp', kp
-
-! FROM XH
-!temp = 0.0
-!do ix = 1,dimx
-!do iy = 1,dimy
-!do iz = 1,dimz
-!  fv = (1.0-volprot(ix,iy,iz))
-!  temp = temp + fv*xh(ix,iy,iz)
-!enddo
-!enddo
-!enddo
-!temp = temp/float(dimx*dimy*dimz) ! average xh 
-
-!if(rank.eq.0)write(stdout,*)'kp from xh', temp
-
-!! FROM RHOSV
-!temp = 0.0
-!do ix = 1,dimx
-!do iy = 1,dimy
-!do iz = 1,dimz
-!  fv = (1.0-volprot(ix,iy,iz))
-!  temp = temp + fv*rhosv(ix,iy,iz)
-!enddo
-!enddo
-!enddo
-!temp = temp*float(longsv)*vsol/float(dimx*dimy*dimz) ! average xh 
-
-!if(rank.eq.0)write(stdout,*)'kp from rhosv', temp
-
-!stop
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! CALCULATE POLYMER VOLUME FRACTION
@@ -598,23 +542,78 @@ sumgauche(ii) = sumgauche_tosend/q_tosend
 enddo ! jj
 
 !------------------ MPI ----------------------------------------------
-!1. Todos al jefe
-
 
 call MPI_Barrier(MPI_COMM_WORLD, err)
+call MPI_REDUCE(avpol_tosend, avpol, ncells*N_monomer, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+call MPI_REDUCE(xh_tosend, xh, ncells, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 
-! Jefe
-if (rank.eq.0) then
-! Junta avpol       
-  call MPI_REDUCE(avpol_tosend, avpol, ncells*N_monomer, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
-endif
 ! Subordinados
 if(rank.ne.0) then
-! Junta avpol       
-  call MPI_REDUCE(avpol_tosend, avpol, ncells*N_monomer, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err) 
-!!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+!!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... !!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
   goto 3333
 endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!! Normalize solvent !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+phisolvtemp = sum(xh)/float(dimx*dimy*dimz)
+
+!!!! Normalize rhosv to have nchains
+
+!rhosv = qsv/phisolvtemp*kp
+!musolv = dlog(rhosv(1,1,1)*vsol/qsv(1,1,1)) ! see notes
+
+!!!!! Normalize xh
+
+xh = xh/phisolvtemp*kp
+
+!! CHECK MUSOLV
+
+!do ix = 1, dimx
+!do iy = 1, dimy
+!do iz = 1, dimz
+
+!print*, musolv, dlog(rhosv(ix,iy,iz)*vsol/qsv(ix,iy,iz))
+
+!enddo
+!enddo
+!enddo
+!stop
+
+!! CHECK AVERAGE SOLV DENSITY
+
+!if(rank.eq.0)write(stdout,*)'Target kp', kp
+
+! FROM XH
+!temp = 0.0
+!do ix = 1,dimx
+!do iy = 1,dimy
+!do iz = 1,dimz
+!  fv = (1.0-volprot(ix,iy,iz))
+!  temp = temp + fv*xh(ix,iy,iz)
+!enddo
+!enddo
+!enddo
+!temp = temp/float(dimx*dimy*dimz) ! average xh 
+
+!if(rank.eq.0)write(stdout,*)'kp from xh', temp
+
+!! FROM RHOSV
+!temp = 0.0
+!do ix = 1,dimx
+!do iy = 1,dimy
+!do iz = 1,dimz
+!  fv = (1.0-volprot(ix,iy,iz))
+!  temp = temp + fv*rhosv(ix,iy,iz)
+!enddo
+!enddo
+!enddo
+!temp = temp*float(longsv)*vsol/float(dimx*dimy*dimz) ! average xh 
+
+!if(rank.eq.0)write(stdout,*)'kp from rhosv', temp
+
+!stop
+
 
 !!!!!!!!!!!!!!!!!!!!!!! FIN MPI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !----------------------------------------------------------------------------------------------

@@ -100,6 +100,9 @@ enddo
 !  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+seed = 845955360 ! All processors have the same seed for solvent conformations
+!print*,'Soy ', rank, 'mi seed es ', seed
+
 il=0
 
 do while (il.lt.cuantassv)
