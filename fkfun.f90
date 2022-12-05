@@ -557,22 +557,38 @@ endif
 
 !!!!!!!!!!!!!!!!!!!!!!! Normalize solvent !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-phisolvtemp = 0.0
-do ix = 1, dimx
-do iy = 1, dimy
-do iz = 1, dimz
-fv = (1.0-volprot(ix,iy,iz))
-phisolvtemp = phisolvtemp + xh(ix,iy,iz)*fv
-enddo
-enddo
-enddo
 
-phisolvtemp = phisolvtemp/float(dimx*dimy*dimz)
-musolv = dlog(kp/phisolvtemp*vsol) 
 
-!!!! Normalize xh
+if (flagmu.eq.0) then ! calculate using constant phi
 
-xh = xh/phisolvtemp*kp
+        phisolvtemp = 0.0
+        do ix = 1, dimx
+        do iy = 1, dimy
+        do iz = 1, dimz
+                fv = (1.0-volprot(ix,iy,iz))
+                phisolvtemp = phisolvtemp + xh(ix,iy,iz)*fv
+        enddo
+        enddo
+        enddo
+
+        phisolvtemp = phisolvtemp/float(dimx*dimy*dimz)
+        musolv = dlog(kp/phisolvtemp*vsol) 
+
+        !!!! Normalize xh
+
+        xh = xh/phisolvtemp*kp
+
+else if (flagmu.eq.1) then  ! calculate using constant expmu
+
+        musolv = kp
+        xh = xh * dexp(musolv)/vsol
+
+endif
+
+
+
+
+
 
 !!!! phisolv
 

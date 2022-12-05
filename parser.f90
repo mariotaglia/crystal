@@ -64,7 +64,7 @@ sigmar = 0.0 ! random sigma
 !dielP = ndr
 !csalt = ndr
 
-
+flagmu = 0 ! default, calculate fixed phi
 vscan = ndi
 scx = ndi
 scy = ndi
@@ -162,6 +162,10 @@ do while (ios == 0)
 
  case ('vtkflag')
    read(buffer, *, iostat=ios) vtkflag
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+ case ('flagmu')
+   read(buffer, *, iostat=ios) flagmu
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
 ! ELECTRO   

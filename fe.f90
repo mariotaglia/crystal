@@ -322,7 +322,7 @@ endif
 rhosv = qsv0*dexp(musolv)/vsol 
 
 !!!!!!!!!!!!!!!!!!! ONLY CALCULATE SOLVENT CONTRIBUTIONS IF KP != 0 !!!!!!!!!!!!!!!!
-if(kp.ne.0.0) then 
+if((kp.ne.0.0).or.(flagmu.eq.1)) then 
 
 ! 1. Mezcla solvente
 

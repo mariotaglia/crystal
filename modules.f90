@@ -40,6 +40,7 @@ integer  dimy
 integer  dimz 
 integer PBC(6)
 integer vtkflag
+integer flagmu
 
 ! ELECTRO
 !integer electroflag
