@@ -189,6 +189,7 @@ use MPI
 use kinsol
 use kaist
 use mparameters_monomer
+use pdb , only: pdbmu, pdbcom
 implicit none
 integer cccc
 character*20 filename
@@ -210,6 +211,10 @@ if(rank.eq.0) then ! solo el jefe escribe a disco....
 !  close(45)
 
 !!!!!!!!!!!!!!!!!!! Guarda archivos !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! vector mu
+if ((vtkflag.ge.1).and.(systemtype.eq.70))call savemuvect(pdbcom,pdbmu,cccc)
+
 ! Polimero, todo
 
   temp = 0.0

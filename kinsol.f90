@@ -164,8 +164,8 @@ endif
 
 call fkinsetvin('CONSTR_VEC', constr, ier) ! constraint vector
 ! CALL FKINSPTFQMR (MAXL, IER)
-call fkinspgmr(maxl, maxlrst, ier) !  Scale Preconditioned GMRES solution of linear system (???)
-!call fkinspbcg(maxl, ier) !  Scale Preconditioned BCG
+!call fkinspgmr(maxl, maxlrst, ier) !  Scale Preconditioned GMRES solution of linear system (???)
+call fkinspbcg(maxl, ier) !  Scale Preconditioned BCG
 
 if (ier .ne. 0) then
   write(stdout,*) 'call_kinsol: SUNDIALS_ERROR: FKINSPGMR returned IER = ', ier
@@ -173,7 +173,7 @@ if (ier .ne. 0) then
   call MPI_FINALIZE(ierr) ! finaliza MPI
   stop
 endif
-call fkinspilssetprec(1, ier) ! preconditiones
+!call fkinspilssetprec(1, ier) ! preconditiones
 
 do i = 1, neq ! scaling vector
   scale(i) = 1.0
