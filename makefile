@@ -10,10 +10,11 @@ endif
 HOST=$(shell hostname)
 $(info HOST is ${HOST})
 
+LFLAGS = -lm /usr/lib64/librt.so -L/projects/p31819/lib/lib -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial      -Wl,-rpath,/projects/p31819/lib/lib
+
 ifeq ($(HOST),spinetta)
 LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
 endif
-
 
 
 ifeq ($(HOST),skay)
@@ -81,8 +82,8 @@ endif
 GIT_VERSION := $(shell git describe --abbrev=6 --dirty --always --tags)
 GFLAGS=-cpp -D_VERSION=\"$(GIT_VERSION)\" $(MKLCOMMENTED)
 
-FF = mpif77 #${F90}
-VER = ~/bin/crystal
+FF = /software/mpi/openmpi-2.1.1-gcc-5.1.0/bin/mpif90 
+VER = /projects/p31819/bin/crystal
 
 all:	$(TARGET)
 

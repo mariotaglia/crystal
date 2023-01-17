@@ -17,6 +17,7 @@ real*4 singlepres
 real*8 x(3), v(3)
 integer, external :: PBCSYMI, PBCREFI
 
+
 !-----  coordenadas -------------------------
 ! Variables
 
@@ -65,7 +66,7 @@ close(45)
 
 ! Archivo paraview
 
-if(vtkflag.eq.1) then
+if(vtkflag.ge.1) then
 
       write(filename,'(A5, A1,I3.3, A4)')title,'.', counter, '.vtk'
       open (unit=45, file=filename)
@@ -119,5 +120,43 @@ if(vtkflag.eq.1) then
 endif
 return
 end
+
+
+subroutine savemuvect(com, mu, counter)
+
+use system
+use transform
+use s2d
+implicit none
+
+integer counter
+character*21 filename
+real*8 mu(3), com(3)
+
+write(filename,'(A6,I3.3, A4)')'mupro.', counter, '.vtk'
+open (unit=45, file=filename)
+write(45,'(A)')'# vtk DataFile Version 2.0'
+write(45,'(A)')'mupro'
+write(45,'(A)')'ASCII'
+write(45,'(A)')'DATASET UNSTRUCTURED_GRID '
+write(45,'(A, I8, A)')'POINTS 1 float'
+write(45, *) com(1),'   ',  com(2), '   ', com(3) ! Cartesian coordinates 
+write(45,'(A, I8)')'POINT_DATA ', 1
+write(45,'(A)') 'VECTORS vectors float'
+write(45,*)mu(1), mu(2), mu(3)
+close(45)
+end
+
+
+
+
+
+
+
+
+
+
+
+
 
 
