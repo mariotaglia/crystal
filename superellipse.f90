@@ -43,8 +43,8 @@ sumpolseg = 0.0
 ! Lower and greater X and Y size
 sizeXL = sizeX + delta 
 sizeXS = sizeX - delta 
-sizeXL = sizeY + delta
-sizeXS = sizeY - delta
+sizeYL = sizeY + delta
+sizeYS = sizeY - delta
 
 ! clear all
 voleps = 0.0
@@ -704,6 +704,7 @@ endif
 volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
 volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
 com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
 
 ! Third quadrant 2
 x(1) = sizeX*abs(cos(pi/2.0 - angle))**(2.0/pfactor)
@@ -773,6 +774,7 @@ endif
 volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
 volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
 com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
 
 ! Fourth quadrant 2
 x(1) = -sizeX*abs(cos(pi/2.0 - angle))**(2.0/pfactor)
@@ -842,6 +844,7 @@ endif
 volxx1(jx,jy,jz) =  volxx1(jx,jy,jz) + 1.0
 volx1(indexvolx(jx,jy,jz)) = volx1(indexvolx(jx,jy,jz)) + 1.0
 com1(indexvolx(jx,jy,jz),:) = com1(indexvolx(jx,jy,jz),:) + x(:)
+sumvolx1 = sumvolx1 + 1.0
 
 enddo ! maxangle condition
 enddo ! jjjz
