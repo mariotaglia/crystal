@@ -285,6 +285,7 @@ module pdb
 real*8 pdbcharge
 real*8 pdbcom(3)
 real*8 pdbmu(3)
+real*8 pdbmur
 
 integer naa
 real*8, allocatable :: volpdb(:,:,:)

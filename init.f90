@@ -69,6 +69,7 @@ if(rank.eq.0) then
        open(unit=315, file='PDBCHARGE.dat',  access='APPEND')
        open(unit=316, file='PDBCOM.dat',  access='APPEND')
        open(unit=317, file='PDBMU.dat',  access='APPEND')
+       open(unit=318, file='PDBMUR.dat',  access='APPEND')
 endif
 
 

@@ -38,6 +38,7 @@ real*8 pro0(cuantas, maxcpp)
 real*8 entropy(dimx,dimy,dimz)
 character*5  title
 real*8 xtotalsum(dimx,dimy,dimz)
+real*8 tempr
  
 ! MPI
 integer stat(MPI_STATUS_SIZE) 
@@ -491,6 +492,8 @@ if(systemtype.eq.70) then
       pdbcharge = 0.0
       pdbmu = 0.0
       F_pdb = 0.0
+      pdbmur = 0.0
+
 
       do i = 1, naa
 
@@ -499,6 +502,13 @@ if(systemtype.eq.70) then
       pdbcharge = pdbcharge + fdispdb(i)*float(zpdb(i))
 
       pdbmu(:) = pdbmu(:) + fdispdb(i)*float(zpdb(i))*(aapos(:,i)-pdbcom(:))
+
+
+      tempr = (aapos(1,i) - float(dimx)/2.0)**2
+      tempr = tempr + (aapos(2,i) - float(dimy)/2.0)**2
+      tempr = sqrt(tempr)
+
+      pdbmur = pdbmur + fdispdb(i)*float(zpdb(i))*tempr
 
       if(fdispdb(i).ne.0.0)F_pdb = F_pdb + fdispdb(i)*dlog(fdispdb(i))
       if(fdispdb(i).ne.1.0)F_pdb = F_pdb + (1.0-fdispdb(i))*dlog(1.0-fdispdb(i))
@@ -670,6 +680,10 @@ endif
 
          write(317,*)looped, pdbmu
          flush(317)
+
+         write(318,*)looped, pdbmur
+         flush(318)
+
 
          endif
  
