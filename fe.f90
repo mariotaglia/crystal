@@ -566,7 +566,7 @@ endif ! solvent
       write(stdout,*) 'Free_Energy_Calc: Free energy(1) = ', Free_energy
       endif
 
-! Calculation of Omega - muSolv*NSolv
+! Calculation of Omega + muSolv*NSolv
 
 Free_Energy_minusSV = Free_Energy
 
