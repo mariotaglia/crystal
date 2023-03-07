@@ -33,7 +33,7 @@ real*8 Free_energy2, sumpi, sumrho, sumel, sumdiel, suma, mupol, sumHS
 real*8 temp
 real*8 F_Mix_OHmin, F_gauche, F_Conf, F_Eq, F_vdW, F_eps, F_electro, F_HS
 real*8 F_conf_sv, F_gauche_sv
-real*8 Free_Energy_minusSv
+real*8 Free_Energy_plusSv
 real*8 pro0(cuantas, maxcpp)
 real*8 entropy(dimx,dimy,dimz)
 character*5  title
@@ -568,14 +568,14 @@ endif ! solvent
 
 ! Calculation of Omega + muSolv*NSolv
 
-Free_Energy_minusSV = Free_Energy
+Free_Energy_plusSV = Free_Energy
 
 do ix = 1, dimx
 do iy = 1, dimy
 do iz = 1, dimz
 
 fv=(1.0-volprot(ix,iy,iz))
-Free_Energy_minusSV = Free_Energy_minusSV + musolv*rhosv(ix,iy,iz)*fv
+Free_Energy_plusSV = Free_Energy_plusSV + 6*musolv*rhosv(ix,iy,iz)*fv*delta**3
 
 enddo
 enddo
@@ -696,7 +696,7 @@ enddo
          write(311,*)looped, F_HS
          write(410,*)looped, F_eps
 
-         write(420,*)looped, Free_Energy_minusSV
+         write(420,*)looped, Free_Energy_plusSV
  
          write(312,*)looped, Free_energy2
 
