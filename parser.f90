@@ -2,7 +2,6 @@
 subroutine readinput
 use molecules
 use const
-use bulk
 use MPI
 use ellipsoid
 use chainsdat

@@ -5,7 +5,6 @@ use chainsdat
 use molecules
 use const
 use results
-use bulk
 use kai
 use MPI
 use fields_fkfun
@@ -696,6 +695,7 @@ do im = 1, N_monomer
     f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) + avpol(ix,iy,iz,im)
 enddo ! im
 
+
 enddo
 enddo
 enddo
@@ -714,8 +714,8 @@ do ip = 1, N_poorsol
     f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+ip*ncells) = f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+ip*ncells) - avpol(ix,iy,iz,im)
    endif
   enddo ! im
-enddo ! ip
 
+enddo ! ip
 enddo ! ix
 enddo ! iy
 enddo ! iz

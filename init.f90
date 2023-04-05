@@ -42,7 +42,6 @@ end subroutine
 subroutine initall
 use molecules
 use const
-use bulk
 use MPI
 use ellipsoid
 use chainsdat
@@ -180,7 +179,6 @@ use kinsol
 use kaist
 use mparameters_monomer
 use channel
-use bulk
 implicit none
 integer cccc
 character*20 filename

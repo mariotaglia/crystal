@@ -7,7 +7,6 @@ use chainsdat
 use molecules
 use results
 use kinsol
-use bulk
 use MPI
 use ellipsoid
 use ematrix

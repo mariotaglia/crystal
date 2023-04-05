@@ -12,7 +12,6 @@ use fields_fkfun
 use MPI
 use molecules
 use kai
-use bulk
 use results
 use ematrix
 use montecarlo
@@ -575,7 +574,7 @@ do iy = 1, dimy
 do iz = 1, dimz
 
 fv=(1.0-volprot(ix,iy,iz))
-Free_Energy_plusSV = Free_Energy_plusSV + 6*musolv*rhosv(ix,iy,iz)*fv*delta**3
+Free_Energy_plusSV = Free_Energy_plusSV + longsv*musolv*rhosv(ix,iy,iz)*fv*delta**3
 
 enddo
 enddo
