@@ -20,6 +20,7 @@ use transform
 use kaist
 use conformations
 use mparameters_monomer
+use solventchains
 implicit none
 
 integer looped
