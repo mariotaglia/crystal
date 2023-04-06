@@ -297,7 +297,7 @@ endif
 !  write(310,*)'kai =          ', Xu
   write(310,*)'musolv =    ', musolv
   write(310,*)'phisolv =    ', phisolv
-  write(310,*)'phivol =       ', Kp
+  write(310,*)'Nsolv =       ', phisolv*(dimx*dimy*dimz)*(delta**3)
   write(310,*)'GIT version = ', _VERSION
 
   sumpol = 0.0

@@ -18,7 +18,7 @@ use mparameters_monomer
 use mmask
 use solventchains
 implicit none
-real*8 phisolvtemp
+real*8 phisolvtemp, Nsolvtemp
 real*8 eta
 real*8 temp
 integer*4 ier2
@@ -581,6 +581,26 @@ else if (flagmu.eq.1) then  ! calculate using constant expmu
 
         musolv = kp
         xh = xh * dexp(musolv)/vsol
+
+else if (flagmu.eq.2) then ! calculate using constant Nsolv
+
+        Nsolvtemp = 0.0
+        do ix = 1, dimx
+        do iy = 1, dimy
+        do iz = 1, dimz
+                fv = (1.0-volprot(ix,iy,iz))
+                Nsolvtemp = Nsolvtemp + xh(ix,iy,iz)*fv
+        enddo
+        enddo
+        enddo
+
+        Nsolvtemp = Nsolvtemp*(delta**3)
+
+        musolv = dlog(kp/Nsolvtemp*vsol) 
+
+        !!!! Normalize xh
+
+        xh = xh/Nsolvtemp*kp
 
 endif
 
