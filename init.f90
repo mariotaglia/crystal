@@ -68,9 +68,10 @@ if(rank.eq.0) then
 !       open(unit=311, file='F_electro.dat',  access='APPEND')
 ! 
 
-open(unit=301, file='F_tot.dat', access='APPEND')
+       open(unit=301, file='F_tot_gcanon.dat', access='APPEND')
+
        open(unit=302, file='F_mixs.dat',  access='APPEND')
-      open(unit=307, file='F_conf.dat',  access='APPEND')
+       open(unit=307, file='F_conf.dat',  access='APPEND')
        open(unit=3071, file='F_gauche.dat',  access='APPEND')
        open(unit=309, file='F_vdW.dat',  access='APPEND')
        open(unit=311, file='F_HS.dat',  access='APPEND')
@@ -79,7 +80,7 @@ open(unit=301, file='F_tot.dat', access='APPEND')
        open(unit=314, file='F_mixpos2.dat',  access='APPEND')
        open(unit=315, file='F_gauche_sv.dat',  access='APPEND')
        open(unit=316, file='F_conf_sv.dat',  access='APPEND')
-       open(unit=420, file='Free_Energy_plusMuNsv.dat',  access='APPEND')
+       open(unit=420, file='F_tot_canon.dat',  access='APPEND')
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!

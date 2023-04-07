@@ -697,6 +697,7 @@ enddo
          write(410,*)looped, F_eps
 
          write(420,*)looped, Free_Energy_plusSV
+         flush(420)
  
          write(312,*)looped, Free_energy2
 
