@@ -139,7 +139,7 @@ kp = 1.0d10+kps(1)
 do i = 1, nkp
  do while (kp.ne.kps(i))
   kp = kps(i)
-  if(rank.eq.0)write(stdout,*)'Switch to kp = ', kp
+  if(rank.eq.0)write(stdout,*)'Switch to kp = ', kp, ' st =', st
   flagcrash = 1
   do while(flagcrash.eq.1)
    flagcrash = 0
@@ -173,7 +173,7 @@ st = 1.0d10+sts(1)
 do i = 1, nst
  do while (st.ne.sts(i))
   st = sts(i)
-  if(rank.eq.0)write(stdout,*)'Switch to st = ', st
+  if(rank.eq.0)write(stdout,*)'Switch to st = ', st, ' kp =', kp
   flagcrash = 1
   do while(flagcrash.eq.1)
    flagcrash = 0

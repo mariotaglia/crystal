@@ -332,7 +332,7 @@ do while (ios == 0)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
    do i = 1, nkp
-   kps(i) = float(i-1)/float(nkp-1)*(kpfin-kpini) + kpini
+   kps(i) = float(i-1)/float(nkp)*(kpfin-kpini) + kpini
    enddo
 
  case ('nst')

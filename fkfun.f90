@@ -589,7 +589,7 @@ else if (flagmu.eq.2) then ! calculate using constant Nsolv
         do iy = 1, dimy
         do iz = 1, dimz
                 fv = (1.0-volprot(ix,iy,iz))
-                Nsolvtemp = Nsolvtemp + xh(ix,iy,iz)*fv
+                Nsolvtemp = Nsolvtemp + xh(ix,iy,iz)*fv/vsol
         enddo
         enddo
         enddo
