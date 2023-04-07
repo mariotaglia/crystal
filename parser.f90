@@ -30,6 +30,7 @@ character(len=50) :: filename = 'DEFINITIONS.txt'
 character basura
 integer ndi
 real*8 ndr
+real*8 kpini, kpfin
 
 ! not defined variables, change if any variable can take the value
 
@@ -327,11 +328,11 @@ do while (ios == 0)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('nkp')
-   read(buffer, *, iostat=ios) nkp
+   read(buffer, *, iostat=ios) nkp, kpini, kpfin
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
    do i = 1, nkp
-   read(fh,*)kps(i)
+   kps(i) = float(i-1)/float(nkp-1)*(kpfin-kpini) + kpini
    enddo
 
  case ('nst')
