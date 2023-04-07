@@ -145,7 +145,7 @@ real*8 hring
 real*8 oval
 integer nkp
 real*8 kp
-real*8 kps(100)
+real*8 kps(1000)
 
 integer nst
 real*8 st
