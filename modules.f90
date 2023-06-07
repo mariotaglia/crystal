@@ -165,7 +165,6 @@ real*8, allocatable :: xtotal(:, :, :, :) ! xtotal para poor solvent
 ! ELECTRO
 !real*8, allocatable :: psi(:, :, :) 
 real*8 musolv ! solvent chem pot
-real*8 phisolv ! solvent volume fraction
 real*8, allocatable :: q(:)
 real*8, allocatable :: qsv(:,:,:)
 real*8, allocatable :: sumprolnpro(:,:,:) ! for fe calc
@@ -176,6 +175,7 @@ real*8 sumgauchesv
 real*8, allocatable :: pro(:,:)
 real*8 prosv 
 real*8, allocatable :: xh(:, :, :)
+real*8, allocatable :: phisolv(:, :, :) ! solvent density
 real*8 shift
 endmodule
 

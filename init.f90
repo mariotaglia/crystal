@@ -300,6 +300,11 @@ endif
   write(310,*)'phisolv =    ', phisolv
   write(310,*)'Nsolv =       ', phisolv*(dimx*dimy*dimz)*(delta**3)/vsol
   write(310,*)'GIT version = ', _VERSION
+  write(310,*)'phisolv Oh =', xh(dimx/2+1,1,1)
+  write(310,*)'phipol Oh =', avpol(dimx/2+1,1,1,1)
+  write(310,*)'phisolv Th =', xh(dimx/2+1, 1, dimz/4+1)
+  write(310,*)'phipol Th =', avpol(dimx/2+1, 1, dimz/4+1,1)
+ 
 
   sumpol = 0.0
   do ix = 1, dimx

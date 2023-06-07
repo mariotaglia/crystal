@@ -60,7 +60,6 @@ real*8 psiv(3)
 integer, external :: PBCSYMI, PBCREFI
 
 ! Solvent data for F_conf
-real*8 qsv0(dimx,dimy,dimz)
 real*8 sumprolnpro0(dimx,dimy,dimz)
 real*8 sumprogauche0(dimx,dimy,dimz)
 
@@ -102,7 +101,6 @@ if(rank.ne.0) then
 
 !!!!! Solvent
 
-      call MPI_REDUCE(qsv, qsv0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
       call MPI_REDUCE(sumprolnpro, sumprolnpro0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
       call MPI_REDUCE(sumprogauche, sumprogauche0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 
@@ -310,17 +308,15 @@ endif
 ! Solvent (processor #0)
 
 
-qsv0 = 0.0
 sumprolnpro0 = 0.0
 sumgauche0 = 0.0
 
 if (rank.eq.0) then 
-call MPI_REDUCE(qsv, qsv0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 call MPI_REDUCE(sumprolnpro, sumprolnpro0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 call MPI_REDUCE(sumprogauche, sumprogauche0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 endif
 
-rhosv = qsv0*dexp(musolv)/vsol 
+rhosv = qsv*dexp(musolv)/vsol 
 
 !!!!!!!!!!!!!!!!!!! ONLY CALCULATE SOLVENT CONTRIBUTIONS IF KP != 0 !!!!!!!!!!!!!!!!
 if((kp.ne.0.0).or.(flagmu.eq.1)) then 
@@ -354,7 +350,7 @@ do iy = 1, dimy
 do iz = 1, dimz
 
 fv=(1.0-volprot(ix,iy,iz))
-F_conf_sv = F_conf_sv + (sumprolnpro0(ix,iy,iz)/qsv0(ix,iy,iz) - dlog(qsv0(ix,iy,iz)))*rhosv(ix,iy,iz)*fv
+F_conf_sv = F_conf_sv + (sumprolnpro0(ix,iy,iz)/qsv(ix,iy,iz) - dlog(qsv(ix,iy,iz)))*rhosv(ix,iy,iz)*fv
 
 
 enddo
@@ -375,7 +371,7 @@ do iy = 1, dimy
 do iz = 1, dimz
 
 fv=(1.0-volprot(ix,iy,iz))
-F_gauche_sv = F_gauche_sv + sumprogauche0(ix,iy,iz)/qsv0(ix,iy,iz)*rhosv(ix,iy,iz)*fv*benergy
+F_gauche_sv = F_gauche_sv + sumprogauche0(ix,iy,iz)/qsv(ix,iy,iz)*rhosv(ix,iy,iz)*fv*benergy
 
 enddo
 enddo

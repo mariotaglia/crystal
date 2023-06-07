@@ -79,9 +79,9 @@ if(vtkflag.eq.1) then
         do iy = 0, scy*dimy
           do iz = 0, scz*dimz
 
-          v(1) = ix*delta ! transformed coordinates
-          v(2) = iy*delta
-          v(3) = iz*delta
+          v(1) = (ix-float(dimx)/2.)*delta ! transformed coordinates
+          v(2) = (iy-float(dimy)/2.)*delta
+          v(3) = (iz-float(dimz)/2.)*delta
 
           x = MATMUL(IMAT,v)
  

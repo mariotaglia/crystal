@@ -18,9 +18,11 @@ use mparameters_monomer
 use mmask
 use solventchains
 implicit none
-real*8 phisolvtemp, Nsolvtemp
+real*8 intq, intxh
+real*8 Nsolvtemp
 real*8 eta
 real*8 temp
+real*8 qtemp
 integer*4 ier2
 integer ncells
 real*8 x(*),f(*)
@@ -30,6 +32,7 @@ integer im, ip
 integer jx, jy, jz, jj
 real*8 xpot(dimx, dimy, dimz, N_monomer)
 real*8 xh_tosend(dimx,dimy,dimz)
+real*8 qsv_tosend(dimx,dimy,dimz)
 ! Charge
 real*8 MV(3),MU(3),MW(3)
 real*8 MVV,MUU,MWW,MVU,MVW,MUW
@@ -358,6 +361,7 @@ enddo
 xh = 0.0
 xh_tosend = 0.0
 qsv = 0.0
+qsv_tosend = 0.0
 sumprolnpro = 0.0
 rhosv = 0.0
 sumprogauche = 0.0
@@ -369,7 +373,9 @@ do iz = 1, dimz ! loop over position COM of solvent molecule
 
 iii = ix+dimx*(iy-1)+dimx*dimy*(iz-1)     ! number of cell
 
-if (mod(iii,size).eq.rank) then ! each processor runs on different cells
+if (mod(iii-1,size).eq.rank) then ! each processor runs on different cells
+! rank 0 takes cell 1,1,1
+
 
 do i = 1, cuantassv ! loop over sv conformations
 prosv = dexp(-benergy*ngauchesv(i)) ! energy of gauche bonds
@@ -424,13 +430,12 @@ do j = 1, longsv ! loop over segment
             
 enddo ! j
 
-   qsv(ix,iy,iz) = qsv(ix,iy,iz) + prosv
+   qsv_tosend(ix,iy,iz) = qsv_tosend(ix,iy,iz) + prosv
    sumprolnpro(ix,iy,iz) = sumprolnpro(ix,iy,iz) + prosv*dlog(prosv)
    sumprogauche(ix,iy,iz) = sumprogauche(ix,iy,iz) + prosv*ngauchesv(i)
 
    fv = (1.0-volprot(ix,iy,iz))
 
-!!!! Obtain xh from qsv
 do j=1,longsv ! calculate xhtemp
 
             jx = ix+pxsv(i,j)
@@ -546,6 +551,7 @@ enddo ! jj
 call MPI_Barrier(MPI_COMM_WORLD, err)
 call MPI_REDUCE(avpol_tosend, avpol, ncells*N_monomer, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 call MPI_REDUCE(xh_tosend, xh, ncells, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+call MPI_REDUCE(qsv_tosend, qsv, ncells, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 
 ! Subordinados
 if(rank.ne.0) then
@@ -556,58 +562,52 @@ endif
 
 !!!!!!!!!!!!!!!!!!!!!!! Normalize solvent !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+        intxh = 0.0
+        do ix = 1, dimx
+        do iy = 1, dimy
+        do iz = 1, dimz
+                fv = (1.0-volprot(ix,iy,iz))
+                intxh  = intxh + xh(ix,iy,iz)*fv*delta**3
+        enddo
+        enddo
+        enddo
+! intx is the integral of xh before normalization
+
+        intq = 0.0
+        do ix = 1, dimx
+        do iy = 1, dimy
+        do iz = 1, dimz
+                fv = (1.0-volprot(ix,iy,iz))
+                intq = intq + qsv(ix,iy,iz)*fv*delta**3
+        enddo
+        enddo
+        enddo
+! intq = integral of qsv
+
 
 
 if (flagmu.eq.0) then ! calculate using constant phi
 
-        phisolvtemp = 0.0
-        do ix = 1, dimx
-        do iy = 1, dimy
-        do iz = 1, dimz
-                fv = (1.0-volprot(ix,iy,iz))
-                phisolvtemp = phisolvtemp + xh(ix,iy,iz)*fv
-        enddo
-        enddo
-        enddo
 
-        phisolvtemp = phisolvtemp/float(dimx*dimy*dimz)
-        musolv = dlog(kp/phisolvtemp*vsol) 
-
-        !!!! Normalize xh
-
-        xh = xh/phisolvtemp*kp
+!!!! Normalize xh
+        xh = xh/intxh*kp*float(dimx*dimy*dimz)*delta**3
+! musolv, see notes
+        musolv = dlog(kp*float(dimx*dimy*dimz*delta**3)/float(longsv)/intq) 
 
 else if (flagmu.eq.1) then  ! calculate using constant expmu
 
         musolv = kp
-        xh = xh * dexp(musolv)/vsol
+! xh, see notes
+        xh = xh*exp(musolv)*qint*float(longsv)/intxh
 
 else if (flagmu.eq.2) then ! calculate using constant Nsolv
 
-        Nsolvtemp = 0.0
-        do ix = 1, dimx
-        do iy = 1, dimy
-        do iz = 1, dimz
-                fv = (1.0-volprot(ix,iy,iz))
-                Nsolvtemp = Nsolvtemp + xh(ix,iy,iz)*fv/vsol
-        enddo
-        enddo
-        enddo
-
-        Nsolvtemp = Nsolvtemp*(delta**3)
-
-        musolv = dlog(kp/Nsolvtemp*vsol) 
+        musolv = dlog(kp*vsol/qint) 
 
         !!!! Normalize xh
-
-        xh = xh/Nsolvtemp*kp
+        xh = xh*exp(musolv)*qint*float(longsv)/intxh
 
 endif
-
-
-
-
-
 
 !!!! phisolv
 

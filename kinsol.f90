@@ -45,13 +45,13 @@ common /psize/ neq
 ncells =  dimx*dimy*dimz
 
 do i = 1, ncells
-   pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+   pp(i) = -1.0 / exp(-udata(i))
 ! pp(i) = 1
 enddo
 
 do i = ncells+1, (N_poorsol+1)*ncells
 !   pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
-pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+pp(i) = 1.0 !0.1 / (1.0+exp(1.0-udata(i)))
 enddo
 
 ! ELECTRO
