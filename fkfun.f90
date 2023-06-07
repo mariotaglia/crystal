@@ -592,20 +592,20 @@ if (flagmu.eq.0) then ! calculate using constant phi
 !!!! Normalize xh
         xh = xh/intxh*kp*float(dimx*dimy*dimz)*delta**3
 ! musolv, see notes
-        musolv = dlog(kp*float(dimx*dimy*dimz*delta**3)/float(longsv)/intq) 
+        musolv = dlog(kp*float(dimx*dimy*dimz)*(delta**3)/float(longsv)/intq) 
 
 else if (flagmu.eq.1) then  ! calculate using constant expmu
 
         musolv = kp
 ! xh, see notes
-        xh = xh*exp(musolv)*qint*float(longsv)/intxh
+        xh = xh*exp(musolv)*intq*float(longsv)/intxh
 
 else if (flagmu.eq.2) then ! calculate using constant Nsolv
 
-        musolv = dlog(kp*vsol/qint) 
+        musolv = dlog(kp*vsol/intq) 
 
         !!!! Normalize xh
-        xh = xh*exp(musolv)*qint*float(longsv)/intxh
+        xh = xh*exp(musolv)*intq*float(longsv)/intxh
 
 endif
 
