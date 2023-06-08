@@ -175,7 +175,7 @@ real*8 sumgauchesv
 real*8, allocatable :: pro(:,:)
 real*8 prosv 
 real*8, allocatable :: xh(:, :, :)
-real*8, allocatable :: phisolv(:, :, :) ! solvent density
+real*8 phisolv ! solvent density
 real*8 shift
 endmodule
 
