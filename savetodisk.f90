@@ -65,6 +65,7 @@ close(45)
 
 ! Archivo paraview
 
+
 if(vtkflag.eq.1) then
 
       write(filename,'(A5, A1,I3.3, A4)')title,'.', counter, '.vtk'

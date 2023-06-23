@@ -180,6 +180,7 @@ use kinsol
 use kaist
 use mparameters_monomer
 use channel
+use solventchains
 implicit none
 integer cccc
 character*20 filename
@@ -298,7 +299,7 @@ endif
 !  write(310,*)'kai =          ', Xu
   write(310,*)'musolv =    ', musolv
   write(310,*)'phisolv =    ', phisolv
-  write(310,*)'Nsolv =       ', phisolv*(dimx*dimy*dimz)*(delta**3)/vsol
+  write(310,*)'Nsolv =       ', phisolv*(dimx*dimy*dimz)*(delta**3)/vsol/longsv
   write(310,*)'GIT version = ', _VERSION
   write(310,*)'phisolv Oh =', xh(dimx/2+1,1,1)
   write(310,*)'phipol Oh =', avpol(dimx/2+1,1,1,1)
