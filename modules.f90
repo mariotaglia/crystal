@@ -110,6 +110,7 @@ integer, ALLOCATABLE :: cpp(:)
 integer, ALLOCATABLE :: cppini(:)
 integer maxcpp
 real*8 lseg
+real*8 lsegkai
 integer readchains
 integer ing ! number of gauches in current chain
 endmodule

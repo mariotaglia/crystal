@@ -44,7 +44,7 @@ volume = dfloat(MCsteps)**3
 
 !if(rank.eq.0)print*, 'kais: CORREGIR MCSTEPS!!!!'
 
-l = lseg 
+l = lsegkai 
 
 do jx = 1, MCsteps
 do jy = 1, MCsteps

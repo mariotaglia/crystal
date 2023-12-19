@@ -84,6 +84,7 @@ randominput = 0
 epstype = 0
 cutoff = ndr
 lseg = ndr
+lsegkai = ndr
 nst = ndi
 delta = ndr
 dx = ndr
@@ -280,9 +281,12 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) cuantassv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
-
  case ('lseg')
    read(buffer, *, iostat=ios) lseg
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+ case ('lsegkai')
+   read(buffer, *, iostat=ios) lsegkai
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
 ! ELECTRO
@@ -671,7 +675,8 @@ if(dz.eq.ndr)call stopundef('dz')
 ! ELECTRO
 !if(dielS.eq.ndr)call stopundef('dielS')
 !if(dielP.eq.ndr)call stopundef('dielP')
-!if(lseg.eq.ndr)call stopundef('lseg')
+if(lseg.eq.ndr)call stopundef('lseg')
+if(lsegkai.eq.ndr)lsegkai=lseg
 !if(csalt.eq.ndr)call stopundef('csalt')
 !if(pHbulk.eq.ndr)call stopundef('pHbulk')
 
