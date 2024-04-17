@@ -5,7 +5,7 @@ use system
 implicit none
 integer i
 integer ix,iy,iz
-
+integer NN
 !aaID = 0.0 ! numero de aminoacido en ix,iy,iz
 
 ! read aa from disk
@@ -36,13 +36,18 @@ read(3333,*)aapos(1,i),aapos(2,i),aapos(3,i),aal(i),aan(i)
 enddo
 
 call assign_aa
+if (systemtype.eq.90) NN = 1
+if (systemtype.eq.80) NN = 2
 
 ! translate  
 do i = 1, naa
-aapos(1,i) = aapos(1,i) + Rell(1,1) ! translate
-aapos(2,i) = aapos(2,i) + Rell(2,1)
-aapos(3,i) = aapos(3,i) + Rell(3,1)
+aapos(1,i) = aapos(1,i) + Rell(1,NN) ! translate
+aapos(2,i) = aapos(2,i) + Rell(2,NN)
+aapos(3,i) = aapos(3,i) + Rell(3,NN)
 enddo
+
+write(*,*)'Prot pos', Rell(1,NN), Rell(2,NN), Rell(3,NN)
+
 
 ! print real coordinates to file
 open(file='real_coords.txt',unit=1111)

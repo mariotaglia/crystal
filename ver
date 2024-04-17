@@ -1,0 +1,300 @@
+diff --git a/fkfun.f90 b/fkfun.f90
+index 7052bbe..fc716c8 100644
+--- a/fkfun.f90
++++ b/fkfun.f90
+@@ -213,152 +213,13 @@ enddo
+  
+ call dielectfcn(xtotalsum,volprot,epsfcn,Depsfcn)
+ 
+-!------------------------------------------------------------------------
+-! PDFs polimero
+-!------------------------------------------------------------------------
+-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-!
+-! PARALELO: Cada procesador trabaja sobre una cadena...
+-!
+-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-
+-! Calcula xpot
+-
+-sttemp = st/(vpol*vsol)
+-
+-do im = 1, N_monomer ! loop over different monomer types
+-
+-do ix=1,dimx
+- do iy=1,dimy
+-   do iz=1,dimz
+-
+-     if(hguess .eq. 0) then
+-
+-      hd = sqrt(float((2*ix-dimx)**2+(2*iy-dimy)**2))/2.0*delta
+-      hd = hd**2+(oval*float(2*iz-dimz)/2.0*delta)**2
+-      hfactor = dexp(-(kp**2)*hd)
+-
+-     elseif(hguess .eq. 1) then
+-
+-      hd = sqrt(float((2*ix-dimx)**2+(2*iy-dimy)**2))/2.0*delta-hring
+-      hd = hd**2+(oval*float(2*iz-dimz)/2.0*delta)**2
+-      hfactor = dexp(-(kp**2)*hd)
+-
+-     else
+-
+-      do i=1,hguess
+-       hds(i) = (float(2*ix-dimx)-2*cos(i*2*pi/hguess)*hring/delta)**2+(float(2*iy-dimy)-2*sin(i*2*pi/hguess)*hring/delta)**2
+-       hds(i) = hds(i)/4.0*(delta**2)+(oval*float(2*iz-dimz)/2.0*delta)**2
+-      end do
+-      hd = minval(hds, mask = hds .gt.0)
+-      hfactor = dexp(-(kp**2)*hd)
+-
+-     end if
+-!xpot=exp(-Uj(rj)) para P(alpha)
+-
+-     fv = (1.0 - volprot(ix,iy,iz)) !fraccion de volumen de la celda que es sc volprot->fraccion pared
+-     xpot(ix, iy, iz, im) = xh(ix,iy,iz)**vpol ! im:tipo de segmento, término de presion osmotica
+-     xpot(ix, iy, iz, im) = xpot(ix,iy,iz, im)*dexp(voleps(ix,iy,iz))  !termino de interaccion con sup de la particula
+-
+- ! Electrostatics
+-
+-     if(zpol(im).ne.0.0) then
+-         xpot(ix,iy,iz,im) =  xpot(ix,iy,iz,im)/fdis(ix,iy,iz,im)*dexp(-psi(ix,iy,iz)*zpol(im))  !fdis: por eq ac. base...  
+-     endif
+-  
+- ! Dielectrics
+-
+-     gradpsi2 = (psi(ix+1,iy,iz)-psi(ix,iy,iz))**2+(psi(ix,iy+1,iz)-psi(ix,iy,iz))**2+(psi(ix,iy,iz+1)-psi(ix,iy,iz))**2 
+-
+-!     gradpsi2 = (psi(ix+1,iy,iz)-psi(ix-1,iy,iz))**2+(psi(ix,iy+1,iz)-psi(ix,iy-1,iz))**2+(psi(ix,iy,iz+1)-psi(ix,iy,iz-1))**2 
+-!     xpot(ix, iy, iz) = xpot(ix,iy,iz)*exp(-Depsfcn(ix,iy,iz)*(gradpsi2)*constqE)
+-
+-     xpot(ix,iy,iz,im) = xpot(ix,iy,iz,im)*exp(Depsfcn(ix,iy,iz)*(gradpsi2)/constq/2.0*vpol/fv)
+-
+- ! Poor solvent depende de la grilla donde esta y de sus vecinos
+-
+-     if(hydroph(im).ne.0) then
+-
+-     protemp=0.0
+-
+-     do ax = -Xulimit,Xulimit 
+-      do ay = -Xulimit,Xulimit
+-       do az = -Xulimit,Xulimit
+-
+-            jx = ix+ax
+-            jy = iy+ay
+-            jz = iz+az
+-
+-            if(jx.lt.1) then
+-            if(PBC(1).eq.1)jx = PBCSYMI(jx,dimx)
+-            if(PBC(1).eq.3)jx = PBCREFI(jx,dimx)
+-            endif
+-
+-            if(jx.gt.dimx) then
+-            if(PBC(2).eq.1)jx = PBCSYMI(jx,dimx)
+-            if(PBC(2).eq.3)jx = PBCREFI(jx,dimx)
+-            endif
+-
+-            if(jy.lt.1) then
+-            if(PBC(3).eq.1)jy = PBCSYMI(jy,dimy)
+-            if(PBC(3).eq.3)jy = PBCREFI(jy,dimy)
+-            endif
+-
+-            if(jy.gt.dimy) then
+-            if(PBC(4).eq.1)jy = PBCSYMI(jy,dimy)
+-            if(PBC(4).eq.3)jy = PBCREFI(jy,dimy)
+-            endif
+-
+-
+-            if(jz.lt.1) then
+-            if(PBC(5).eq.1)jz = PBCSYMI(jz,dimz)
+-            if(PBC(5).eq.3)jz = PBCREFI(jz,dimz)
+-            endif
+-
+-            if(jz.gt.dimz) then
+-            if(PBC(6).eq.1)jz = PBCSYMI(jz,dimz)
+-            if(PBC(6).eq.3)jz = PBCREFI(jz,dimz)
+-            endif
+-
+-
+-            if((jx.ge.1).and.(jx.le.dimx)) then
+-            if((jy.ge.1).and.(jy.le.dimy)) then
+-            if((jz.ge.1).and.(jz.le.dimz)) then
+-                fv = (1.0-volprot(jx,jy,jz))
+-
+-               do ip = 1, N_poorsol
+-               protemp=protemp + hfactor*Xu(ax,ay,az)*st_matrix(hydroph(im),ip)*sttemp*xtotal(jx,jy,jz,ip)*fv
+-               enddo ! ip
+-
+-            endif
+-            endif
+-            endif
+-
+-       enddo
+-      enddo
+-     enddo
+-
+-     xpot(ix,iy,iz,im) = xpot(ix,iy,iz,im)*dexp(protemp)
+-
+-     endif ! hydrph
+-
+-   enddo ! ix
+-  enddo ! iy
+-enddo !iz
+-
+-enddo ! N_monomer
+-
+-!!!!!!!!!!!!!!!!!!!!!! Calculate pro from xpot !!!!!!!!!!!!!
+-call calcavpol(xpot)
+-!!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... 
+-if(rank.ne.0)goto 3333
+-!!!!!!!!!!!!!!!!!!!!!!! FIN MPI !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-
+-
+ !----------------------------------------------------------------------------------------------
+ !   Construye Ecuaciones a resolver 
+ !----------------------------------------------------------------------------------------------
+ 
++
++avpol = 0.0
++
+ ! Qtot
+ 
+ 
+diff --git a/init.f90 b/init.f90
+index 979dead..f9a20bf 100755
+--- a/init.f90
++++ b/init.f90
+@@ -189,6 +189,7 @@ use MPI
+ use kinsol
+ use kaist
+ use mparameters_monomer
++use pdb , only: pdbmu, pdbcom
+ implicit none
+ integer cccc
+ character*20 filename
+@@ -210,6 +211,10 @@ if(rank.eq.0) then ! solo el jefe escribe a disco....
+ !  close(45)
+ 
+ !!!!!!!!!!!!!!!!!!! Guarda archivos !!!!!!!!!!!!!!!!!!!!!!!!!!!!
++
++! vector mu
++if ((vtkflag.ge.1).and.(systemtype.eq.70))call savemuvect(pdbcom,pdbmu,cccc)
++
+ ! Polimero, todo
+ 
+   temp = 0.0
+diff --git a/kinsol.f90 b/kinsol.f90
+index 2032487..2e22f0d 100644
+--- a/kinsol.f90
++++ b/kinsol.f90
+@@ -164,8 +164,8 @@ endif
+ 
+ call fkinsetvin('CONSTR_VEC', constr, ier) ! constraint vector
+ ! CALL FKINSPTFQMR (MAXL, IER)
+-call fkinspgmr(maxl, maxlrst, ier) !  Scale Preconditioned GMRES solution of linear system (???)
+-!call fkinspbcg(maxl, ier) !  Scale Preconditioned BCG
++!call fkinspgmr(maxl, maxlrst, ier) !  Scale Preconditioned GMRES solution of linear system (???)
++call fkinspbcg(maxl, ier) !  Scale Preconditioned BCG
+ 
+ if (ier .ne. 0) then
+   write(stdout,*) 'call_kinsol: SUNDIALS_ERROR: FKINSPGMR returned IER = ', ier
+@@ -173,7 +173,7 @@ if (ier .ne. 0) then
+   call MPI_FINALIZE(ierr) ! finaliza MPI
+   stop
+ endif
+-call fkinspilssetprec(1, ier) ! preconditiones
++!call fkinspilssetprec(1, ier) ! preconditiones
+ 
+ do i = 1, neq ! scaling vector
+   scale(i) = 1.0
+diff --git a/makefile b/makefile
+index 4b2c493..78afc6e 100644
+--- a/makefile
++++ b/makefile
+@@ -10,12 +10,13 @@ endif
+ HOST=$(shell hostname)
+ $(info HOST is ${HOST})
+ 
++LFLAGS = -lm /usr/lib64/librt.so -L/projects/p31819/lib/lib -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial      -Wl,-rpath,/projects/p31819/lib/lib
++
+ ifeq ($(HOST),spinetta)
+ LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
+ endif
+ 
+ 
+-
+ ifeq ($(HOST),skay)
+ LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
+ 
+@@ -81,8 +82,8 @@ endif
+ GIT_VERSION := $(shell git describe --abbrev=6 --dirty --always --tags)
+ GFLAGS=-cpp -D_VERSION=\"$(GIT_VERSION)\" $(MKLCOMMENTED)
+ 
+-FF = mpif77 #${F90}
+-VER = ~/bin/crystal
++FF = /software/mpi/openmpi-2.1.1-gcc-5.1.0/bin/mpif90 
++VER = /projects/p31819/bin/crystal
+ 
+ all:	$(TARGET)
+ 
+diff --git a/savetodisk.f90 b/savetodisk.f90
+index 231343f..2d9fad1 100644
+--- a/savetodisk.f90
++++ b/savetodisk.f90
+@@ -17,6 +17,7 @@ real*4 singlepres
+ real*8 x(3), v(3)
+ integer, external :: PBCSYMI, PBCREFI
+ 
++
+ !-----  coordenadas -------------------------
+ ! Variables
+ 
+@@ -65,7 +66,7 @@ close(45)
+ 
+ ! Archivo paraview
+ 
+-if(vtkflag.eq.1) then
++if(vtkflag.ge.1) then
+ 
+       write(filename,'(A5, A1,I3.3, A4)')title,'.', counter, '.vtk'
+       open (unit=45, file=filename)
+@@ -121,3 +122,41 @@ return
+ end
+ 
+ 
++subroutine savemuvect(com, mu, counter)
++
++use system
++use transform
++use s2d
++implicit none
++
++integer counter
++character*21 filename
++real*8 mu(3), com(3)
++
++write(filename,'(A6,I3.3, A4)')'mupro.', counter, '.vtk'
++open (unit=45, file=filename)
++write(45,'(A)')'# vtk DataFile Version 2.0'
++write(45,'(A)')'mupro'
++write(45,'(A)')'ASCII'
++write(45,'(A)')'DATASET UNSTRUCTURED_GRID '
++write(45,'(A, I8, A)')'POINTS 1 float'
++write(45, *) com(1),'   ',  com(2), '   ', com(3) ! Cartesian coordinates 
++write(45,'(A, I8)')'POINT_DATA ', 1
++write(45,'(A)') 'VECTORS vectors float'
++write(45,*)mu(1), mu(2), mu(3)
++close(45)
++end
++
++
++
++
++
++
++
++
++
++
++
++
++
++

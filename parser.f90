@@ -28,7 +28,7 @@ character(len=50) :: filename = 'DEFINITIONS.txt'
 character basura
 integer ndi
 real*8 ndr
-
+integer NNN2
 ! not defined variables, change if any variable can take the value
 
 seed = 938121
@@ -547,6 +547,83 @@ do while (ios == 0)
      enddo
 
      endif ! NNN
+     
+!!!!!!!!!!!! CASE 80 NP + prot
+     case(80)
+     read(fh, *) basura
+     read(fh, *)NNN2
+
+     NNN = 2
+     if(NNN.ne.0) then
+     
+     call allocateell
+     read(fh, *) basura
+     do j = 1, NNN2
+     read(fh, *) Rellf(1,j), Rellf(2,j), Rellf(3,j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'pos to', Rellf(1,j), Rellf(2,j), Rellf(3,j)
+     enddo
+     read(fh, *) basura
+     do j = 1, NNN2
+     read(fh, *) Aell(1,j), Aell(2,j), Aell(3,j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'axis to', Aell(1,j), Aell(2,j), Aell(3,j)
+     enddo
+     read(fh, *) basura
+     do j = 1, NNN2
+     read(fh, *) rotmatrix(1,1,j), rotmatrix(1,2,j), rotmatrix(1,3,j)
+     read(fh, *) rotmatrix(2,1,j), rotmatrix(2,2,j), rotmatrix(2,3,j)
+     read(fh, *) rotmatrix(3,1,j), rotmatrix(3,2,j), rotmatrix(3,3,j)
+     if(rank.eq.0) then
+         write(stdout,*) 'parser:','Set particle',j,'rotation to:'
+         write(stdout,*) 'parser:', rotmatrix(1,1,j), rotmatrix(1,2,j), rotmatrix(1,3,j)
+         write(stdout,*) 'parser:', rotmatrix(2,1,j), rotmatrix(2,2,j), rotmatrix(2,3,j)
+         write(stdout,*) 'parser:', rotmatrix(3,1,j), rotmatrix(3,2,j), rotmatrix(3,3,j)
+     endif
+     enddo
+     read(fh, *) basura
+     do j = 1, NNN2
+     read(fh, *) sigma(j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'surface coverage to', sigma(j)
+     enddo
+
+     read(fh, *) basura
+     do j = 1, NNN2
+     read(fh, *) echarge(j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'charge to', echarge(j)
+     enddo
+     read(fh, *) basura
+     do j = 1, NNN2
+     read(fh, *) eeps(j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set particle',j,'hydrophobicity to', eeps(j)
+     enddo
+
+     endif ! NNN
+     NNN2 = 2
+!    call allocateell
+
+     read(fh, *) basura
+     do j = NNN2, NNN2
+     read(fh, *) Rellf(1,j), Rellf(2,j), Rellf(3,j)
+
+     if(rank.eq.0)write(stdout,*) 'parser:','Set protein center of mass',j,'pos to',  Rellf(1,j), Rellf(2,j), Rellf(3,j)
+     enddo
+
+     !!!!!!!!!!1 plano + prot
+     case(90)  
+
+     read(fh, *) basura
+     read(fh, *) Npolx, Npoly ! number of polymers in x and y
+     read(fh, *) basura
+     read(fh, *) eepsc
+
+     NNN = 1
+     call allocateell
+     
+     read(fh, *) basura
+     do j = 1, NNN
+     read(fh, *) Rellf(1,j), Rellf(2,j), Rellf(3,j)
+     if(rank.eq.0)write(stdout,*) 'parser:','Set protein center of mass',j,'pos to',  Rellf(1,j), Rellf(2,j), Rellf(3,j)
+     enddo
+
 endselect
 endselect
 

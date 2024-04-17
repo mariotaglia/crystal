@@ -481,7 +481,7 @@ endif
 ! 6. Chemical EQ PDB
 
 
-if(systemtype.eq.70) then
+if(systemtype.eq.70.or.systemtype.eq.80.or.systemtype.eq.90) then
       pdbcom = 0.0
       do i = 1, naa
         pdbcom(:) = pdbcom(:) + aapos(:,i)
@@ -583,7 +583,7 @@ endif
 
 ! charge protein
 
-if (systemtype.eq.70) then
+if (systemtype.eq.70.or.systemtype.eq.80.or.systemtype.eq.90) then
       do im = 1, naa
        if(zpdb(im).ne.0) then
 
@@ -652,7 +652,7 @@ endif
          write(308,*)looped, F_Eq
          flush(308)
          
-         if(systemtype.eq.70) then
+         if(systemtype.eq.70.or.systemtype.eq.80.or.systemtype.eq.90) then
          write(314,*)looped, F_pdb
          flush(314)
          endif

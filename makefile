@@ -1,6 +1,6 @@
 TARGET = 3D
 
-SRC = modules.f90 maps.f90 SPmain.f90 channel.f90 PBC.f90 parser.f90 init.f90 allocation.f90 allocatencha.f90 allocateell.f90 3D.f90  allocatecpp.f90  cadenas.f90 cadenas_b.f90 cadenas_b2.f90  fe.f90  fkfun.f90  kai.f90  kinsol.f90  pxs.f90  savetodisk.f90 rands.f90 ellipsoid.f90 dielectric.f90 transform.f90 testsystem.f90 testsystemc.f90 testsystemr.f90 monomers.definitions.f90 chains.definitions.f90 channel-part.f90 channel-pdb.f90 pdbfromfile.f90 testsystempdb.f90 
+SRC = modules.f90 maps.f90 SPmain.f90 channel.f90 PBC.f90 parser.f90 init.f90 allocation.f90 allocatencha.f90 allocateell.f90 3D.f90  allocatecpp.f90  cadenas.f90 cadenas_b.f90 cadenas_b2.f90  fe.f90  fkfun.f90  kai.f90  kinsol.f90  pxs.f90  savetodisk.f90 rands.f90 ellipsoid.f90 dielectric.f90 transform.f90 testsystem.f90 testsystemc.f90 testsystemr.f90 monomers.definitions.f90 chains.definitions.f90 channel-part.f90 channel-pdb.f90 pdbfromfile.f90 testsystempdb.f90  NP-pdb.f90 plano-pdb.f90
 
 ifeq ($(MKL),true)
    SRC += csr.f90 csr_map.f90
@@ -10,7 +10,8 @@ endif
 HOST=$(shell hostname)
 $(info HOST is ${HOST})
 
-LFLAGS = -lm /usr/lib64/librt.so -L/projects/p31819/lib/lib -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial      -Wl,-rpath,/projects/p31819/lib/lib
+#LFLAGS = -lm /usr/lib64/librt.so -L/projects/p31819/lib/lib -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial      -Wl,-rpath,/projects/p31819/lib/lib
+LFLAGS = -lsundials_fkinsol -lsundials_fnvecserial -lsundials_kinsol -lsundials_nvecserial -lm
 
 ifeq ($(HOST),spinetta)
 LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
@@ -79,11 +80,17 @@ ifeq ($(HOST),quser10)
 LFLAGS = -L/home/mta183/KINSOL2.7/lib -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial -lm -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2 -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -lgfortranbegin -lgfortran -lm
 endif
 
+ifeq ($(HOST),quser32)
+LFLAGS = -L/home/mta183/KINSOL2.7/lib -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial -lm -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2 -L/usr/lib/gcc/x86_64-redhat-linux/4.1.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -lgfortranbegin -lgfortran -lm
+endif
+
+
 GIT_VERSION := $(shell git describe --abbrev=6 --dirty --always --tags)
 GFLAGS=-cpp -D_VERSION=\"$(GIT_VERSION)\" $(MKLCOMMENTED)
 
-FF = /software/mpi/openmpi-2.1.1-gcc-5.1.0/bin/mpif90 
-VER = /projects/p31819/bin/crystal
+#FF = /software/mpi/openmpi-2.1.1-gcc-5.1.0/bin/mpif90 
+FF = mpif90
+VER = /projects/crystal
 
 all:	$(TARGET)
 

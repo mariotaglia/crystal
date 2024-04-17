@@ -190,7 +190,7 @@ do ix=1,dimx
  enddo  
 enddo
 
-if (systemtype.eq.70) then
+if (systemtype.eq.70.or.systemtype.eq.80.or.systemtype.eq.90) then   !sump type 80 y 90
 fdispdb = 0.0
 do im = 1, naa
 select case (zpdb(im))
@@ -382,7 +382,7 @@ enddo
 enddo
 enddo
 
-if(systemtype.eq.70) then
+if(systemtype.eq.70.or.systemtype.eq.80.or.systemtype.eq.90) then
 do im = 1, naa
   ix = xxpdb(im)
   iy = yypdb(im)

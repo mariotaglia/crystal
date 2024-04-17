@@ -95,6 +95,11 @@ elseif (systemtype.eq.60) then
 call update_matrix_60(flag) ! channel + particles
 elseif (systemtype.eq.70) then
 call update_matrix_70(flag) ! channel + protein
+elseif (systemtype.eq.80) then
+call update_matrix_80(flag) ! protein
+elseif (systemtype.eq.90) then
+call update_matrix_90(flag) ! protein
+
 endif
 call calcfv ! calc fv matrix ! IMPORTANT
 
