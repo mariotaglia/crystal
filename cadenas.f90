@@ -6,7 +6,6 @@ use system
 use chainsdat
 use MPI
 use branches
-use solventchains
 implicit none
 integer i,il,ll
 integer j

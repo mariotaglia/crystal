@@ -1,17 +1,16 @@
 subroutine monomer_definitions
 
 use MPI
+use chainsdat
 use mparameters_monomer
 
 implicit none
-integer i
+integer i, j
 
-N_poorsol = 1 ! number of different kais
-N_monomer = 1
+N_monomer = N_poorsol + 1 ! 0: hydrophilic, 1 < x < N_poorsol 
 
 ALLOCATE (st_matrix(0:N_poorsol, 0:N_poorsol)) ! interaction between monomer types in fraction of st, scaled by st-scale during running....
 ALLOCATE (hydroph(N_monomer)) ! 0: hydrophilic, 1 < x < N_poorsol, type of poor solvent
-
 
 ! ELECTRO
 !ALLOCATE (zpol(N_monomer))    ! charge of monomer segment: 1: base, -1: acid, 0:neutral
@@ -19,10 +18,18 @@ ALLOCATE (hydroph(N_monomer)) ! 0: hydrophilic, 1 < x < N_poorsol, type of poor 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-st_matrix(0,0)=1.0
-st_matrix(0,1)=1.0
-st_matrix(1,0)=1.0
-st_matrix(1,1)=1.0
+! Cross interactions as Berthelot Rules
+open(file="epsilon.in",unit=333)
+st_matrix(0,0)=0.0
+do i = 1, N_poorsol
+  read(333, *) st_matrix(i,i)
+enddo
+
+do i = 1, N_poorsol
+  do j = 1, N_poorsol
+    st_matrix(i,j) = sqrt(st_matrix(i,i)*st_matrix(j,j))
+  enddo
+enddo
 
 ! Segment type 1 for NPC, positive base, hydrophilic
 

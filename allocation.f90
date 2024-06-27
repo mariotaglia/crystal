@@ -13,7 +13,6 @@ use MPI
 use kai
 use mparameters_monomer
 use mmask
-use solventchains
 implicit none
 
 

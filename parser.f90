@@ -5,6 +5,7 @@ use const
 use MPI
 use ellipsoid
 use chainsdat
+use mparameters_monomer
 ! ELECTRO
 !use inputtemp
 use transform
@@ -16,7 +17,6 @@ use channel
 use superellipse
 use branches
 use cube
-use solventchains
 implicit none
 
 ! Input related variables
@@ -289,7 +289,7 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) lsegkai
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
-! ELECTRO
+   ! ELECTRO
 ! case ('dielP')
 !   read(buffer, *, iostat=ios) dielP
 !   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -304,6 +304,10 @@ do while (ios == 0)
 !
  case ('vsol')
    read(buffer, *, iostat=ios) vsol0
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+ case ('N_poorsol')
+   read(buffer, *, iostat=ios) N_poorsol
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('benergy')
@@ -681,6 +685,8 @@ if(lsegkai.eq.ndr)lsegkai=lseg
 !if(pHbulk.eq.ndr)call stopundef('pHbulk')
 
 if(vpol0.eq.ndr)call stopundef('vpol')
+if(vsol0.eq.ndr)call stopundef('vsol')
+if(N_poorsol.eq.ndr)call stopundef('N_poorsol')
 if(vsol0.eq.ndr)call stopundef('vsol')
 if(benergy.eq.ndr)call stopundef('benergy')
 if(transform_type.eq.1)then

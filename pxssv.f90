@@ -7,7 +7,7 @@ use system
 use MPI
 use const
 use transform
-use solventchains
+use chainsdat
 implicit none
     
 integer j, ii, jj,i, il
