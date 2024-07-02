@@ -291,7 +291,7 @@ integer naa
 real*8, allocatable :: volpdb(:,:,:)
 real*8 sumvolpdb
 real*8, allocatable :: aapos(:,:)
-character*1, allocatable :: aal(:)
+character*3, allocatable :: aal(:)
 integer, allocatable :: xxpdb(:)
 integer, allocatable :: yypdb(:)
 integer, allocatable :: zzpdb(:)

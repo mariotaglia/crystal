@@ -200,6 +200,10 @@ select case (zpdb(im))
   case (-1)
    fdispdb(im) = 1.0 /(1.0 + xHplus(xxpdb(im),yypdb(im), zzpdb(im))  &
    /(K0pdb(im)*xh(xxpdb(im),yypdb(im), zzpdb(im))))
+  case(2) !para Fe2+ y Fe3+
+   fdispdb(im) = 1.0
+  case(3)
+  fdispdb(im) = 1.0       
 endselect
 enddo
 endif
@@ -388,7 +392,8 @@ do im = 1, naa
   iy = yypdb(im)
   iz = zzpdb(im)
   qtot(ix,iy,iz) = qtot(ix,iy,iz) + float(zpdb(im))*fdispdb(im)*vsol/(delta**3)
-!  print*, im, float(zpdb(im))*fdispdb(im)*vsol, zpdb(im), fdispdb(im)
+  !print*, im,  zpdb(im), float(zpdb(im))*fdispdb(im),vsol/(delta**3), fdispdb(im)
+
 enddo
 endif
 

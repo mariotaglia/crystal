@@ -169,7 +169,7 @@ implicit none
       case('M')
       zpdb(i) = 0
       pKapdb(i) = 0.0
-      radiuspdb(i) = 73.4
+      radiuspdb(i) =  73.4  ! 45 corre
 
       case('P')
       zpdb(i) = 0
@@ -233,6 +233,39 @@ implicit none
           zpdb(i) = -1
           pKapdb(i) = 4.5
         endif
+
+      case('Fe2')
+      zpdb(i) = 2
+      pKapdb(i) = 14 !cheuqear
+      radiuspdb(i) = 1.1  !chequear 
+      case('Fe3')
+      zpdb(i) = 3.0
+      pKapdb(i) = 1 !chequear
+      radiuspdb(i) = 0.83 !chequear  0.83 0.13 ok
+      case('F31')
+      zpdb(i) = 2
+      pKapdb(i) = 14 !chequear
+      radiuspdb(i) = 0.55 !chequear
+      case('F32')
+      zpdb(i) = 1
+      pKapdb(i) = 14 !chequear
+      radiuspdb(i) = 0.27 !chequear
+      case('Pi')
+      zpdb(i) = 0 !chequear
+      pKapdb(i) = 14 !chequear
+      radiuspdb(i) = 67.1 !chequear
+      case('Pr')
+      zpdb(i) = -1 !chequear
+      pKapdb(i) = 4.5 !chequear
+      radiuspdb(i) = 56.4 !chequear
+      case('Cs')
+      zpdb(i) = 0 !chequear
+      pKapdb(i) = 14 !chequear
+      radiuspdb(i) = 45.1 !chequear
+
+
+
+
 
       case default
         print*, 'aminoacid not recognized. stop'

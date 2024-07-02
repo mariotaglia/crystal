@@ -494,10 +494,12 @@ if(systemtype.eq.70.or.systemtype.eq.80.or.systemtype.eq.90) then
       F_pdb = 0.0
       pdbmur = 0.0
 
-
+      open(unit=565656, file='fdispdb.dat')
       do i = 1, naa
 
-      if(zpdb(i).ne.0) then ! only charged
+      write(565656,*) i,aal(i), zpdb(i), fdispdb(i)
+
+      if(zpdb(i).ne.0) then ! only charged 
 
       pdbcharge = pdbcharge + fdispdb(i)*float(zpdb(i))
 
@@ -509,11 +511,13 @@ if(systemtype.eq.70.or.systemtype.eq.80.or.systemtype.eq.90) then
       tempr = sqrt(tempr)
 
       pdbmur = pdbmur + fdispdb(i)*float(zpdb(i))*tempr
-
+      if(zpdb(i).ne.2.AND.zpdb(i).ne.3) then  !elimino el Fe2+ y F23+
       if(fdispdb(i).ne.0.0)F_pdb = F_pdb + fdispdb(i)*dlog(fdispdb(i))
       if(fdispdb(i).ne.1.0)F_pdb = F_pdb + (1.0-fdispdb(i))*dlog(1.0-fdispdb(i))
 
       F_pdb = F_pdb + (1.0-fdispdb(i))*dlog(K0pdb(i))
+
+      endif
 
       select case (zpdb(i))
       case (1) ! base
@@ -672,7 +676,7 @@ endif
          write(313,*)looped, mupol
          flush(313)
 
-         write(315,*)looped, pdbcharge
+         write(315,*)looped, pHs(looped), pdbcharge
          flush(315)
 
          write(316,*)looped, pdbcom
