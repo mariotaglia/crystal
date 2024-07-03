@@ -34,7 +34,6 @@ real*8 MVV,MUU,MWW,MVU,MVW,MUW
 real*8 psivv,psiuu,psiww, psivu,psivw,psiuw
 real*8 psiv(3), epsv(3)
 real*8 xtotalsum(dimx,dimy,dimz)
-
 integer, external :: PBCSYMI, PBCREFI
 
 ! poor solvent 
@@ -391,6 +390,7 @@ do im = 1, naa
   ix = xxpdb(im)
   iy = yypdb(im)
   iz = zzpdb(im)
+
   qtot(ix,iy,iz) = qtot(ix,iy,iz) + float(zpdb(im))*fdispdb(im)*vsol/(delta**3)
   !print*, im,  zpdb(im), float(zpdb(im))*fdispdb(im),vsol/(delta**3), fdispdb(im)
 
@@ -418,6 +418,7 @@ enddo
 enddo
 enddo
 
+
 ! Poor solvent
 
 do ix=1,dimx
@@ -437,6 +438,7 @@ enddo ! ip
 enddo ! ix
 enddo ! iy
 enddo ! iz
+
 
 
 if(electroflag.eq.1) then

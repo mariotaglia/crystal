@@ -237,23 +237,20 @@ implicit none
       case('Fe2')
       zpdb(i) = 2
       pKapdb(i) = 14 !cheuqear
-      radiuspdb(i) = 1.1  !chequear 
+      radiuspdb(i) = 1.1  !chequear 1.1
       case('Fe3')
       zpdb(i) = 3.0
       pKapdb(i) = 1 !chequear
-      radiuspdb(i) = 0.83 !chequear  0.83 0.13 ok
-      case('F31')
-      zpdb(i) = 2
-      pKapdb(i) = 14 !chequear
-      radiuspdb(i) = 0.55 !chequear
-      case('F32')
-      zpdb(i) = 1
-      pKapdb(i) = 14 !chequear
-      radiuspdb(i) = 0.27 !chequear
+      radiuspdb(i) = 0.83 !chequear  0.83  ok
       case('Pi')
       zpdb(i) = 0 !chequear
       pKapdb(i) = 14 !chequear
-      radiuspdb(i) = 67.1 !chequear
+      radiuspdb(i) = 67.1 !chequear  67.1 con 20 corre con 4 pirroles
+      case('Pm')
+      zpdb(i) = 0 !chequear
+      pKapdb(i) = 14 !chequear
+      radiuspdb(i) = 20.0 !chequear  67.1 con 20 corre con 4 pirroles
+
       case('Pr')
       zpdb(i) = -1 !chequear
       pKapdb(i) = 4.5 !chequear
@@ -261,7 +258,7 @@ implicit none
       case('Cs')
       zpdb(i) = 0 !chequear
       pKapdb(i) = 14 !chequear
-      radiuspdb(i) = 45.1 !chequear
+      radiuspdb(i) = 45.1 !chequear  45.1
 
 
 
