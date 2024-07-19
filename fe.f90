@@ -497,8 +497,8 @@ if(systemtype.eq.70.or.systemtype.eq.80.or.systemtype.eq.90) then
       open(unit=565656, file='fdispdb.dat')
       do i = 1, naa
 
-      write(565656,*) i,aal(i), zpdb(i), fdispdb(i)
-
+      if(rank.eq.0)  write(565656,*) looped, pHs(looped),aal(i), zpdb(i), fdispdb(i)
+      
       if(zpdb(i).ne.0) then ! only charged 
 
       pdbcharge = pdbcharge + fdispdb(i)*float(zpdb(i))

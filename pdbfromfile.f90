@@ -143,17 +143,27 @@ implicit none
 
       case('Y')
       zpdb(i) = -1
-      pKapdb(i) = 10.5
+      pKapdb(i) = 9.57 ! 10.5
+      radiuspdb(i) = 91.9
+
+      case('Ym') !tyrosine 67
+      zpdb(i) = 0
+      pKapdb(i) = 14.0
       radiuspdb(i) = 91.9
 
       case('K')
       zpdb(i) = 1
-      pKapdb(i) = 10.54
+      pKapdb(i) = 11.43  !9.5 !11.43 ! 10.54
+      radiuspdb(i) = 77.3
+      
+      case('Km') !Lysine 73
+      zpdb(i) = 1
+      pKapdb(i) = 10.23 !9.5 !11.43 ! 10.54
       radiuspdb(i) = 77.3
 
       case('R')
       zpdb(i) = 1
-      pKapdb(i) = 12.48
+      pKapdb(i) = 13.37 ! 12.48
       radiuspdb(i) = 94.6
 
       case('N')
@@ -193,12 +203,12 @@ implicit none
 
       case('D')
       zpdb(i) = -1
-      pKapdb(i) = 3.9
+      pKapdb(i) = 2.97 !3.9
       radiuspdb(i) = 42.0
 
       case('E')
       zpdb(i) = -1
-      pKapdb(i) = 4.07
+      pKapdb(i) = 3.13 ! 4.07
       radiuspdb(i) = 56.42
 
       case('C')    ! Reduced Cysteine !
@@ -213,9 +223,14 @@ implicit none
 
       case('H')
       zpdb(i) = 1
-      pKapdb(i) = 6.04
+      pKapdb(i) = 6.04  !6.98 !6.04
       radiuspdb(i) = 67.1
-
+      
+      case('Hm') !CASE HISTIDINE COORDINATED TO HEME C
+      zpdb(i) = 1 !0
+      radiuspdb(i) = 67.1
+      pKapdb(i) = 4.57 !14.0
+    
       case('Z')    ! CASE FLUOROPHORE OF GFP !
       zpdb(i) = 0
       pKapdb(i) = 0
@@ -226,12 +241,12 @@ implicit none
       zpdb(i) = 0
       pKapdb(i) = 0.0
         if(aan(i).eq.1) then ! N terminal
-          zpdb(i) = 1
-          pKapdb(i) = 9.5
+          zpdb(i) = 0 ! 1 
+          pKapdb(i) = 10.4333 !9.5
         endif
         if(aan(i).eq.aan(naa)) then ! N terminal
           zpdb(i) = -1
-          pKapdb(i) = 4.5
+          pKapdb(i) = 3.57 !4.5
         endif
 
       case('Fe2')
@@ -253,12 +268,12 @@ implicit none
 
       case('Pr')
       zpdb(i) = -1 !chequear
-      pKapdb(i) = 4.5 !chequear
+      pKapdb(i) = 3.13 !4.5 !chequear
       radiuspdb(i) = 56.4 !chequear
       case('Cs')
       zpdb(i) = 0 !chequear
       pKapdb(i) = 14 !chequear
-      radiuspdb(i) = 45.1 !chequear  45.1
+      radiuspdb(i) = 30.1 !45.1  chequear  45.1
 
 
 
