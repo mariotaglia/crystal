@@ -253,7 +253,7 @@ if ((vtkflag.ge.1).and.(systemtype.eq.70))call savemuvect(pdbcom,pdbmu,cccc)
 !  call savetodisk(xOHmin, title, cccc)
 ! fdis
   title = 'frdis'
-  temp(1:dimx,1:dimy, 1:dimz) = fdis(1:dimx,1:dimy, 1:dimz,1)
+  temp(1:dimx,1:dimy, 1:dimz) = fdis(1:dimx,1:dimy, 1:dimz,2)*avpol(1:dimx,1:dimy, 1:dimz,2)*(1-volprot(1:dimx,1:dimy, 1:dimz))
   call savetodisk(temp, title, cccc)
 
 
