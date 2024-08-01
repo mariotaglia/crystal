@@ -450,6 +450,7 @@ endif
       do iy  = 1, dimy
       do iz  = 1, dimz
 
+
       F_electro = F_electro &
        + delta**3*psi(ix, iy, iz)*qtot(ix, iy, iz)/2.0/vsol
 
@@ -542,8 +543,8 @@ endif
       Free_Energy2 = 0.0
 
       xtotalsum = 0.0
-      do ip = 1, N_poorsol
-      xtotalsum(:,:,:)= xtotalsum(:,:,:)+xtotal(:,:,:,ip)
+      do im = 1, N_monomer
+       xtotalsum(:,:,:)= xtotalsum(:,:,:)+avpol(:,:,:,im)
       enddo
 
 
@@ -574,13 +575,12 @@ endif
          sumel = sumel + volq(ix,iy,iz)*psi(ix,iy,iz)*vsol                   
 
 
-         psiv(1) = psi(ix+1,iy,iz)-psi(ix,iy,iz)
-         psiv(2) = psi(ix,iy+1,iz)-psi(ix,iy,iz)
-         psiv(3) = psi(ix,iy,iz+1)-psi(ix,iy,iz)
+         psiv(1) = (psi(ix+1,iy,iz)-psi(ix-1,iy,iz))/2
+         psiv(2) = (psi(ix,iy+1,iz)-psi(ix,iy-1,iz))/2
+         psiv(3) = (psi(ix,iy,iz+1)-psi(ix,iy,iz-1))/2
 
          gradpsi2 = DOT_PRODUCT(MATMUL(TMAT, psiv), MATMUL(TMAT, psiv))
          sumdiel = sumdiel + 0.5/constq*xtotalsum(ix,iy,iz)*gradpsi2*Depsfcn(ix,iy,iz)
-
          enddo
          enddo
          enddo
@@ -619,10 +619,11 @@ endif
          enddo
 
          Free_Energy2 = Free_Energy2 + suma - F_vdW
-
+         
       if (verbose.ge.1) then
-      write(stdout,*) 'Free_Energy_Calc: Free energy(2) = ', Free_energy2
+      write(stdout,*) 'Free_Energy_Calc: Free energy(2) = ', Free_energy2,sumdiel
       endif
+
 
 ! Guarda energia libre
 

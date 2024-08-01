@@ -20,6 +20,8 @@ do iy = 1, dimy
 do iz = 1, dimz
 epsfcn(ix,iy,iz) = prot(ix,iy,iz)*dielSr + (1.0-prot(ix,iy,iz))*(phi(ix,iy,iz)*dielPr + (1.0-phi(ix,iy,iz))) 
 Depsfcn(ix,iy,iz) = (1.0-prot(ix,iy,iz))*(dielPr -1.0)
+!Depsfcn(ix,iy,iz) = 0.0
+!write(*,*) "Diel TEST", dielPr, dielPr-1.0, (1.0-prot(ix,iy,iz)),Depsfcn(ix,iy,iz)
 enddo
 enddo
 enddo
