@@ -72,10 +72,14 @@ do i = 1, Npolx
  do j = 1, Npoly
  ncha = ncha + 1
 
- v(1) = spacex*float(i)-spacex/2.0
+! v(1) = spacex*float(i)-spacex/2.0
  v(2) = spacey*float(j)-spacey/2.0
  v(3) = lseg
-
+if(mod(j,2).eq.0) then
+  v(1) = spacex*float(i)-spacex/2.0
+else 
+  v(1) = spacex*float(i)  
+endif
 ! v in transformed space, x in real space
 
  x = MATMUL(IMAT,v)
