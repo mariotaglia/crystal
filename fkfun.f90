@@ -16,6 +16,7 @@ use transform
 use kaist
 use mparameters_monomer
 use mmask
+use solventchains
 implicit none
 real*8 intq, intxh
 real*8 Nsolvtemp
@@ -421,7 +422,7 @@ do j = 1, longsv ! loop over segment
             if((jy.ge.1).and.(jy.le.dimy)) then
             if((jz.ge.1).and.(jz.le.dimz)) then
  
-            prosv = prosv*xpot(jx, jy, jz, segtypesv(j))
+            prosv = prosv*xpot(jx, jy, jz, 1)
 
             endif     
             endif     

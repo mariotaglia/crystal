@@ -5,7 +5,6 @@ use const
 use MPI
 use ellipsoid
 use chainsdat
-use mparameters_monomer
 ! ELECTRO
 !use inputtemp
 use transform
@@ -17,6 +16,8 @@ use channel
 use superellipse
 use branches
 use cube
+use solventchains
+use mparameters_monomer
 implicit none
 
 ! Input related variables
@@ -80,6 +81,8 @@ cuantas = ndi
 cuantassv = ndi
 readchains = ndi
 infile = ndi
+interaction_00 = ndi
+interaction_11 = ndi
 randominput = 0
 epstype = 0
 cutoff = ndr
@@ -289,7 +292,7 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) lsegkai
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
-   ! ELECTRO
+! ELECTRO
 ! case ('dielP')
 !   read(buffer, *, iostat=ios) dielP
 !   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -304,10 +307,6 @@ do while (ios == 0)
 !
  case ('vsol')
    read(buffer, *, iostat=ios) vsol0
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
- case ('N_poorsol')
-   read(buffer, *, iostat=ios) N_poorsol
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('benergy')
@@ -333,6 +332,14 @@ do while (ios == 0)
 
  case ('infile')
    read(buffer, *, iostat=ios) infile
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+ 
+ case ('interaction_00')
+   read(buffer, *, iostat=ios) interaction_00 
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+ case ('interaction_11')
+   read(buffer, *, iostat=ios) interaction_11
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('nkp')
@@ -666,6 +673,8 @@ if(longsv.eq.ndi)call stopundef('longsv')
 if(cuantas.eq.ndi)call stopundef('cuantas')
 if(cuantassv.eq.ndi)call stopundef('cuantassv')
 if(infile.eq.ndi)call stopundef('infile')
+if(interaction_00.eq.ndi)call stopundef('interaction_00')
+if(interaction_11.eq.ndi)call stopundef('interaction_11')
 if(cutoff.eq.ndr)call stopundef('Xucutoff')
 if(readchains.eq.ndi)call stopundef('readchains')
 if(systemtype.eq.ndi)call stopundef('systemtype')
@@ -685,8 +694,6 @@ if(lsegkai.eq.ndr)lsegkai=lseg
 !if(pHbulk.eq.ndr)call stopundef('pHbulk')
 
 if(vpol0.eq.ndr)call stopundef('vpol')
-if(vsol0.eq.ndr)call stopundef('vsol')
-if(N_poorsol.eq.ndr)call stopundef('N_poorsol')
 if(vsol0.eq.ndr)call stopundef('vsol')
 if(benergy.eq.ndr)call stopundef('benergy')
 if(transform_type.eq.1)then

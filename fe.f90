@@ -20,6 +20,7 @@ use transform
 use kaist
 use conformations
 use mparameters_monomer
+use solventchains
 implicit none
 
 integer looped
@@ -484,6 +485,7 @@ endif ! solvent
 
             do ip = 0, N_poorsol
             do ipp = 0, N_poorsol
+ 
                 F_vdW = F_vdW - 0.5000*delta**3*xtotal(ix,iy,iz,ip) &
         *xtotal(jx,jy,jz,ipp)*Xu(ax, ay, az)*st*st_matrix(ip,ipp)*fv*fv2/(vsol*vsol)
  

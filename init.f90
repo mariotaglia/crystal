@@ -180,6 +180,7 @@ use kinsol
 use kaist
 use mparameters_monomer
 use channel
+use solventchains
 implicit none
 integer cccc
 character*20 filename

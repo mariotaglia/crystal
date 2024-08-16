@@ -1,8 +1,21 @@
+module solventchains
+integer longsv
+integer cuantassv
+integer*2, allocatable :: pxsv(:,:)
+integer*2, allocatable :: pysv(:,:)
+integer*2, allocatable :: pzsv(:,:)
+integer*2, allocatable :: ngauchesv(:)
+integer ingsv ! number of gauches in current chain
+real*8, ALLOCATABLE :: in1sv(:,:)  ! segment positions 
+end module
+
+
 module mparameters_monomer
 integer N_poorsol ! number of different kais
 integer N_monomer ! number of different monomer types
 real*8, allocatable :: st_matrix(:,:) ! interaction between monomer types in fraction of st, scaled by st-scale during running....
 integer, allocatable :: hydroph(:) ! 0: hydrophilic, 1 < x < N_poorsol, type of poor solvent
+real*8 interaction_00, interaction_11
 
 ! ELECTRO
 !integer, allocatable :: zpol(:)  ! charge of monomer segment: 1: base, -1: acid, 0:neutral
@@ -101,16 +114,6 @@ real*8 lseg
 real*8 lsegkai
 integer readchains
 integer ing ! number of gauches in current chain
-integer longsv
-integer cuantassv
-integer, allocatable :: segtypesv(:) ! sequence of the chain
-integer*2, allocatable :: pxsv(:,:)
-integer*2, allocatable :: pysv(:,:)
-integer*2, allocatable :: pzsv(:,:)
-integer*2, allocatable :: ngauchesv(:)
-integer ingsv ! number of gauches in current chain
-real*8, ALLOCATABLE :: in1sv(:,:)  ! segment positions
-real*8 interaction_11, interaction_22, interaction_12
 endmodule
 
 module molecules

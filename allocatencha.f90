@@ -4,6 +4,7 @@ use fields_fkfun
 use chainsdat
 use conformations
 use rotchain
+use solventchains
 implicit none
 
 ! fields_fkfun
