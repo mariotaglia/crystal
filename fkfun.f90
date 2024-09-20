@@ -68,7 +68,7 @@ hds = -1
 !-----------------------------------------------------
 ! Common variables
 
-shift = 1.0d100
+shift = 1.0d-100
 
 ncells = dimx*dimy*dimz ! numero de celdas
 
@@ -339,18 +339,6 @@ do ix=1,dimx
   enddo ! iy
 enddo !iz
 enddo ! N_monomer
-
-! BIAS
-do ix = 1, dimx
-do iy = 1, dimy
-do iz = 1, dimz
-temp = sqrt((float(ix-25))**2.+(float(iy-25))**2.+(float(iz-25))**2.)
-xpot(ix,iy,iz,:) = xpot(ix,iy,iz,:)  *  (1.0 + exp(-(temp/25.0)**2)*0.)
-
-enddo
-enddo
-enddo
-
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

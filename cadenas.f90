@@ -223,7 +223,7 @@ do while (nchas.eq.0)
          if (state.eq.3) then 
             state=2
          endif
-
+         state =  0
          if (state.eq.0) then ! trans
             call mrrrr(m,tt,mm)
           do ii=1,3
