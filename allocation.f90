@@ -29,7 +29,7 @@ ALLOCATE(xh(dimx, dimy, dimz))
 ALLOCATE(rhosv(dimx, dimy, dimz))
 ALLOCATE(qsv(dimx, dimy, dimz))
 ALLOCATE(sumprolnpro(dimx, dimy, dimz))
-ALLOCATE(sumprogauche(dimx, dimy, dimz))
+ALLOCATE(sumprotrans(dimx, dimy, dimz))
 
 ! kinsol
 ALLOCATE (xflag(eqs*dimx*dimy*dimz))

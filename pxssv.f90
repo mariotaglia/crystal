@@ -34,7 +34,7 @@ enddo
 
 com = com/float(longsv)
 
-ngauchesv(il) = ingsv
+ntranssv(il) = ingsv
 
 do j = 1, longsv
 

@@ -4,8 +4,8 @@ integer cuantassv
 integer*2, allocatable :: pxsv(:,:)
 integer*2, allocatable :: pysv(:,:)
 integer*2, allocatable :: pzsv(:,:)
-integer*2, allocatable :: ngauchesv(:)
-integer ingsv ! number of gauches in current chain
+integer*2, allocatable :: ntranssv(:)
+integer ingsv ! number of transs in current chain
 real*8, ALLOCATABLE :: in1sv(:,:)  ! segment positions 
 end module
 
@@ -113,7 +113,7 @@ integer maxcpp
 real*8 lseg
 real*8 lsegkai
 integer readchains
-integer ing ! number of gauches in current chain
+integer ing ! number of transs in current chain
 endmodule
 
 module molecules
@@ -170,10 +170,10 @@ real*8 musolv ! solvent chem pot
 real*8, allocatable :: q(:)
 real*8, allocatable :: qsv(:,:,:)
 real*8, allocatable :: sumprolnpro(:,:,:) ! for fe calc
-real*8, allocatable :: sumprogauche(:,:,:) ! for fe calc
+real*8, allocatable :: sumprotrans(:,:,:) ! for fe calc
 real*8, allocatable :: rhosv(:,:,:) 
-real*8, allocatable :: sumgauche(:)
-real*8 sumgauchesv
+real*8, allocatable :: sumtrans(:)
+real*8 sumtranssv
 real*8, allocatable :: pro(:,:)
 real*8 prosv 
 real*8, allocatable :: xh(:, :, :)
@@ -185,7 +185,7 @@ module conformations
 integer*2, allocatable :: px(:,:,:)
 integer*2, allocatable :: py(:,:,:)
 integer*2, allocatable :: pz(:,:,:)
-integer*2, allocatable :: ngauche(:,:)
+integer*2, allocatable :: ntrans(:,:)
 endmodule
 
 module MPI

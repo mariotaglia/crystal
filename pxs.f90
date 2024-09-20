@@ -179,7 +179,7 @@ endselect
     if(flag.eq.0) then
 
     newcuantas(ii) = newcuantas(ii)+1
-    ngauche(newcuantas(ii),ii) = ing
+    ntrans(newcuantas(ii),ii) = ing
 
             do j = 1, long
             aa = floor(pxtemp(1,j)/delta) + 1

@@ -1,9 +1,9 @@
-subroutine cadenas_b(chains,nchas,gauches)
+subroutine cadenas_b(chains,nchas,transs)
 use chainsdat
 use const     
 use branches
 implicit none
-real*8 chains(3,200,100), gauches(100)
+real*8 chains(3,200,100), transs(100)
 integer i,state,statef,ii,j,ive,jve
 real*8 rn,state1,sitheta,cotheta,dista
 real*8 siphip,cophip
@@ -242,7 +242,7 @@ enddo ! j
             chains(3,j,nchas)=xendr(3,j)
          enddo
 
-         gauches(nchas) = ng
+         transs(nchas) = ng
          if (nchas.eq.25)exit
  enddo   
 enddo

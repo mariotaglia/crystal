@@ -24,15 +24,15 @@ use solventchains
 implicit none
 
 integer looped
-real*8  q_tosend(ncha), sumgauche_tosend(ncha)
-real*8  q0(ncha), sumgauche0(ncha)
+real*8  q_tosend(ncha), sumtrans_tosend(ncha)
+real*8  q0(ncha), sumtrans0(ncha)
 integer newcuantas0(ncha)
 real*8 F_Mix_s, F_Mix_pos
 real*8 F_Mix_neg, F_Mix_Hplus
 real*8 Free_energy2, sumpi, sumrho, sumel, sumdiel, suma, mupol, sumHS
 real*8 temp
-real*8 F_Mix_OHmin, F_gauche, F_Conf, F_Eq, F_vdW, F_eps, F_electro, F_HS
-real*8 F_conf_sv, F_gauche_sv
+real*8 F_Mix_OHmin, F_trans, F_Conf, F_Eq, F_vdW, F_eps, F_electro, F_HS
+real*8 F_conf_sv, F_trans_sv
 real*8 Free_Energy_plusSv
 real*8 pro0(cuantas, maxcpp)
 real*8 entropy(dimx,dimy,dimz)
@@ -61,7 +61,7 @@ integer, external :: PBCSYMI, PBCREFI
 
 ! Solvent data for F_conf
 real*8 sumprolnpro0(dimx,dimy,dimz)
-real*8 sumprogauche0(dimx,dimy,dimz)
+real*8 sumprotrans0(dimx,dimy,dimz)
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!! MPI !!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -72,7 +72,7 @@ real*8 sumprogauche0(dimx,dimy,dimz)
 entropy = 0.0
 q0 = 0.0
 q_tosend = 0.0
-sumgauche_tosend = 0.0
+sumtrans_tosend = 0.0
 
 if(rank.ne.0) then
        dest = 0
@@ -91,18 +91,18 @@ if(rank.ne.0) then
 ! Envia pro
         CALL MPI_SEND(pro, cuantas*cpp(rank+1) , MPI_DOUBLE_PRECISION, dest, tag, MPI_COMM_WORLD,err)
 
-! sum gauche
+! sum trans
        do jj = 1, cpp(rank+1)
        iii = cppini(rank+1)+jj
-       sumgauche_tosend(iii) = sumgauche(iii)
+       sumtrans_tosend(iii) = sumtrans(iii)
        enddo
-        call MPI_REDUCE(sumgauche_tosend, sumgauche0, ncha, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+        call MPI_REDUCE(sumtrans_tosend, sumtrans0, ncha, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 
 
 !!!!! Solvent
 
       call MPI_REDUCE(sumprolnpro, sumprolnpro0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
-      call MPI_REDUCE(sumprogauche, sumprogauche0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+      call MPI_REDUCE(sumprotrans, sumprotrans0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 
       goto 888 !!!! PROCESSORS NOT EQ 1 GO TO THE END 
 
@@ -270,29 +270,29 @@ if(rank.eq.0) then
 endif
 
 
-! 6.5 Energy of gauche bonds
+! 6.5 Energy of trans bonds
 
-      F_gauche = 0.0
+      F_trans = 0.0
 
 ! Jefe
 
 if (rank.eq.0) then ! Igual tiene que serlo, ver arriba
 
-       do jj = 1, cpp(rank+1) ! sumgauche in rank 0
+       do jj = 1, cpp(rank+1) ! sumtrans in rank 0
        iii = jj
-       sumgauche_tosend(iii) = sumgauche(iii)
+       sumtrans_tosend(iii) = sumtrans(iii)
        enddo
 
-        call MPI_REDUCE(sumgauche_tosend, sumgauche0, ncha, &
+        call MPI_REDUCE(sumtrans_tosend, sumtrans0, ncha, &
         MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 
        do ii = 1, ncha
-       F_gauche = F_gauche + sumgauche0(ii)*ngpol(ii)*benergy
+       F_trans = F_trans + sumtrans0(ii)*ngpol(ii)*benergy
        enddo  
 
        endif ! rank
 
-      Free_Energy = Free_Energy + F_gauche
+      Free_Energy = Free_Energy + F_trans
 
 if(rank.eq.0) then
       title = 'entpy'
@@ -309,11 +309,11 @@ endif
 
 
 sumprolnpro0 = 0.0
-sumgauche0 = 0.0
+sumtrans0 = 0.0
 
 if (rank.eq.0) then 
 call MPI_REDUCE(sumprolnpro, sumprolnpro0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
-call MPI_REDUCE(sumprogauche, sumprogauche0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+call MPI_REDUCE(sumprotrans, sumprotrans0, dimx*dimy*dimz, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 endif
 
 rhosv = qsv*dexp(musolv)/vsol 
@@ -364,22 +364,22 @@ Free_Energy = Free_Energy + F_conf_sv
 
 ! Gauche energy solvent
 
-F_gauche_sv = 0.0
+F_trans_sv = 0.0
 
 do ix = 1, dimx
 do iy = 1, dimy
 do iz = 1, dimz
 
 fv=(1.0-volprot(ix,iy,iz))
-F_gauche_sv = F_gauche_sv + sumprogauche0(ix,iy,iz)/qsv(ix,iy,iz)*rhosv(ix,iy,iz)*fv*benergy
+F_trans_sv = F_trans_sv + sumprotrans0(ix,iy,iz)/qsv(ix,iy,iz)*rhosv(ix,iy,iz)*fv*benergy
 
 enddo
 enddo
 enddo
 
 
-F_gauche_sv = F_gauche_sv*(delta**3)
-Free_Energy = Free_Energy + F_gauche_sv 
+F_trans_sv = F_trans_sv*(delta**3)
+Free_Energy = Free_Energy + F_trans_sv 
 
 endif ! solvent
 
@@ -682,8 +682,8 @@ enddo
 !         write(311,*)looped, F_electro
 
 
-         write(3071,*)looped, F_gauche
-         write(315,*)looped, F_gauche_sv
+         write(3071,*)looped, F_trans
+         write(315,*)looped, F_trans_sv
          write(316,*)looped, F_conf_sv
 
 

@@ -53,7 +53,7 @@ parameter(tag = 0)
 integer err
 real*8 avpol_tosend(dimx,dimy,dimz,N_monomer)
 real*8 avpol_temp(dimx,dimy,dimz,N_monomer)
-real*8 q_tosend, sumgauche_tosend
+real*8 q_tosend, sumtrans_tosend
 real*8 gradpsi2
 real*8 fv, fv2
 
@@ -333,7 +333,6 @@ do ix=1,dimx
      enddo
 
      xpot(ix,iy,iz,im) =xpot(ix,iy,iz,im) + protemp
-     xpot(ix,iy,iz,im) = dexp(xpot(ix,iy,iz,im))
 
    enddo ! ix
   enddo ! iy
@@ -352,7 +351,7 @@ qsv = 0.0
 qsv_tosend = 0.0
 sumprolnpro = 0.0
 rhosv = 0.0
-sumprogauche = 0.0
+sumprotrans = 0.0
 
 
 do ix = 1, dimx
@@ -366,7 +365,7 @@ if (mod(iii-1,size).eq.rank) then ! each processor runs on different cells
 
 
 do i = 1, cuantassv ! loop over sv conformations
-prosv = dexp(-benergy*ngauchesv(i)) ! energy of gauche bonds
+prosv = -benergy*ntranssv(i) ! energy of trans bonds
 
 do j = 1, longsv ! loop over segment
 
@@ -410,7 +409,7 @@ do j = 1, longsv ! loop over segment
             if((jy.ge.1).and.(jy.le.dimy)) then
             if((jz.ge.1).and.(jz.le.dimz)) then
  
-            prosv = prosv*xpot(jx, jy, jz, 1)
+            prosv = prosv+xpot(jx, jy, jz, 1)
 
             endif     
             endif     
@@ -418,9 +417,10 @@ do j = 1, longsv ! loop over segment
             
 enddo ! j
 
+   prosv = dexp(prosv)
    qsv_tosend(ix,iy,iz) = qsv_tosend(ix,iy,iz) + prosv
    sumprolnpro(ix,iy,iz) = sumprolnpro(ix,iy,iz) + prosv*dlog(prosv)
-   sumprogauche(ix,iy,iz) = sumprogauche(ix,iy,iz) + prosv*ngauchesv(i)
+   sumprotrans(ix,iy,iz) = sumprotrans(ix,iy,iz) + prosv*ntranssv(i)
 
    fv = (1.0-volprot(ix,iy,iz))
 
@@ -492,25 +492,26 @@ enddo ! iz
 avpol = 0.0
 avpol_tosend = 0.0
 q = 0.0
-sumgauche = 0.0
+sumtrans = 0.0
 
 do jj = 1, cpp(rank+1)
    ii = cppini(rank+1)+jj
 
    q_tosend=0.0
-   sumgauche_tosend = 0.0
+   sumtrans_tosend = 0.0
    avpol_temp = 0.0
 
  do i=1,newcuantas(ii)
-   pro(i, jj)=shift
+   pro(i, jj)=dlog(shift)
    do j=1,long
     ax = px(i, j, jj) ! cada uno para su cadena...
     ay = py(i, j, jj)
     az = pz(i, j, jj)         
-    pro(i, jj) = pro(i, jj) * xpot(ax, ay, az, segtype(j))
+    pro(i, jj) = pro(i, jj) + xpot(ax, ay, az, segtype(j))
 
    enddo
-    pro(i,jj) = pro(i,jj)*exp(-benergy*ngauche(i,ii)) ! energy of gauche bonds
+    pro(i,jj) = pro(i,jj) -benergy*ntrans(i,ii) ! energy of trans bonds
+    pro(i,jj)=dexp(pro(i,jj))
 
    do j=1,long
    fv = (1.0-volprot(px(i,j, jj),py(i,j, jj),pz(i,j, jj)))
@@ -521,7 +522,7 @@ do jj = 1, cpp(rank+1)
    enddo
 
    q_tosend=q_tosend+pro(i, jj)
-   sumgauche_tosend = sumgauche_tosend+ngauche(i, ii)*pro(i,jj)
+   sumtrans_tosend = sumtrans_tosend+ntrans(i, ii)*pro(i,jj)
 
  enddo ! i
 ! norma 
@@ -529,7 +530,7 @@ do jj = 1, cpp(rank+1)
 avpol_tosend=avpol_tosend + avpol_temp/q_tosend
 
 q(ii) = q_tosend ! no la envia ahora
-sumgauche(ii) = sumgauche_tosend/q_tosend
+sumtrans(ii) = sumtrans_tosend/q_tosend
 
 !write(stdout,*) rank+1,jj,ii,q(ii)
 enddo ! jj

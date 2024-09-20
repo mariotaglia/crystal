@@ -11,7 +11,7 @@ implicit none
 integer i,il,ll
 integer j
 real*8 indax, inday, indaz
-real*8 chains(3,200,100), gauches(100)
+real*8 chains(3,200,100), transs(100)
 real*8 altx,alty,altz,x(200),y(200),xp(200),yp(200)
 real*8 theta,theta1
 integer iglobal
@@ -59,11 +59,11 @@ do while (il.lt.cuantas)
  select case (branched)
 
  case (0)
-  call cadenas72mr(chains,nchas,gauches,long)
+  call cadenas72mr(chains,nchas,transs,long)
  case (1)
-  call cadenas_b(chains,nchas,gauches) ! branched chains
+  call cadenas_b(chains,nchas,transs) ! branched chains
  case (2)
-  call cadenas_b2(chains,nchas,gauches) ! branched chains type 2
+  call cadenas_b2(chains,nchas,transs) ! branched chains type 2
 
 
 endselect
@@ -71,7 +71,7 @@ endselect
   do i=1,nchas
       il=il+1
       if(il.gt.cuantas)exit
-      ing = gauches(i)
+      ing = transs(i)
       do j=1,long
          in1(j,2)=chains(2,j,i)
          in1(j,3)=chains(3,j,i)
@@ -107,12 +107,12 @@ il=0
 
 do while (il.lt.cuantassv)
 
-  call cadenas72mr(chains,nchas,gauches,longsv)
+  call cadenas72mr(chains,nchas,transs,longsv)
 
   do i=1,nchas
       il=il+1
       if(il.gt.cuantassv)exit
-      ingsv = gauches(i)
+      ingsv = transs(i)
       do j=1,longsv
          in1sv(j,2)=chains(2,j,i)
          in1sv(j,3)=chains(3,j,i)
@@ -130,12 +130,12 @@ enddo ! il
 return
 end
 
-subroutine cadenas72mr(chains,nchas,gauches,long)
+subroutine cadenas72mr(chains,nchas,transs,long)
 use const  
 use chainsdat, only : lseg
 implicit none
 integer long
-real*8 chains(3,200,100), gauches(100)
+real*8 chains(3,200,100), transs(100)
 integer i,state,ii,j,ive,jve
 real*8 rn,state1,sitheta,cotheta,dista
 real*8 siphip,cophip
@@ -281,7 +281,7 @@ do while (nchas.eq.0)
             chains(2,j,nchas)=xendr(2,j)
             chains(3,j,nchas)=xendr(3,j)
          enddo
-            gauches(nchas) = ng
+            transs(nchas) = ng
          if (nchas.eq.25)exit
  enddo   
 enddo
