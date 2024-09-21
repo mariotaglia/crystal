@@ -30,7 +30,7 @@ real*8 protemp
 integer i,j, ix, iy, iz, ii, ax, ay, az
 integer im, ip
 integer jx, jy, jz, jj
-real*8 xpot(dimx, dimy, dimz, N_monomer)
+real*8 xpot(dimx, dimy, dimz, 0:N_monomer) ! 0 is solvent
 real*8 xh_tosend(dimx,dimy,dimz)
 real*8 qsv_tosend(dimx,dimy,dimz)
 ! Charge
@@ -68,7 +68,7 @@ hds = -1
 !-----------------------------------------------------
 ! Common variables
 
-shift = 1.0d-100
+shift = 1.0d100
 
 ncells = dimx*dimy*dimz ! numero de celdas
 
@@ -243,7 +243,7 @@ enddo
 
 sttemp = st/vsol
 
-do im = 1, N_monomer ! loop over different monomer types
+do im = 0, N_monomer ! loop over different monomer types
 
 do ix=1,dimx
  do iy=1,dimy
@@ -409,7 +409,7 @@ do j = 1, longsv ! loop over segment
             if((jy.ge.1).and.(jy.le.dimy)) then
             if((jz.ge.1).and.(jz.le.dimz)) then
  
-            prosv = prosv+xpot(jx, jy, jz, 1)
+            prosv = prosv+xpot(jx, jy, jz, 0)
 
             endif     
             endif     
