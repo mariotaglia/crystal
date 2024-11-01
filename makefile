@@ -37,7 +37,7 @@ endif
 
 # some definitions
 SHELL = /bin/bash
-FFLAGS= -O3 #  -fbacktrace -fbounds-check # -O3
+FFLAGS=   -fbacktrace -fbounds-check # -O3
 
 
 ifeq ($(HOST),piluso.rosario-conicet.gov.ar)

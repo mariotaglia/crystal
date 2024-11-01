@@ -58,6 +58,15 @@ if(electroflag.eq.1) then
 do i = ncells*(N_poorsol+1), ncells*(N_poorsol+2)
    pp(i) = 1.0
 enddo
+do i = ncells*(N_poorsol+2)+1, ncells*(N_poorsol+5) !noeq
+   pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+enddo
+else
+do i = ncells*(N_poorsol+1)+1, ncells*(N_poorsol+4) !noeq
+   pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+
+enddo
+
 endif
 
    ier = 0
@@ -159,6 +168,13 @@ enddo
 if(electroflag.eq.1) then
 do i = ncells*(N_poorsol+1), ncells*(N_poorsol+2)  !constraint vector
    constr(i) = 0.0 ! no contraint for psi
+enddo
+do i = ncells*(N_poorsol+2)+1, ncells*(N_poorsol+5) !noeq
+constr(i) = 2.0 ! !constraint vector xpos, xneg, xHplus, xOHmin > 0
+enddo
+else
+do i = ncells*(N_poorsol+1)+1, ncells*(N_poorsol+4) !noeq
+constr(i) = 2.0 ! !constraint vector xpos, xneg, xHplus, xOHmin > 0
 enddo
 endif
 

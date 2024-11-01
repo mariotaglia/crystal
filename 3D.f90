@@ -12,6 +12,7 @@ use MPI
 use ellipsoid
 use ematrix
 use mparameters_monomer
+use inputtemp
 implicit none
 external fcn
 integer i, ix, iy, iz, ip
@@ -62,19 +63,27 @@ if(infile.eq.0) then
 
 if(electroflag.eq.1) then
 
-  do i=(N_poorsol+1)*ncells+1, (N_poorsol+5)*ncells !noeq
-
-  !do i=(N_poorsol+1)*ncells+1, (N_poorsol+2)*ncells
+  do i=(N_poorsol+1)*ncells+1, (N_poorsol+2)*ncells
     xg1(i)=0.0d0
     x1(i)=0.0d0
   enddo
+  do i = (N_poorsol+2)*ncells+1, (N_poorsol+4)*ncells !!add noeq
+    xg1(i) = xsalt/zpos
+    x1(i) = xsalt/zpos
+  enddo  
+   do i = (N_poorsol+4)*ncells+1, (N_poorsol+5)*ncells
+   xg1(i) = (cHplus*Na/(1.0d24))*(vsol)
+   x1(i) = (cHplus*Na/(1.0d24))*(vsol)
+   enddo
 else  !noeq
-  do i=(N_poorsol+1)*ncells+1, (N_poorsol+4)*ncells !noeq
-
-  !do i=(N_poorsol+1)*ncells+1, (N_poorsol+2)*ncells
-    xg1(i)=0.0d0
-    x1(i)=0.0d0
+  do i = (N_poorsol+1)*ncells+1, (N_poorsol+3)*ncells
+    xg1(i) = xsalt/zpos
+    x1(i) = xsalt/zpos
   enddo
+   do i = (N_poorsol+3)*ncells+1, (N_poorsol+4)*ncells
+   xg1(i) = (cHplus*Na/(1.0d24))*(vsol)
+   x1(i) = (cHplus*Na/(1.0d24))*(vsol)
+   enddo                                              !!fin add noeqº
 
 endif ! electroflag
 endif ! infile
