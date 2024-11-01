@@ -54,10 +54,10 @@ enddo
 enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Bulk or Wall, PBC = 0 or 2
+! Bulk or Wall, PBC = 0 or 2, 4 eq a bulk
 
 select case (PBC(1)) ! x = 0
-case(0) ! set bulk 
+case(0,4) ! set bulk 
    epsfcn(0,:,:) = 1.0 ! water dielectric
    Depsfcn(0,:,:) = 0.0 ! irrevant, shouldn't be polymer in bulk
 case(2)
@@ -66,7 +66,7 @@ case(2)
 endselect
 
 select case (PBC(2)) ! x = dimx
-case(0) ! set bulk 
+case(0,4) ! set bulk 
    epsfcn(dimx+1,:,:) = 1.0 ! water dielectric
    Depsfcn(dimx+1,:,:) = 0.0 ! irrevant, shouldn't be polymer in bulk
 case(2)
@@ -75,7 +75,7 @@ case(2)
 endselect
 
 select case (PBC(3)) ! y = 0
-case(0) ! set bulk 
+case(0,4) ! set bulk 
    epsfcn(:,0,:) = 1.0 ! water dielectric
    Depsfcn(:,0,:) = 0.0 ! irrevant, shouldn't be polymer in bulk
 case(2)
@@ -84,7 +84,7 @@ case(2)
 endselect
 
 select case (PBC(4)) ! y = dimy
-case(0) ! set bulk 
+case(0,4) ! set bulk 
    epsfcn(:,dimy+1,:) = 1.0 ! water dielectric
    Depsfcn(:,dimy+1,:) = 0.0 ! irrevant, shouldn't be polymer in bulk
 case(2)
@@ -93,7 +93,7 @@ case(2)
 endselect
 
 select case (PBC(5)) ! z = 0
-case(0)
+case(0,4)
    epsfcn(:,:,0) = 1.0 ! water dielectric
    Depsfcn(:,:,0) = 0.0 ! irrevant, shouldn't be polymer in bulk
 case(2)
@@ -102,7 +102,7 @@ case(2)
 endselect
 
 select case (PBC(6)) ! z = dimz
-case(0) ! set bulk 
+case(0,4) ! set bulk 
    epsfcn(:,:,dimz+1) = 1.0 ! water dielectric
    Depsfcn(:,:,dimz+1) = 0.0 ! irrevant, shouldn't be polymer in bulk
 case(2)

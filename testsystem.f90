@@ -28,31 +28,37 @@ testsystem = 0
 if (v(1).le.0.0) then ! system is checked in transformed space
  if (PBC(1).eq.2)testsystem = -1
  if (PBC(1).eq.0)testsystem = -2
+ if (PBC(1).eq.4)testsystem = -2
 endif
 
 if (v(1).gt.(float(dimx)*delta)) then
  if (PBC(2).eq.2)testsystem = -1
  if (PBC(2).eq.0)testsystem = -2
+ if (PBC(2).eq.4)testsystem = -2
 endif
 
 if (v(2).le.0.0) then
  if (PBC(3).eq.2)testsystem = -1
  if (PBC(3).eq.0)testsystem = -2
+ if (PBC(3).eq.4)testsystem = -2
 endif
 
 if (v(2).gt.(float(dimy)*delta)) then
  if (PBC(4).eq.2)testsystem = -1
  if (PBC(4).eq.0)testsystem = -2
+ if (PBC(4).eq.4)testsystem = -2
 endif
 
 if (v(3).le.0.0) then
  if (PBC(5).eq.2)testsystem = -1
  if (PBC(5).eq.0)testsystem = -2
+ if (PBC(5).eq.4)testsystem = -2
 endif
 
 if (v(3).gt.(float(dimz)*delta)) then
  if (PBC(6).eq.2)testsystem = -1
  if (PBC(6).eq.0)testsystem = -2
+ if (PBC(6).eq.4)testsystem = -2
 endif
 
 if (testsystem.eq.0) then ! saves some time

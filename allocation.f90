@@ -27,14 +27,22 @@ ALLOCATE (xpar(dimx*dimy*dimz))
 
 ! results
 ALLOCATE (avpol(dimx, dimy, dimz, N_monomer))
-ALLOCATE (xpos(dimx, dimy, dimz)) ! pos ion
-ALLOCATE (xneg(dimx, dimy, dimz)) ! neg ioni
+!ALLOCATE (xpos(dimx, dimy, dimz)) ! pos ion
+!ALLOCATE (xneg(dimx, dimy, dimz)) ! neg ioni
+ALLOCATE (xpos(0:dimx+1, 0:dimy+1, 0:dimz+1)) ! pos ion no eq
+ALLOCATE (xneg(0:dimx+1,0:dimy+1, 0:dimz+1)) ! neg ioni no eq
 ALLOCATE (qtot(dimx, dimy, dimz)) ! Carga total
-ALLOCATE (xHplus(dimx, dimy, dimz)) ! H+
-ALLOCATE (xOHmin(dimx, dimy, dimz)) ! OH-
+!ALLOCATE (xHplus(dimx, dimy, dimz)) ! H+
+!ALLOCATE (xOHmin(dimx, dimy, dimz)) ! OH-
+ALLOCATE (xHplus(0:dimx+1, 0:dimy+1, 0:dimz+1)) ! H+ no eq
+ALLOCATE (xOHmin(0:dimx+1, 0:dimy+1, 0:dimz+1)) ! OH- no eq
 ALLOCATE (fdis(dimx, dimy, dimz, N_monomer))
 ALLOCATE (epsfcn(0:dimx+1, 0:dimy+1, 0:dimz+1))
 ALLOCATE (Depsfcn(0:dimx+1, 0:dimy+1, 0:dimz+1))
+ALLOCATE (mupos(0:dimx+1, 0:dimy+1, 0:dimz+1))
+ALLOCATE (muneg(0:dimx+1, 0:dimy+1, 0:dimz+1))
+ALLOCATE (muHplus(0:dimx+1, 0:dimy+1, 0:dimz+1))
+ALLOCATE (muOHmin(0:dimx+1, 0:dimy+1, 0:dimz+1))
 
 ! ematrix
 ALLOCATE (volprot(dimx,dimy,dimz))

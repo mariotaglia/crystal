@@ -62,7 +62,16 @@ if(infile.eq.0) then
 
 if(electroflag.eq.1) then
 
-  do i=(N_poorsol+1)*ncells+1, (N_poorsol+2)*ncells
+  do i=(N_poorsol+1)*ncells+1, (N_poorsol+5)*ncells !noeq
+
+  !do i=(N_poorsol+1)*ncells+1, (N_poorsol+2)*ncells
+    xg1(i)=0.0d0
+    x1(i)=0.0d0
+  enddo
+else  !noeq
+  do i=(N_poorsol+1)*ncells+1, (N_poorsol+4)*ncells !noeq
+
+  !do i=(N_poorsol+1)*ncells+1, (N_poorsol+2)*ncells
     xg1(i)=0.0d0
     x1(i)=0.0d0
   enddo

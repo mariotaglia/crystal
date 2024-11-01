@@ -63,6 +63,10 @@ integer PBC(6)
 integer vtkflag
 integer electroflag
 integer eqs ! number of set of equations 
+real*8 pHbulk_l, pHbulk_r !noeq
+real*8 pOHbulk_l, pOHbulk_r !noeq
+real*8 csalt_l, csalt_r !noeq
+
 endmodule
 
 
@@ -155,7 +159,11 @@ real*8 st
 real*8 sts(100)
 
 integer npH
-real*8 pHs(100)
+real*8 pHs(100) !noeq comentar a futuro?
+real*8 pHs_l(100), pHs_r(100) !noeq
+
+integer npsi!noeq
+real*8 psibulk_l(100), psibulk_r(100), psi_ref ! noeq
 
 integer nsc
 real*8 sc
@@ -238,6 +246,8 @@ real*8, allocatable :: qtot(:,:,:) ! Carga total
 real*8, allocatable :: xHplus(:,:,:) ! H+
 real*8, allocatable :: xOHmin(:,:,:) ! OH-
 real*8, allocatable :: fdis(:,:,:,:)
+real*8, allocatable :: mupos(:,:,:), muneg(:,:,:) !noeq
+real*8, allocatable :: muHplus(:,:,:), muOHmin(:,:,:) !noeq
 endmodule
 
 module bulk

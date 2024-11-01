@@ -26,8 +26,9 @@ logical flag
 character*10 filename
 integer j, i, ii, iii
 integer flagcrash
-real*8 stok,kpok,pHbulkok
+real*8 stok,kpok,pHbulkok, psiok
 real*8 time0, timeF
+real*8 betae
 
 stdout = 6
 
@@ -147,7 +148,7 @@ endif
 select case (vscan)
 
 case (1)
-pHbulk=pHs(1)
+pHbulk=pHs(1) 
 st = sts(1)
 kp = 1.0d10+kps(1)
 do i = 1, nkp
@@ -254,6 +255,41 @@ do i = 1, npH
 
 enddo
 
+case (4)
+betae = 38.94
+pHbulk=pHs(1)
+kp = 0
+st = sts(1)
+psi_ref = 1.0d10+psibulk_r(1)
+do i = 1, npsi
+ do while (psi_ref.ne.psibulk_r(i))
+  psi_ref = psibulk_r(i)
+  if(rank.eq.0)write(stdout,*)'Switch to psi = ', psi_ref/betae
+  flagcrash = 1
+  do while(flagcrash.eq.1)
+   flagcrash = 0
+   call initbulk
+   call solve(flagcrash)
+   if(flagcrash.eq.1) then
+    if(i.eq.1)stop
+    psi_ref = (psi_ref + psiOK)/2.0
+    if(rank.eq.0)write(stdout,*)'Error, switch to psi = ', psi_ref/betae
+   endif
+  enddo
+
+  psiOK = psi_ref ! last st solved OK
+  if(rank.eq.0)write(stdout,*) 'Solved OK, psi: ', psi_ref/betae
+
+  enddo  ! do while ne
+
+ counterr = counter + i + ii  - 1
+ call Free_Energy_Calc(counterr)
+ if(rank.eq.0)write(stdout,*) 'Free energy after solving', free_energy
+ call savedata(counterr)
+ if(rank.eq.0)write(stdout,*) 'Save OK'
+ call store2disk(counterr)
+
+ enddo ! do i 
 
 endselect
 

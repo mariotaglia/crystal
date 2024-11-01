@@ -29,6 +29,7 @@ character basura
 integer ndi
 real*8 ndr
 integer NNN2
+real*8 betae !noeq
 ! not defined variables, change if any variable can take the value
 
 seed = 938121
@@ -80,7 +81,8 @@ dy = ndr
 dz = ndr
 cdiva = ndr
 csalt = ndr
-
+csalt_l = ndr !noeq
+csalt_r = ndr !noeq
 vpol0 = ndr
 fz=ndr !yamila
 
@@ -258,9 +260,9 @@ do while (ios == 0)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('csalt')
-   read(buffer, *, iostat=ios) csalt
+   read(buffer, *, iostat=ios) csalt_l, csalt_r !noeq
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
+   csalt = csalt_l !borrar a futuro
  case ('vsol')
    read(buffer, *, iostat=ios) vsol0
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -327,11 +329,26 @@ do while (ios == 0)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
   
    do i = 1, npH
-   read(fh,*)pHs(i)
+   read(fh,*)pHs_l(i), pHs_r(i) !noeq
+   pHs(i) = pHs_l(i) !noeq borrar dps
    enddo 
 
-   pHbulk = pHs(1)
+   pHbulk_l = pHs_l(1) !noeq
+   pHbulk_r = pHs_r(1) !noeq
+   pHbulk = pHs_l(1) ! noeq borrar a futuro
+ case('npsi') !noeq
+        betae = 38.94             ! beta * e
 
+       read(buffer, *, iostat=ios) npsi
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+   do i = 1, npsi
+   read(fh,*)psibulk_l(i), psibulk_r(i) !noeq
+   psibulk_l(i) = psibulk_l(i)*betae
+   psibulk_r(i) = psibulk_r(i)*betae
+   enddo
+
+   
  case ('nsc')
    read(buffer, *, iostat=ios) nsc
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -681,11 +698,14 @@ if(dielS.eq.ndr)call stopundef('dielS')
 if(dielP.eq.ndr)call stopundef('dielP')
 if(lseg.eq.ndr)call stopundef('lseg')
 if(csalt.eq.ndr)call stopundef('csalt')
+if(csalt_l.eq.ndr) call stopundef('csalt_l') !noeq
+if(csalt_r.eq.ndr) call stopundef('csalt_r') !noeq
 if(vpol0.eq.ndr)call stopundef('vpol')
 if(vsol0.eq.ndr)call stopundef('vsol')
 if(benergy.eq.ndr)call stopundef('benergy')
 if(gama0.eq.ndr)call stopundef('gama')
 if(fz.eq.ndr)call stopundef('fz') !yamila
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

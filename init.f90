@@ -29,8 +29,10 @@ error = 1e-4 ! para comparar con la norma...
 errel=1d-6
 itmax=200
 
-if(electroflag.eq.0)eqs=(1+N_poorsol)
-if(electroflag.eq.1)eqs=(2+N_poorsol)
+!if(electroflag.eq.0)eqs=(1+N_poorsol)
+!if(electroflag.eq.1)eqs=(2+N_poorsol)
+if(electroflag.eq.0)eqs=(4+N_poorsol) !no eq
+if(electroflag.eq.1)eqs=(5+N_poorsol) !no eq
 
 end subroutine
 
@@ -93,7 +95,6 @@ integer im
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Input-dependent variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 vpol = vpol0/vsol ! vpol in units of vsol
 constqE = vpol/(2.0d0*constq)
@@ -196,6 +197,7 @@ integer cccc
 character*20 filename
 character*5  title
 real*8 temp(dimx,dimy,dimz)
+real*8 temp2(0:dimx+1, 0:dimy+1, 0:dimz+1)
 real*8 sumpol
 integer ix,iy,iz, im
 !----------------------------------------------------------
@@ -268,6 +270,22 @@ if ((vtkflag.ge.1).and.(systemtype.eq.70))call savemuvect(pdbcom,pdbmu,cccc)
 ! Particle
 !  title = 'avpar'
 !  call savetodisk(volprot, title, cccc)
+
+!para noeq
+   title = 'mupos'
+  temp2(0:dimx+1,0:dimy+1, 0:dimz+1) = mupos(0:dimx+1,0:dimy+1, 0:dimz+1)
+  call savetodisk(temp2, title, cccc)
+  title = 'muneg'
+  temp2(0:dimx+1,0:dimy+1, 0:dimz+1) = muneg(0:dimx+1,0:dimy+1, 0:dimz+1)
+  call savetodisk(temp2, title, cccc)
+  title = 'muHplus'
+  temp2(0:dimx+1,0:dimy+1, 0:dimz+1) = muHplus(0:dimx+1,0:dimy+1, 0:dimz+1)
+  call savetodisk(temp2, title, cccc)
+  title = 'muOHmin'
+  temp2(0:dimx+1,0:dimy+1, 0:dimz+1) = muOHmin(0:dimx+1,0:dimy+1, 0:dimz+1)
+  call savetodisk(temp2, title, cccc)
+
+
 
 ! save volprot for supercell
 

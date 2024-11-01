@@ -46,7 +46,15 @@ real*8 avpol_temp(dimx,dimy,dimz,N_monomer)
 real*8 q_tosend
 real*8 gradpsi2
 real*8 fv
-
+!no eq
+real*8 cHplus_l, cHplus_r, xHplusbulk_l, xHplusbulk_r
+real*8 cOHmin_l, cOHmin_r, xOHminbulk_l, xOHminbulk_r
+real*8 xsalt_l, xsalt_r
+real*8 xposbulk_l, xposbulk_r, xnegbulk_l, xnegbulk_r
+real*8 xsolbulk_l, xsolbulk_r
+real*8 muposbulk_l, muposbulk_r, munegbulk_l, munegbulk_r
+real*8 muHplusbulk_l, muHplusbulk_r, muOHminbulk_l, muOHminbulk_r
+real*8 fpos, fneg, fHOH
 ! hamiltonian inception
 real*8 hfactor, hd
 real*8, allocatable :: hds(:)
@@ -88,8 +96,18 @@ do ix=1,dimx
      do ip = 1, N_poorsol
       xtotal(ix,iy,iz,ip) = x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+ ip*ncells) !fraccion polimero de tipo ip
      enddo
-     if(electroflag.eq.1)psi(ix,iy,iz)=x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)   !potencial electrostatico
-
+     if(electroflag.eq.1) then
+        psi(ix,iy,iz)=x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)   !potencial electrostatico
+        xpos(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+ncells)
+        xneg(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+2*ncells)
+        xHplus(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+3*ncells)
+        xOHmin(ix,iy,iz)=Kw*(xh(ix,iy,iz)**2)/xHplus(ix,iy,iz)
+      else 
+        xpos(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)
+        xneg(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+ncells)
+        xHplus(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+2*ncells)
+        xOHmin(ix,iy,iz)=Kw*(xh(ix,iy,iz)**2)/xHplus(ix,iy,iz)
+      endif
   enddo
  enddo
 enddo
@@ -120,10 +138,10 @@ enddo
 enddo
 enddo
 
-! Bulk or Wall, PBC = 0 or 2
+! Bulk or Wall, PBC = 0 or 2 or 4 ! noqe
 
 select case (PBC(1)) ! x = 0
-case(0) ! set bulk 
+case(0,4) ! set bulk 
    psi(0,:,:) = 0.0 
 case(2)
    psi(0,:,:) = psi(1,:,:) ! zero charge
@@ -134,10 +152,12 @@ case(0) ! set bulk
    psi(dimx+1,:,:) = 0.0  
 case(2)
    psi(dimx+1,:,:) = psi(dimx,:,:) ! zero charge
+case(4)
+   psi(dimx+1,:,:) = psi_ref !      
 endselect
 
 select case (PBC(3)) ! y = 0
-case(0) ! set bulk 
+case(0,4) ! set bulk 
    psi(:,0,:) = 0.0  
 case(2)
    psi(:,0,:) = psi(:,1,:) ! zero charge
@@ -148,10 +168,12 @@ case(0) ! set bulk
    psi(:,dimy+1,:) = 0.0
 case(2)
    psi(:,dimy+1,:) = psi(:,dimy,:) ! zero charge
+case(4)
+   psi(:,dimy+1,:) = psi_ref     
 endselect
 
 select case (PBC(5)) ! z = 0
-case(0) ! set bulk 
+case(0,4) ! set bulk 
    psi(:,:,0) = 0.0  
 case(2)
    psi(:,:,0) = psi(:,:,1) ! zero charge
@@ -162,6 +184,8 @@ case(0) ! set bulk
    psi(:,:,dimz+1) = 0.0
 case(2)
    psi(:,:,dimz+1) = psi(:,:,dimz) ! zero charge
+case(4)
+   psi(:,:,dimz+1) = psi_ref     
 endselect
 
 ! volume fraction and frdir
@@ -502,7 +526,194 @@ enddo
 enddo
 
 endif ! electroflag
- 
+
+!! ec de no eq!!
+!!!defino pre mu bulk
+      cHplus_l = 10**(-pHbulk_l)    ! concentration H+ in bulk
+      cHplus_r = 10**(-pHbulk_r)    ! concentration H+ in bulk
+
+      xHplusbulk_l = (cHplus_l*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
+      xHplusbulk_r = (cHplus_r*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
+
+      pOHbulk_l= pKw -pHbulk_l
+      pOHbulk_r= pKw -pHbulk_r
+
+      cOHmin_l = 10**(-pOHbulk_l)   ! concentration OH- in bulk
+      cOHmin_r = 10**(-pOHbulk_r)   ! concentration OH- in bulk
+
+      xOHminbulk_l = (cOHmin_l*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
+      xOHminbulk_r = (cOHmin_r*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
+
+      xsalt_l=(csalt_l*Na/(1.0d24))*(vsalt*vsol)   ! volume fraction salt,csalt in mol/l
+      xsalt_r=(csalt_r*Na/(1.0d24))*(vsalt*vsol)   ! volume fraction salt,csalt in mol/l
+
+      if(pHbulk_l.le.7) then  ! pH<= 7
+            xposbulk_l=xsalt_l/zpos
+            xnegbulk_l=   -xsalt_l/zneg +(xHplusbulk_l -xOHminbulk_l) *vsalt ! NaCl+ HCl
+      else                  ! pH >7
+            xposbulk_l=xsalt_l/zpos +(xOHminbulk_l -xHplusbulk_l)*vsalt ! NaCl+ NaOH
+            xnegbulk_l=-xsalt_l/zneg
+      endif
+
+      if(pHbulk_r.le.7) then  ! pH<= 7
+            xposbulk_r=xsalt_r/zpos
+            xnegbulk_r= -xsalt_r/zneg +(xHplusbulk_r -xOHminbulk_r) *vsalt ! NaCl+ HCl  
+      else                  ! pH >7 
+            xposbulk_r=xsalt_r/zpos +(xOHminbulk_r -xHplusbulk_r)*vsalt ! NaCl+ NaOH   
+            xnegbulk_r=-xsalt_r/zneg
+      endif
+
+
+         xsolbulk_l=1.0 -xHplusbulk_l -xOHminbulk_l - xnegbulk_l -xposbulk_l
+
+         xsolbulk_r=1.0 -xHplusbulk_r -xOHminbulk_r - xnegbulk_r -xposbulk_r
+
+
+
+!mu bulk
+
+         muposbulk_l= dlog(xposbulk_l/vsalt) - dlog(xsolbulk_l)*vsalt + 0.0*zpos
+
+         munegbulk_l=dlog(xnegbulk_l/vsalt)-dlog(xsolbulk_l)*vsalt + 0.0*zneg
+
+         muHplusbulk_l=dlog(xHplusbulk_l)-dlog(xsolbulk_l) + 0.0
+
+         muOHminbulk_l=dlog(xOHminbulk_l)-dlog(xsolbulk_l) - 0.0
+
+         muposbulk_r=dlog(xposbulk_r/vsalt)-dlog(xsolbulk_r)*vsalt +psi_ref*zpos
+
+         munegbulk_r=dlog(xnegbulk_r/vsalt)-dlog(xsolbulk_r)*vsalt +psi_ref*zneg
+
+         muHplusbulk_r=dlog(xHplusbulk_r)-dlog(xsolbulk_r)*vsalt +psi_ref
+
+         muOHminbulk_r=dlog(xOHminbulk_r)-dlog(xsolbulk_r)*vsalt -psi_ref
+     
+
+!mu no bulk
+do ix=1,dimx
+do iy=1,dimy
+do iz=1,dimz
+
+       mupos(ix,iy,iz)=dlog(xpos(ix,iy,iz)/vsalt)-dlog(xh(ix,iy,iz))*vsalt+psi(ix,iy,iz)*zpos
+
+       muneg(ix,iy,iz)=dlog(xneg(ix,iy,iz)/vsalt)-dlog(xh(ix,iy,iz))*vsalt +psi(ix,iy,iz)*zneg
+
+       muHplus(ix,iy,iz)=dlog(xHplus(ix,iy,iz))-dlog(xh(ix,iy,iz)) +psi(ix,iy,iz)
+
+       muOHmin(ix,iy,iz)=dlog(xOHmin(ix,iy,iz))-dlog(xh(ix,iy,iz)) -psi(ix,iy,iz)
+
+enddo
+enddo
+enddo
+     mupos(0,:,:) = mupos(1,:,:)
+     mupos(:,0,:) = mupos(:,1,:)
+     mupos(:,:,0) = muposbulk_l
+
+     mupos(dimx+1,:,:) = mupos(dimx,:,:)
+     mupos(:,dimy+1,:) = mupos(:,dimy,:)
+     mupos(:,:,dimz+1) = muposbulk_r
+
+
+     muneg(0,:,:) = muneg(1,:,:)
+     muneg(:,0,:) = muneg(:,1,:)
+     muneg(:,:,0) = munegbulk_l
+
+     muneg(dimx+1,:,:) = muneg(dimx,:,:)
+     muneg(:,dimy+1,:) = muneg(:,dimy,:)
+     muneg(:,:,dimz+1) = munegbulk_r
+
+     muHplus(0,:,:) = muHplus(1,:,:)
+     muHplus(:,0,:) = muHplus(:,1,:)
+     muHplus(:,:,0) = muHplusbulk_l
+
+     muHplus(dimx+1,:,:) = muHplus(dimx,:,:)
+     muHplus(:,dimy+1,:) = muHplus(:,dimy,:)
+     muHplus(:,:,dimz+1) = muHplusbulk_r
+
+     muOHmin(0,:,:) = muOHmin(1,:,:)
+     muOHmin(:,0,:) = muOHmin(:,1,:)
+     muOHmin(:,:,0) = muOHminbulk_l
+
+     muOHmin(dimx+1,:,:) = muOHmin(dimx,:,:)
+     muOHmin(:,dimy+1,:) = muOHmin(:,dimy,:)
+     muOHmin(:,:,dimz+1) = muOHminbulk_r
+
+
+     xpos(0,:,:) = xpos(1,:,:)
+     xpos(:,0,:) = xpos(:,1,:)
+     xpos(:,:,0) = xposbulk_l
+
+     xpos(dimx+1,:,:) = xpos(dimx,:,:)
+     xpos(:,dimy+1,:) = xpos(:,dimy,:)
+     xpos(:,:,dimz+1) = xposbulk_r
+
+
+     xneg(0,:,:) = xneg(1,:,:)
+     xneg(:,0,:) = xneg(:,1,:)
+     xneg(:,:,0) = xnegbulk_l
+
+     xneg(dimx+1,:,:) = xneg(dimx,:,:)
+     xneg(:,dimy+1,:) = xneg(:,dimy,:)
+     xneg(:,:,dimz+1) = xnegbulk_r
+
+     xHplus(0,:,:) = xHplus(1,:,:)
+     xHplus(:,0,:) = xHplus(:,1,:)
+     xHplus(:,:,0) = xHplusbulk_l
+
+     xHplus(dimx+1,:,:) = xHplus(dimx,:,:)
+     xHplus(:,dimy+1,:) = xHplus(:,dimy,:)
+     xHplus(:,:,dimz+1) = xHplusbulk_r
+
+     xOHmin(0,:,:) = xOHmin(1,:,:)
+     xOHmin(:,0,:) = xOHmin(:,1,:)
+     xOHmin(:,:,0) = xOHminbulk_l
+
+     xOHmin(dimx+1,:,:) = xOHmin(dimx,:,:)
+     xOHmin(:,dimy+1,:) = xOHmin(:,dimy,:)
+     xOHmin(:,:,dimz+1) = xOHminbulk_r
+    
+
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+
+
+  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells) = &
+        0.5*(xpos(ix+1,iy,iz)-xpos(ix-1,iy,iz)) *(mupos(ix+1,iy,iz)-mupos(ix-1,iy,iz)) &
+        +3*xpos(ix,iy,iz)*(mupos(ix+1,iy,iz)-2*mupos(ix,iy,iz)+mupos(ix-1,iy,iz)) &
+        +0.5*(xpos(ix,iy+1,iz)-xpos(ix,iy-1,iz))*(mupos(ix,iy+1,iz)-mupos(ix,iy-1,iz)) &
+        +3*xpos(ix,iy,iz)*(mupos(ix,iy+1,iz)-2*mupos(ix,iy,iz)+mupos(ix,iy-1,iz)) &
+        +0.5*(xpos(ix,iy,iz+1)-xpos(ix,iy,iz-1))*(mupos(ix,iy,iz+1)-mupos(ix,iy,iz-1)) & 
+        +3*xpos(ix,iy,iz)*(mupos(ix,iy,iz+1)-2*mupos(ix,iy,iz)+mupos(ix,iy,iz+1)) 
+
+  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells) = & 
+      0.5*(xpos(ix+1,iy,iz)-xpos(ix-1,iy,iz))*(mupos(ix+1,iy,iz)-mupos(ix-1,iy,iz)) &
+      +3*xpos(ix,iy,iz)*(mupos(ix+1,iy,iz)-2*mupos(ix,iy,iz)+mupos(ix-1,iy,iz)) &
+      +0.5*(xpos(ix,iy+1,iz)-xpos(ix,iy-1,iz))*(mupos(ix,iy+1,iz)-mupos(ix,iy-1,iz)) &
+      +3*xpos(ix,iy,iz)*(mupos(ix,iy+1,iz)-2*mupos(ix,iy,iz)+mupos(ix,iy-1,iz)) &
+      +0.5*(xpos(ix,iy,iz+1)-xpos(ix,iy,iz-1))*(mupos(ix,iy,iz+1)-mupos(ix,iy,iz-1)) &
+      +3*xpos(ix,iy,iz)*(mupos(ix,iy,iz+1)-2*mupos(ix,iy,iz)+mupos(ix,iy,iz+1)) 
+
+  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+ncells)=  &
+       0.5*(xneg(ix+1,iy,iz)-xneg(ix-1,iy,iz))*(muneg(ix+1,iy,iz)-muneg(ix-1,iy,iz)) &
+      +3*xneg(ix,iy,iz)*(muneg(ix+1,iy,iz)-2*muneg(ix,iy,iz)+muneg(ix-1,iy,iz)) &
+      +0.5*(xneg(ix,iy+1,iz)-xneg(ix,iy-1,iz))*(muneg(ix,iy+1,iz)-muneg(ix,iy-1,iz)) &
+      +3*xneg(ix,iy,iz)*(muneg(ix,iy+1,iz)-2*muneg(ix,iy,iz)+muneg(ix,iy-1,iz)) &
+      +0.5*(xneg(ix,iy,iz+1)-xneg(ix,iy,iz-1))*(muneg(ix,iy,iz+1)-muneg(ix,iy,iz-1)) &
+      +3*xneg(ix,iy,iz)*(muneg(ix,iy,iz+1)-2*muneg(ix,iy,iz)+muneg(ix,iy,iz+1)) 
+
+  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+2*ncells)=  &
+       0.5*(xHplus(ix+1,iy,iz)-xHplus(ix-1,iy,iz))*(muHplus(ix+1,iy,iz)-muHplus(ix-1,iy,iz)) &
+      +3*xHplus(ix,iy,iz)*(muHplus(ix+1,iy,iz)-2*muHplus(ix,iy,iz)+muHplus(ix-1,iy,iz)) &
+      +0.5*(xHplus(ix,iy+1,iz)-xHplus(ix,iy-1,iz))*(muHplus(ix,iy+1,iz)-muHplus(ix,iy-1,iz)) &
+      +3*xHplus(ix,iy,iz)*(muHplus(ix,iy+1,iz)-2*muHplus(ix,iy,iz)+muHplus(ix,iy-1,iz)) &
+      +0.5*(xHplus(ix,iy,iz+1)-xHplus(ix,iy,iz-1))*(muHplus(ix,iy,iz+1)-muHplus(ix,iy,iz-1)) &
+      +3*xHplus(ix,iy,iz)*(muHplus(ix,iy,iz+1)-2*muHplus(ix,iy,iz)+muHplus(ix,iy,iz+1)) 
+
+enddo
+enddo
+enddo
+
 norma = 0.0
 
 do i = 1, eqs*ncells
@@ -511,7 +722,7 @@ enddo
 
 iter = iter + 1
 if(verbose.ge.3) then
-if(rank.eq.0)write(stdout,*)'fkfun:', iter, norma, q(1)
+if(rank.eq.0)write(stdout,*)'fkfun:', iter, norma
 endif
 
 if(isnan(norma)) then
