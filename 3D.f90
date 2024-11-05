@@ -174,6 +174,18 @@ do i = 1, eqs*ncells
 enddo
 infile = 2 ! no vuelve a leer infile
 
+!!!!no eq
+
+do ix=1,dimx
+ do iy=1,dimy
+  do iz=1,dimz
+         xflag(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+ncells)=xpos(ix,iy,iz)
+         xflag(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+2*ncells)=xneg(ix,iy,iz)
+         xflag(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+3*ncells)=xHplus(ix,iy,iz)
+  enddo
+ enddo
+enddo
+
 !----------------------------------------------------------
 !  OUTPUT
 !----------------------------------------------------------

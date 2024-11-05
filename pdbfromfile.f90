@@ -38,7 +38,7 @@ enddo
 call assign_aa
 if (systemtype.eq.90) NN = 1
 if (systemtype.eq.80) NN = 2
-
+NN = 1
 ! translate  
 do i = 1, naa
 aapos(1,i) = aapos(1,i) + Rell(1,NN) ! translate

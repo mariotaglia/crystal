@@ -25,6 +25,7 @@ vsalt=((4.0/3.0)*pi*(0.2)**3)/vsol  ! volume salt in units of vsol 0.2=radius sa
 constq=delta*delta*4.0*pi*lb/vsol   ! multiplicative factor in poisson eq  
 pKw = 14
 Kw = 10**(-pKw)
+
 error = 1e-4 ! para comparar con la norma...
 errel=1d-6
 itmax=200
@@ -144,6 +145,7 @@ do im = 1, naa
       end select
 enddo
 
+Kw0 = (Kw*((vsol/xsolbulk)**2)*(Na/1.0d24)**2) ! intrinsic water disoc constant
 
 
 end subroutine
@@ -242,21 +244,21 @@ if ((vtkflag.ge.1).and.(systemtype.eq.70))call savemuvect(pdbcom,pdbmu,cccc)
 !  title = 'avsol'
 !  call savetodisk(temp, title, cccc)
 ! Cationes
-!  title = 'avpos'
-!  call savetodisk(xpos, title, cccc)
+ ! title = 'avpos'
+ ! call savetodisk(xpos, title, cccc)
 ! Aniones
-!  title = 'avneg'
-!  call savetodisk(xneg, title, cccc)
+ ! title = 'avneg'
+ ! call savetodisk(xneg, title, cccc)
 ! H+
-!  title = 'avHpl'
-!  call savetodisk(xHplus, title, cccc)
+ ! title = 'avHpl'
+ ! call savetodisk(xHplus, title, cccc)
 ! OH-
-!  title = 'avOHm'
-!  call savetodisk(xOHmin, title, cccc)
+ ! title = 'avOHm'
+ ! call savetodisk(xOHmin, title, cccc)
 ! fdis
-  title = 'frdis'
-  temp(1:dimx,1:dimy, 1:dimz) = fdis(1:dimx,1:dimy, 1:dimz,2)*avpol(1:dimx,1:dimy, 1:dimz,2)*(1-volprot(1:dimx,1:dimy, 1:dimz))
-  call savetodisk(temp, title, cccc)
+!  title = 'frdis'
+!  temp(1:dimx,1:dimy, 1:dimz) = fdis(1:dimx,1:dimy, 1:dimz,2)*avpol(1:dimx,1:dimy, 1:dimz,2)*(1-volprot(1:dimx,1:dimy, 1:dimz))
+!  call savetodisk(temp, title, cccc)
 
 
 ! Potencial electrostatico
@@ -265,6 +267,10 @@ if ((vtkflag.ge.1).and.(systemtype.eq.70))call savemuvect(pdbcom,pdbmu,cccc)
 
   title = 'poten'
   call savetodisk(temp, title, cccc)
+
+  temp2(0:dimx+1,0:dimy+1, 0:dimz+1) = psi(0:dimx+1,0:dimy+1, 0:dimz+1)
+  title = 'potdV'
+  call savetodisk(temp/38.94, title, cccc)
 
 
 ! Particle

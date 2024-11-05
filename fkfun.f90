@@ -55,6 +55,7 @@ real*8 xsolbulk_l, xsolbulk_r
 real*8 muposbulk_l, muposbulk_r, munegbulk_l, munegbulk_r
 real*8 muHplusbulk_l, muHplusbulk_r, muOHminbulk_l, muOHminbulk_r
 real*8 fpos, fneg, fHOH
+real*8 normaxh, normapsi, normaxpos, normaxneg, normaxHplus, sumnorma
 ! hamiltonian inception
 real*8 hfactor, hd
 real*8, allocatable :: hds(:)
@@ -86,7 +87,6 @@ endif
 
 
 ! Recupera xh y psi desde x()
-
 psi = 0.0
 do ix=1,dimx
  do iy=1,dimy
@@ -101,12 +101,12 @@ do ix=1,dimx
         xpos(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+ncells)
         xneg(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+2*ncells)
         xHplus(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+3*ncells)
-        xOHmin(ix,iy,iz)=Kw*(xh(ix,iy,iz)**2)/xHplus(ix,iy,iz)
+        xOHmin(ix,iy,iz)=Kw0*(xh(ix,iy,iz)**2)/xHplus(ix,iy,iz)
       else 
         xpos(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)
         xneg(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+ncells)
         xHplus(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+2*ncells)
-        xOHmin(ix,iy,iz)=Kw*(xh(ix,iy,iz)**2)/xHplus(ix,iy,iz)
+        xOHmin(ix,iy,iz)=Kw0*(xh(ix,iy,iz)**2)/xHplus(ix,iy,iz)
       endif
   enddo
  enddo
@@ -148,12 +148,12 @@ case(2)
 endselect
 
 select case (PBC(2)) ! x = dimx
-case(0) ! set bulk 
+case(0,4) ! set bulk 
    psi(dimx+1,:,:) = 0.0  
 case(2)
    psi(dimx+1,:,:) = psi(dimx,:,:) ! zero charge
-case(4)
-   psi(dimx+1,:,:) = psi_ref !      
+!case(4)
+!   psi(dimx+1,:,:) = psi_ref !      
 endselect
 
 select case (PBC(3)) ! y = 0
@@ -164,12 +164,12 @@ case(2)
 endselect
 
 select case (PBC(4)) ! y = dimy
-case(0) ! set bulk 
+case(0,4) ! set bulk 
    psi(:,dimy+1,:) = 0.0
 case(2)
    psi(:,dimy+1,:) = psi(:,dimy,:) ! zero charge
-case(4)
-   psi(:,dimy+1,:) = psi_ref     
+!case(4)
+!   psi(:,dimy+1,:) = psi_ref     
 endselect
 
 select case (PBC(5)) ! z = 0
@@ -197,10 +197,10 @@ do ix=1,dimx
  do iy=1,dimy
   do iz=1,dimz
     !no me queda claro si esto se comenta
- !   xpos(ix, iy, iz) = expmupos*(xh(ix, iy, iz)**vsalt)*dexp(-psi(ix, iy, iz)*zpos) ! ion plus volume fraction vsalt=vsal/vsv
- !   xneg(ix, iy, iz) = expmuneg*(xh(ix, iy, iz)**vsalt)*dexp(-psi(ix, iy, iz)*zneg) ! ion neg volume fraction
- !   xHplus(ix, iy, iz) = expmuHplus*(xh(ix, iy, iz))*dexp(-psi(ix, iy, iz))           ! H+ volume fraction
- !   xOHmin(ix, iy,iz) = expmuOHmin*(xh(ix,iy,iz))*dexp(+psi(ix,iy,iz))           ! OH-  volume fraction
+   ! xpos(ix, iy, iz) = expmupos*(xh(ix, iy, iz)**vsalt)*dexp(-psi(ix, iy, iz)*zpos) ! ion plus volume fraction vsalt=vsal/vsv
+   ! xneg(ix, iy, iz) = expmuneg*(xh(ix, iy, iz)**vsalt)*dexp(-psi(ix, iy, iz)*zneg) ! ion neg volume fraction
+   ! xHplus(ix, iy, iz) = expmuHplus*(xh(ix, iy, iz))*dexp(-psi(ix, iy, iz))           ! H+ volume fraction
+   !   xOHmin(ix, iy,iz) = expmuOHmin*(xh(ix,iy,iz))*dexp(+psi(ix,iy,iz))           ! OH-  volume fraction
      do im =1,N_monomer
         if (zpol(im).eq.1) then !BASE
           fdis(ix,iy,iz,im) = 1.0 /(1.0 + xOHmin(ix,iy,iz)/(K0(im)*xh(ix,iy,iz))) !k0 k en fraccion de volumen
@@ -678,13 +678,6 @@ do iy = 1, dimy
 do iz = 1, dimz
 
 
-  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells) = &
-        0.5*(xpos(ix+1,iy,iz)-xpos(ix-1,iy,iz)) *(mupos(ix+1,iy,iz)-mupos(ix-1,iy,iz)) &
-        +3*xpos(ix,iy,iz)*(mupos(ix+1,iy,iz)-2*mupos(ix,iy,iz)+mupos(ix-1,iy,iz)) &
-        +0.5*(xpos(ix,iy+1,iz)-xpos(ix,iy-1,iz))*(mupos(ix,iy+1,iz)-mupos(ix,iy-1,iz)) &
-        +3*xpos(ix,iy,iz)*(mupos(ix,iy+1,iz)-2*mupos(ix,iy,iz)+mupos(ix,iy-1,iz)) &
-        +0.5*(xpos(ix,iy,iz+1)-xpos(ix,iy,iz-1))*(mupos(ix,iy,iz+1)-mupos(ix,iy,iz-1)) & 
-        +3*xpos(ix,iy,iz)*(mupos(ix,iy,iz+1)-2*mupos(ix,iy,iz)+mupos(ix,iy,iz+1)) 
 
   f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells) = & 
       0.5*(xpos(ix+1,iy,iz)-xpos(ix-1,iy,iz))*(mupos(ix+1,iy,iz)-mupos(ix-1,iy,iz)) &
@@ -692,7 +685,7 @@ do iz = 1, dimz
       +0.5*(xpos(ix,iy+1,iz)-xpos(ix,iy-1,iz))*(mupos(ix,iy+1,iz)-mupos(ix,iy-1,iz)) &
       +3*xpos(ix,iy,iz)*(mupos(ix,iy+1,iz)-2*mupos(ix,iy,iz)+mupos(ix,iy-1,iz)) &
       +0.5*(xpos(ix,iy,iz+1)-xpos(ix,iy,iz-1))*(mupos(ix,iy,iz+1)-mupos(ix,iy,iz-1)) &
-      +3*xpos(ix,iy,iz)*(mupos(ix,iy,iz+1)-2*mupos(ix,iy,iz)+mupos(ix,iy,iz+1)) 
+      +3*xpos(ix,iy,iz)*(mupos(ix,iy,iz+1)-2*mupos(ix,iy,iz)+mupos(ix,iy,iz-1)) 
 
   f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+ncells)=  &
        0.5*(xneg(ix+1,iy,iz)-xneg(ix-1,iy,iz))*(muneg(ix+1,iy,iz)-muneg(ix-1,iy,iz)) &
@@ -700,7 +693,7 @@ do iz = 1, dimz
       +0.5*(xneg(ix,iy+1,iz)-xneg(ix,iy-1,iz))*(muneg(ix,iy+1,iz)-muneg(ix,iy-1,iz)) &
       +3*xneg(ix,iy,iz)*(muneg(ix,iy+1,iz)-2*muneg(ix,iy,iz)+muneg(ix,iy-1,iz)) &
       +0.5*(xneg(ix,iy,iz+1)-xneg(ix,iy,iz-1))*(muneg(ix,iy,iz+1)-muneg(ix,iy,iz-1)) &
-      +3*xneg(ix,iy,iz)*(muneg(ix,iy,iz+1)-2*muneg(ix,iy,iz)+muneg(ix,iy,iz+1)) 
+      +3*xneg(ix,iy,iz)*(muneg(ix,iy,iz+1)-2*muneg(ix,iy,iz)+muneg(ix,iy,iz-1)) 
 
   f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+2*ncells)=  &
        0.5*(xHplus(ix+1,iy,iz)-xHplus(ix-1,iy,iz))*(muHplus(ix+1,iy,iz)-muHplus(ix-1,iy,iz)) &
@@ -708,21 +701,48 @@ do iz = 1, dimz
       +0.5*(xHplus(ix,iy+1,iz)-xHplus(ix,iy-1,iz))*(muHplus(ix,iy+1,iz)-muHplus(ix,iy-1,iz)) &
       +3*xHplus(ix,iy,iz)*(muHplus(ix,iy+1,iz)-2*muHplus(ix,iy,iz)+muHplus(ix,iy-1,iz)) &
       +0.5*(xHplus(ix,iy,iz+1)-xHplus(ix,iy,iz-1))*(muHplus(ix,iy,iz+1)-muHplus(ix,iy,iz-1)) &
-      +3*xHplus(ix,iy,iz)*(muHplus(ix,iy,iz+1)-2*muHplus(ix,iy,iz)+muHplus(ix,iy,iz+1)) 
+      +3*xHplus(ix,iy,iz)*(muHplus(ix,iy,iz+1)-2*muHplus(ix,iy,iz)+muHplus(ix,iy,iz-1)) 
 
 enddo
 enddo
 enddo
 
 norma = 0.0
-
+normaxh = 0.0
+normapsi =0.0
+normaxpos = 0.0
+normaxneg = 0.0
+normaxHplus = 0.0
+sumnorma = 0.0
 do i = 1, eqs*ncells
   norma = norma + (f(i))**2
 enddo
 
+do i = 1, ncells
+  normaxh = normaxh+ (f(i))**2
+enddo
+
+do i =  ncells, 2*ncells
+  normapsi = normapsi ++ (f(i))**2
+enddo
+
+do i =  2*ncells, 3*ncells
+  normaxpos = normaxpos ++ (f(i))**2
+enddo
+
+do i =  3*ncells, 4*ncells
+  normaxneg = normaxneg ++ (f(i))**2
+enddo
+
+do i =  4*ncells, 5*ncells
+  normaxHplus = normaxHplus ++ (f(i))**2
+enddo
+
+
+sumnorma = sumnorma +normaxh+ normapsi+ normaxpos+ normaxneg+ normaxHplus
 iter = iter + 1
 if(verbose.ge.3) then
-if(rank.eq.0)write(stdout,*)'fkfun:', iter, norma
+if(rank.eq.0)write(stdout,*)'fkfun:', iter, norma, sumnorma, normaxh, normapsi, normaxpos, normaxneg, normaxHplus
 endif
 
 if(isnan(norma)) then
