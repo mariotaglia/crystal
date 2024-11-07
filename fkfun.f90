@@ -98,6 +98,7 @@ do ix=1,dimx
      enddo
      if(electroflag.eq.1) then
         psi(ix,iy,iz)=x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)   !potencial electrostatico
+       ! write(*,*) iz, psi(ix,iy,iz)
         xpos(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+ncells)
         xneg(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+2*ncells)
         xHplus(ix,iy,iz)= x(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+3*ncells)
@@ -141,35 +142,39 @@ enddo
 ! Bulk or Wall, PBC = 0 or 2 or 4 ! noqe
 
 select case (PBC(1)) ! x = 0
-case(0,4) ! set bulk 
+case(0) ! set bulk 
    psi(0,:,:) = 0.0 
 case(2)
    psi(0,:,:) = psi(1,:,:) ! zero charge
+case(4) 
+   psi(0,:,:) = psi(dimx,:,:)     
 endselect
 
 select case (PBC(2)) ! x = dimx
-case(0,4) ! set bulk 
+case(0) ! set bulk 
    psi(dimx+1,:,:) = 0.0  
 case(2)
    psi(dimx+1,:,:) = psi(dimx,:,:) ! zero charge
-!case(4)
-!   psi(dimx+1,:,:) = psi_ref !      
+case(4)
+   psi(dimx+1,:,:) = psi(1,:,:)      
 endselect
 
 select case (PBC(3)) ! y = 0
-case(0,4) ! set bulk 
+case(0) ! set bulk 
    psi(:,0,:) = 0.0  
 case(2)
    psi(:,0,:) = psi(:,1,:) ! zero charge
+case(4)
+  psi(:,0,:) = psi(:, dimy,:)      
 endselect
 
 select case (PBC(4)) ! y = dimy
-case(0,4) ! set bulk 
+case(0) ! set bulk 
    psi(:,dimy+1,:) = 0.0
 case(2)
    psi(:,dimy+1,:) = psi(:,dimy,:) ! zero charge
-!case(4)
-!   psi(:,dimy+1,:) = psi_ref     
+case(4)
+   psi(:,dimy+1,:) = psi(:,1,:)     
 endselect
 
 select case (PBC(5)) ! z = 0
@@ -501,7 +506,10 @@ do iz=1,dimz
 psivv = psi(ix+1,iy,iz)-2*psi(ix,iy,iz)+psi(ix-1,iy,iz)
 psiuu = psi(ix,iy+1,iz)-2*psi(ix,iy,iz)+psi(ix,iy-1,iz)
 psiww = psi(ix,iy,iz+1)-2*psi(ix,iy,iz)+psi(ix,iy,iz-1)
-
+!write(*,*) psi(ix+1,iy,iz),-2*psi(ix,iy,iz),psi(ix-1,iy,iz)
+!write(*,*)iz,  psi(ix,iy,iz+1),2*psi(ix,iy,iz),psi(ix,iy,iz-1)
+!write(*,*) psivv, psiuu,psiww
+!stop
 psivu = (psi(ix+1,iy+1,iz)+psi(ix-1,iy-1,iz)-psi(ix+1,iy-1,iz)-psi(ix-1,iy+1,iz))/4.0
 psivw = (psi(ix+1,iy,iz+1)+psi(ix-1,iy,iz-1)-psi(ix+1,iy,iz-1)-psi(ix-1,iy,iz+1))/4.0
 psiuw = (psi(ix,iy+1,iz+1)+psi(ix,iy-1,iz-1)-psi(ix,iy+1,iz-1)-psi(ix,iy-1,iz+1))/4.0
@@ -520,11 +528,11 @@ psitemp = psitemp + DOT_PRODUCT(MATMUL(TMAT,epsv),MATMUL(TMAT,psiv))
 ! OJO CHECK!!!!
 
 f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)=(psitemp + qtot(ix, iy, iz)*constq)/(-2.0)
-
+!write(*,*) ix, iy, iz, psitemp, psivv, psiuu, psiww
 enddo
 enddo
 enddo
-
+!stop
 endif ! electroflag
 
 !! ec de no eq!!
@@ -677,31 +685,57 @@ do ix = 1, dimx
 do iy = 1, dimy
 do iz = 1, dimz
 
+ f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells) = &
+      xpos(ix+1,iy,iz)*(mupos(ix+1,iy,iz)-mupos(ix,iy,iz))-xpos(ix,iy,iz)*(mupos(ix,iy,iz)-mupos(ix-1,iy,iz)) &
+      +xpos(ix,iy,iz)*(mupos(ix+1,iy,iz)-2*mupos(ix,iy,iz)+mupos(ix-1,iy,iz)) &
+      +xpos(ix,iy+1,iz)*(mupos(ix,iy+1,iz)-mupos(ix,iy,iz))-xpos(ix,iy,iz)*(mupos(ix,iy,iz)-mupos(ix,iy-1,iz)) &
+      +xpos(ix,iy,iz)*(mupos(ix,iy+1,iz)-2*mupos(ix,iy,iz)+mupos(ix,iy-1,iz)) &
+      +xpos(ix,iy,iz+1)*(mupos(ix,iy,iz+1)-mupos(ix,iy,iz))-xpos(ix,iy,iz)*(mupos(ix,iy,iz)-mupos(ix,iy,iz-1)) &
+      +xpos(ix,iy,iz)*(mupos(ix,iy,iz+1)-2*mupos(ix,iy,iz)+mupos(ix,iy,iz-1))
+
+ f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+ncells) = &
+      xneg(ix+1,iy,iz)*(muneg(ix+1,iy,iz)-muneg(ix,iy,iz))-xneg(ix,iy,iz)*(muneg(ix,iy,iz)-muneg(ix-1,iy,iz)) &
+      +xneg(ix,iy,iz)*(muneg(ix+1,iy,iz)-2*muneg(ix,iy,iz)+muneg(ix-1,iy,iz)) &
+      +xneg(ix,iy+1,iz)*(muneg(ix,iy+1,iz)-muneg(ix,iy,iz))-xneg(ix,iy,iz)*(muneg(ix,iy,iz)-muneg(ix,iy-1,iz)) &
+      +xneg(ix,iy,iz)*(muneg(ix,iy+1,iz)-2*muneg(ix,iy,iz)+muneg(ix,iy-1,iz)) &
+      +xneg(ix,iy,iz+1)*(muneg(ix,iy,iz+1)-muneg(ix,iy,iz))-xneg(ix,iy,iz)*(muneg(ix,iy,iz)-muneg(ix,iy,iz-1)) &
+      +xneg(ix,iy,iz)*(muneg(ix,iy,iz+1)-2*muneg(ix,iy,iz)+muneg(ix,iy,iz-1))
+
+ f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+2*ncells) = &
+      xHplus(ix+1,iy,iz)*(muHplus(ix+1,iy,iz)-muHplus(ix,iy,iz))-xHplus(ix,iy,iz)*(muHplus(ix,iy,iz)-muHplus(ix-1,iy,iz)) &
+      +xHplus(ix,iy,iz)*(muHplus(ix+1,iy,iz)-2*muHplus(ix,iy,iz)+muHplus(ix-1,iy,iz)) &
+      +xHplus(ix,iy+1,iz)*(muHplus(ix,iy+1,iz)-muHplus(ix,iy,iz))-xHplus(ix,iy,iz)*(muHplus(ix,iy,iz)-muHplus(ix,iy-1,iz)) &
+      +xHplus(ix,iy,iz)*(muHplus(ix,iy+1,iz)-2*muHplus(ix,iy,iz)+muHplus(ix,iy-1,iz)) &
+      +xHplus(ix,iy,iz+1)*(muHplus(ix,iy,iz+1)-muHplus(ix,iy,iz))-xHplus(ix,iy,iz)*(muHplus(ix,iy,iz)-muHplus(ix,iy,iz-1)) &
+      +xHplus(ix,iy,iz)*(muHplus(ix,iy,iz+1)-2*muHplus(ix,iy,iz)+muHplus(ix,iy,iz-1))
 
 
-  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells) = & 
-      0.5*(xpos(ix+1,iy,iz)-xpos(ix-1,iy,iz))*(mupos(ix+1,iy,iz)-mupos(ix-1,iy,iz)) &
-      +3*xpos(ix,iy,iz)*(mupos(ix+1,iy,iz)-2*mupos(ix,iy,iz)+mupos(ix-1,iy,iz)) &
-      +0.5*(xpos(ix,iy+1,iz)-xpos(ix,iy-1,iz))*(mupos(ix,iy+1,iz)-mupos(ix,iy-1,iz)) &
-      +3*xpos(ix,iy,iz)*(mupos(ix,iy+1,iz)-2*mupos(ix,iy,iz)+mupos(ix,iy-1,iz)) &
-      +0.5*(xpos(ix,iy,iz+1)-xpos(ix,iy,iz-1))*(mupos(ix,iy,iz+1)-mupos(ix,iy,iz-1)) &
-      +3*xpos(ix,iy,iz)*(mupos(ix,iy,iz+1)-2*mupos(ix,iy,iz)+mupos(ix,iy,iz-1)) 
 
-  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+ncells)=  &
-       0.5*(xneg(ix+1,iy,iz)-xneg(ix-1,iy,iz))*(muneg(ix+1,iy,iz)-muneg(ix-1,iy,iz)) &
-      +3*xneg(ix,iy,iz)*(muneg(ix+1,iy,iz)-2*muneg(ix,iy,iz)+muneg(ix-1,iy,iz)) &
-      +0.5*(xneg(ix,iy+1,iz)-xneg(ix,iy-1,iz))*(muneg(ix,iy+1,iz)-muneg(ix,iy-1,iz)) &
-      +3*xneg(ix,iy,iz)*(muneg(ix,iy+1,iz)-2*muneg(ix,iy,iz)+muneg(ix,iy-1,iz)) &
-      +0.5*(xneg(ix,iy,iz+1)-xneg(ix,iy,iz-1))*(muneg(ix,iy,iz+1)-muneg(ix,iy,iz-1)) &
-      +3*xneg(ix,iy,iz)*(muneg(ix,iy,iz+1)-2*muneg(ix,iy,iz)+muneg(ix,iy,iz-1)) 
 
-  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+2*ncells)=  &
-       0.5*(xHplus(ix+1,iy,iz)-xHplus(ix-1,iy,iz))*(muHplus(ix+1,iy,iz)-muHplus(ix-1,iy,iz)) &
-      +3*xHplus(ix,iy,iz)*(muHplus(ix+1,iy,iz)-2*muHplus(ix,iy,iz)+muHplus(ix-1,iy,iz)) &
-      +0.5*(xHplus(ix,iy+1,iz)-xHplus(ix,iy-1,iz))*(muHplus(ix,iy+1,iz)-muHplus(ix,iy-1,iz)) &
-      +3*xHplus(ix,iy,iz)*(muHplus(ix,iy+1,iz)-2*muHplus(ix,iy,iz)+muHplus(ix,iy-1,iz)) &
-      +0.5*(xHplus(ix,iy,iz+1)-xHplus(ix,iy,iz-1))*(muHplus(ix,iy,iz+1)-muHplus(ix,iy,iz-1)) &
-      +3*xHplus(ix,iy,iz)*(muHplus(ix,iy,iz+1)-2*muHplus(ix,iy,iz)+muHplus(ix,iy,iz-1)) 
+
+!  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells) = & 
+!      0.5*(xpos(ix+1,iy,iz)-xpos(ix-1,iy,iz))*(mupos(ix+1,iy,iz)-mupos(ix-1,iy,iz)) &
+!      +3*xpos(ix,iy,iz)*(mupos(ix+1,iy,iz)-2*mupos(ix,iy,iz)+mupos(ix-1,iy,iz)) &
+!      +0.5*(xpos(ix,iy+1,iz)-xpos(ix,iy-1,iz))*(mupos(ix,iy+1,iz)-mupos(ix,iy-1,iz)) &
+!      +3*xpos(ix,iy,iz)*(mupos(ix,iy+1,iz)-2*mupos(ix,iy,iz)+mupos(ix,iy-1,iz)) &
+!      +0.5*(xpos(ix,iy,iz+1)-xpos(ix,iy,iz-1))*(mupos(ix,iy,iz+1)-mupos(ix,iy,iz-1)) &
+!      +3*xpos(ix,iy,iz)*(mupos(ix,iy,iz+1)-2*mupos(ix,iy,iz)+mupos(ix,iy,iz-1)) 
+
+!  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+ncells)=  &
+!       0.5*(xneg(ix+1,iy,iz)-xneg(ix-1,iy,iz))*(muneg(ix+1,iy,iz)-muneg(ix-1,iy,iz)) &
+!      +3*xneg(ix,iy,iz)*(muneg(ix+1,iy,iz)-2*muneg(ix,iy,iz)+muneg(ix-1,iy,iz)) &
+!      +0.5*(xneg(ix,iy+1,iz)-xneg(ix,iy-1,iz))*(muneg(ix,iy+1,iz)-muneg(ix,iy-1,iz)) &
+!      +3*xneg(ix,iy,iz)*(muneg(ix,iy+1,iz)-2*muneg(ix,iy,iz)+muneg(ix,iy-1,iz)) &
+!      +0.5*(xneg(ix,iy,iz+1)-xneg(ix,iy,iz-1))*(muneg(ix,iy,iz+1)-muneg(ix,iy,iz-1)) &
+!      +3*xneg(ix,iy,iz)*(muneg(ix,iy,iz+1)-2*muneg(ix,iy,iz)+muneg(ix,iy,iz-1)) 
+
+!  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+2*ncells)=  &
+!       0.5*(xHplus(ix+1,iy,iz)-xHplus(ix-1,iy,iz))*(muHplus(ix+1,iy,iz)-muHplus(ix-1,iy,iz)) &
+!      +3*xHplus(ix,iy,iz)*(muHplus(ix+1,iy,iz)-2*muHplus(ix,iy,iz)+muHplus(ix-1,iy,iz)) &
+!      +0.5*(xHplus(ix,iy+1,iz)-xHplus(ix,iy-1,iz))*(muHplus(ix,iy+1,iz)-muHplus(ix,iy-1,iz)) &
+!      +3*xHplus(ix,iy,iz)*(muHplus(ix,iy+1,iz)-2*muHplus(ix,iy,iz)+muHplus(ix,iy-1,iz)) &
+!      +0.5*(xHplus(ix,iy,iz+1)-xHplus(ix,iy,iz-1))*(muHplus(ix,iy,iz+1)-muHplus(ix,iy,iz-1)) &
+!      +3*xHplus(ix,iy,iz)*(muHplus(ix,iy,iz+1)-2*muHplus(ix,iy,iz)+muHplus(ix,iy,iz-1)) 
 
 enddo
 enddo

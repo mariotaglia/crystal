@@ -13,6 +13,7 @@ use ellipsoid
 use ematrix
 use mparameters_monomer
 use inputtemp
+use kaist 
 implicit none
 external fcn
 integer i, ix, iy, iz, ip
@@ -36,7 +37,7 @@ parameter(tag = 0)
 integer err
 integer ier_tosend
 double  precision norma_tosend
-
+integer j, k
 ! number of equations
 
 ncells = dimx*dimy*dimz
@@ -62,11 +63,20 @@ if(infile.eq.0) then
   enddo
 
 if(electroflag.eq.1) then
-
-  do i=(N_poorsol+1)*ncells+1, (N_poorsol+2)*ncells
-    xg1(i)=0.0d0
-    x1(i)=0.0d0
+!  do i=(N_poorsol+1)*ncells+1, (N_poorsol+2)*ncells
+!    xg1(i)=0.0d0
+!    x1(i)=0.0d0
+!  enddo
+ do ix=1,dimx
+ do iy=1,dimy
+  do iz=1,dimz
+     i= ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells
+     xg1(i) = psi_ref/float(dimz+1)*float(iz)      
+     x1(i) = xg1(i) 
   enddo
+ enddo
+enddo
+
   do i = (N_poorsol+2)*ncells+1, (N_poorsol+4)*ncells !!add noeq
     xg1(i) = xsalt/zpos
     x1(i) = xsalt/zpos
