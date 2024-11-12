@@ -204,8 +204,8 @@ do ix=1,dimx
     !no me queda claro si esto se comenta
    ! xpos(ix, iy, iz) = expmupos*(xh(ix, iy, iz)**vsalt)*dexp(-psi(ix, iy, iz)*zpos) ! ion plus volume fraction vsalt=vsal/vsv
    ! xneg(ix, iy, iz) = expmuneg*(xh(ix, iy, iz)**vsalt)*dexp(-psi(ix, iy, iz)*zneg) ! ion neg volume fraction
-   ! xHplus(ix, iy, iz) = expmuHplus*(xh(ix, iy, iz))*dexp(-psi(ix, iy, iz))           ! H+ volume fraction
-   !   xOHmin(ix, iy,iz) = expmuOHmin*(xh(ix,iy,iz))*dexp(+psi(ix,iy,iz))           ! OH-  volume fraction
+    ! xHplus(ix, iy, iz) = expmuHplus*(xh(ix, iy, iz))*dexp(-psi(ix, iy, iz))           ! H+ volume fraction
+    ! xOHmin(ix, iy,iz) = expmuOHmin*(xh(ix,iy,iz))*dexp(+psi(ix,iy,iz))           ! OH-  volume fraction
      do im =1,N_monomer
         if (zpol(im).eq.1) then !BASE
           fdis(ix,iy,iz,im) = 1.0 /(1.0 + xOHmin(ix,iy,iz)/(K0(im)*xh(ix,iy,iz))) !k0 k en fraccion de volumen
@@ -710,8 +710,17 @@ do iz = 1, dimz
       +xHplus(ix,iy,iz)*(muHplus(ix,iy,iz+1)-2*muHplus(ix,iy,iz)+muHplus(ix,iy,iz-1))
 
 
+ f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) =  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))
+ f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells) = & 
+   -f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells)      
+ f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells) = &
+   (1.0 - volprot(ix,iy,iz))*f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells) 
+ f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+ncells) = &
+   (1.0 - volprot(ix,iy,iz))* f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+ncells) 
+ f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+2*ncells) = &
+  (1.0 - volprot(ix,iy,iz))*f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells+2*ncells) 
 
-
+   
 
 !  f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells+electroflag*ncells) = & 
 !      0.5*(xpos(ix+1,iy,iz)-xpos(ix-1,iy,iz))*(mupos(ix+1,iy,iz)-mupos(ix-1,iy,iz)) &

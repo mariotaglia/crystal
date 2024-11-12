@@ -68,8 +68,8 @@ if(electroflag.eq.1) then
 !    x1(i)=0.0d0
 !  enddo
  do ix=1,dimx
- do iy=1,dimy
-  do iz=1,dimz
+  do iy=1,dimy
+   do iz=1,dimz
      i= ix+dimx*(iy-1)+dimx*dimy*(iz-1)+(N_poorsol+1)*ncells
      xg1(i) = psi_ref/float(dimz+1)*float(iz)      
      x1(i) = xg1(i) 

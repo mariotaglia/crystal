@@ -57,14 +57,17 @@ enddo
 if(electroflag.eq.1) then
 do i = ncells*(N_poorsol+1), ncells*(N_poorsol+2)
    pp(i) = 1.0
+!   pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+
 enddo
 do i = ncells*(N_poorsol+2)+1, ncells*(N_poorsol+5) !noeq
-   pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+  pp(i) =  0.1/ (1+exp(1.0-udata(i)))
+ !   pp(i) = 1.0
+ !  pp(i) = 0.5d0 / (udata(i)+ 5.0d0)
 enddo
 else
 do i = ncells*(N_poorsol+1)+1, ncells*(N_poorsol+4) !noeq
    pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
-
 enddo
 
 endif
@@ -190,10 +193,32 @@ if (ier .ne. 0) then
   stop
 endif
 call fkinspilssetprec(1, ier) ! preconditiones
-
+!!!!!
 do i = 1, neq ! scaling vector
   scale(i) = 1.0
 enddo
+
+!version 2D
+!do i = 1, ncells ! scaling vector
+!  scale(i) = 1.0
+!enddo
+
+
+!do i = ncells+1, 2*ncells
+!  scale(i) = 1.0
+!enddo
+
+!do i = 2*ncells+1, 4*ncells
+!  scale(i) = 1.0 ! 1.0 !1000
+!enddo
+
+!do i = 4*ncells+1, 5*ncells
+!  scale(i) = 0.1
+!enddo
+
+
+
+
 
 do i = 1, neq ! Initial guess
       x1(i) = x1_old(i)
