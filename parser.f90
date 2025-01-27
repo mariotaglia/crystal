@@ -673,8 +673,17 @@ if(longsv.eq.ndi)call stopundef('longsv')
 if(cuantas.eq.ndi)call stopundef('cuantas')
 if(cuantassv.eq.ndi)call stopundef('cuantassv')
 if(infile.eq.ndi)call stopundef('infile')
-if(interaction_00.eq.ndi)call stopundef('interaction_00')
-if(interaction_11.eq.ndi)call stopundef('interaction_11')
+
+
+if(interaction_00.eq.ndi) then
+        print*, 'interaction_00 undefined, use default value of 1.0'
+        interaction_00=1.0
+endif        
+if(interaction_11.eq.ndi) then
+        print*, 'interaction_11 undefined, use default value of 1.0'
+        interaction_11=1.0
+endif        
+
 if(cutoff.eq.ndr)call stopundef('Xucutoff')
 if(readchains.eq.ndi)call stopundef('readchains')
 if(systemtype.eq.ndi)call stopundef('systemtype')
