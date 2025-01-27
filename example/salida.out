@@ -1,0 +1,57 @@
+ Program Crystal
+ GIT Version: 0e4430-dirty
+ MPI OK
+ parser:Reading parameters from DEFINITIONS.txt                                   
+ parser:Set stdout = 6
+ parser:Set sigmar = 0.0
+ parser:Set readchains = 0
+ parser:Set verbose = 5
+ parser:Set dimx = 23
+ parser:Set dimy = 23
+ parser:Set dimz = 23
+ parser:Set delta = 0.25
+ parser:Set dx = 0.0
+ parser:Set dy = 0.0
+ parser:Set dz = 0.0
+ parser:Set transform_type = 1
+ parser:Set PBC = 1 1 1 1 1 1
+ parser:Set infile = 0
+ parser:Set vscan = 2
+ parser:Variable interaction_00 is undefined 
+ parser:Variable interaction_00 is undefined 
+ parser:Set flagmu = 1
+ parser:Set nkp = -20.0 0.01 -20.0
+ parser:Set nst = 4
+ parser:Variable interaction_00 is undefined 
+ parser:Set benergy = -0.65
+ parser:Set Xucutoff = 2.0
+ parser:Set long = 12
+ parser:Set lseg = 0.154
+ parser:Set lsegkai = 0.4
+ parser:Set cuantas = 100000
+ parser:Set longsv = 6
+ parser:Set cuantassv = 100
+ parser:Set vpol = 0.008
+ parser:Set vsol = 0.008
+ parser:Set vtkflag = 0
+ parser:Set scx = 1
+ parser:Set scy = 1
+ parser:Set scz = 1
+ parser:Set systemtype = 9
+ parser:Set particle           1 pos to   0.0000000000000000        0.0000000000000000        0.0000000000000000     
+ parser:Set particle           2 pos to  0.50000000000000000       0.50000000000000000       0.50000000000000000     
+ parser:Set particle           1 octahedron size to   5.0400000000000000     
+ parser:Set particle           2 octahedron size to   5.0400000000000000     
+ parser:Set particle           1 cube size to   3.5640000000000001     
+ parser:Set particle           2 cube size to   3.5640000000000001     
+ parser:Set particle           1 surface coverage to   5.8499999999999996     
+ parser:Set particle           2 surface coverage to   5.8499999999999996     
+ parser:Set particle           1 charge to   0.0000000000000000     
+ parser:Set particle           2 charge to   0.0000000000000000     
+ parser:Set particle           1 hydrophobicity to   0.0000000000000000     
+ parser:Set particle           2 hydrophobicity to   0.0000000000000000     
+ parser:Set readchains = 0
+ parser:Set coordinate_system = 2
+ parser:Set randominput = 0
+ parser:Set seed = 938121
+ parser:Variable interaction_00 is undefined 
