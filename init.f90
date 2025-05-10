@@ -188,6 +188,10 @@ character*5  title
 real*8 temp(dimx,dimy,dimz)
 real*8 sumpol
 integer ix,iy,iz, im
+real*8 sumvol, sumrho, varrho, tmp
+
+
+
 !----------------------------------------------------------
 !  OUTPUT
 !----------------------------------------------------------
@@ -202,6 +206,41 @@ if(rank.eq.0) then ! solo el jefe escribe a disco....
 !  close(45)
 
 !!!!!!!!!!!!!!!!!!! Guarda archivos !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! average density
+
+sumvol = 0.0 
+sumrho = 0.0
+
+do ix = 1, dimx
+ do iy = 1, dimy
+  do iz = 1, dimz
+   sumvol = sumvol + (1.0-volprot(ix,iy,iz))
+   do im = 1, N_monomer
+     sumrho = sumrho + (1.0-volprot(ix,iy,iz))*avpol(ix,iy,iz,im)/vsol
+   enddo
+  enddo
+ enddo
+enddo
+
+sumrho = sumrho/sumvol
+sumvol = sumvol*(delta**3)
+
+do ix = 1, dimx
+ do iy = 1, dimy
+  do iz = 1, dimz
+   tmp = 0.0
+   do im = 1, N_monomer
+     tmp = tmp + avpol(ix,iy,iz,im)/vsol ! total density at x,y,z
+   enddo
+   varrho = varrho + ((tmp-sumrho)**2)*(1.0-volprot(ix,iy,iz))*(delta**3)
+  enddo
+ enddo
+enddo
+
+
+
+
 ! Polimero, todo
 
   temp = 0.0
@@ -285,6 +324,9 @@ endif
   write(310,*)'delta       = ',delta
   write(310,*)'vsol        = ',vsol
   write(310,*)'vpol       = ',vpol*vsol
+  write(310,*)'Vcell-VNP  = ',sumvol
+  write(310,*)'Av dens    = ',sumrho
+  write(310,*)'Var dens    = ',varrho
 
   ! ELECTRO  
   ! write(310,*)'vsalt       = ',vsalt*vsol

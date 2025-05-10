@@ -13,6 +13,11 @@ $(info HOST is ${HOST})
 
 LFLAGS = -lm /usr/lib64/librt.so -L/projects/p31819/lib/lib -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial      -Wl,-rpath,/projects/p31819/lib/lib
 
+ifeq ($(HOST),skay)
+LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
+endif
+
+
 
 ifeq ($(HOST),carapa)
 LFLAGS = -lsundials_fkinsol -lsundials_fnvecserial -lsundials_kinsol -lsundials_nvecserial -lm
