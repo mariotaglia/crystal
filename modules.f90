@@ -1,3 +1,12 @@
+module depletant
+real*8 dradius ! depletant radius in nm 
+real*8 dphi    ! depletant volume fraction in bulk
+real*8 dvol    ! depletant volume in nm^3
+integer dmax   ! depletant size for volume distribution
+real*8, allocatable :: Xdep(:,:,:) ! depletant volume distribution in lattice
+endmodule
+
+
 module mparameters_monomer
 integer N_poorsol ! number of different kais
 integer N_monomer ! number of different monomer types
@@ -208,6 +217,9 @@ real*8, allocatable :: qtot(:,:,:) ! Carga total
 real*8, allocatable :: xHplus(:,:,:) ! H+
 real*8, allocatable :: xOHmin(:,:,:) ! OH-
 real*8, allocatable :: fdis(:,:,:,:)
+
+real*8, allocatable :: avdep(:,:,:) ! depletant ix iy iz
+real*8, allocatable :: phidep(:,:,:) ! depletant number density ix iy iz
 endmodule
 
 module bulk

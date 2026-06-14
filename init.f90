@@ -110,10 +110,83 @@ expmuneg = xnegbulk /xsolbulk**vsalt
 expmuHplus = xHplusbulk /xsolbulk   ! vsol = vHplus 
 expmuOHmin = xOHminbulk /xsolbulk   ! vsol = vOHmin 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Depletant
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+call make_depletant
+end subroutine
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!! Initializes depletant properties !!!!!!!!!!!!!!!!!!
+
+subroutine make_depletant
+use depletant
+use transform
+use system
+use const
+implicit none
+
+real*8 AAAd(3,3)
+integer npoints
+real*8 Relld(3)
+real*8 Aelld(3)
+real*8 vect(3)
+real*8 voltemp(dimx,dimy,dimz)
+real*8 volsumtemp
+logical flag
+integer ix,iy,iz
+
+flag = .false.
+voltemp = 0.0
+volsumtemp = 0.0
+
+AAAd = 0.0 ! Spherical depletant
+AAAd (1,1) = dradius
+AAAd (2,2) = dradius
+AAAd (3,3) = dradius
+
+Aelld(1) = dradius
+Aelld(2) = dradius
+Aelld(3) = dradius
+
+Relld(1) = 0.5*dfloat(dimx)*delta ! put the depletant particle in the center of the lattice, transformed space
+Relld(2) = 0.5*dfloat(dimy)*delta 
+Relld(3) = 0.5*dfloat(dimz)*delta 
+
+vect = MATMUL(IMAT,Relld)
+Relld(:) = vect(:)
+
+npoints = 50
+
+
+print*, 'dradius:', dradius
+print*, dphi
+print*, AAAd
+print*, Aelld
+print*,Relld
+call integrate(AAAd(:,:),Aelld(:), Relld(:),npoints, voltemp, volsumtemp, flag) ! integrate volume of sphere
+
+do ix = 1, dimx
+do iy = 1, dimy
+do iz = 1, dimz
+if(voltemp(ix,iy,iz).ne.0.0)print*, ix,iy,iz,voltemp(ix,iy,iz)
+enddo
+enddo
+enddo
+
+
+
+stop
 end subroutine
 
 subroutine endall
 use MPI
+
+
+
+
 implicit none
 
 !!!!!!!!!!!!!!!!!!!!!!

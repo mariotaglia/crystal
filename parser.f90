@@ -15,6 +15,7 @@ use s2d
 use channel
 use branches
 use cube
+use depletant
 implicit none
 
 ! Input related variables
@@ -89,6 +90,9 @@ benergy = ndr
 
 nsc = 1
 scs(1) = 1.0
+
+dradius = 0.0
+dphi = 0.0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -284,6 +288,14 @@ do while (ios == 0)
 
  case ('vpol')
    read(buffer, *, iostat=ios) vpol
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+ case ('dradius')
+   read(buffer, *, iostat=ios) dradius
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+ case ('dphi')
+   read(buffer, *, iostat=ios) dphi
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('vscan')
