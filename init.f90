@@ -126,6 +126,7 @@ use depletant
 use transform
 use system
 use const
+use MPI
 implicit none
 
 real*8 AAAd(3,3)
@@ -136,55 +137,73 @@ real*8 vect(3)
 real*8 voltemp(dimx,dimy,dimz)
 real*8 volsumtemp
 logical flag
-integer ix,iy,iz
+integer ix,iy,iz,i
+integer cx, cy, cz ! center of the depletant in the lattice
+
+
+if(dradius.eq.0.0)dradius = 1.d-10 ! avoids NaN
 
 flag = .false.
 voltemp = 0.0
 volsumtemp = 0.0
 
 AAAd = 0.0 ! Spherical depletant
-AAAd (1,1) = dradius
-AAAd (2,2) = dradius
-AAAd (3,3) = dradius
 
 Aelld(1) = dradius
 Aelld(2) = dradius
 Aelld(3) = dradius
 
-Relld(1) = 0.5*dfloat(dimx)*delta ! put the depletant particle in the center of the lattice, transformed space
-Relld(2) = 0.5*dfloat(dimy)*delta 
-Relld(3) = 0.5*dfloat(dimz)*delta 
+ do i = 1,3
+ AAAd(i,i) = 1.0/(Aelld(i)**2)
+ enddo
+
+cx = dimx/2
+cy = dimy/2
+cz = dimz/2
+
+Relld(1) = dfloat(cx)*delta-delta/2. ! put the depletant particle in the center of a cell, transformed space
+Relld(2) = dfloat(cy)*delta-delta/2. 
+Relld(3) = dfloat(cz)*delta-delta/2.
 
 vect = MATMUL(IMAT,Relld)
 Relld(:) = vect(:)
 
-npoints = 50
+npoints = 100
 
-
-print*, 'dradius:', dradius
-print*, dphi
-print*, AAAd
-print*, Aelld
-print*,Relld
 call integrate(AAAd(:,:),Aelld(:), Relld(:),npoints, voltemp, volsumtemp, flag) ! integrate volume of sphere
 
-do ix = 1, dimx
-do iy = 1, dimy
-do iz = 1, dimz
-if(voltemp(ix,iy,iz).ne.0.0)print*, ix,iy,iz,voltemp(ix,iy,iz)
+!!! Find dmax
+
+dmax = 0
+do ix = cx, dimx
+ if((voltemp(ix,cy,cz).ne.0).and.(dmax.lt.(ix-cx)))dmax=ix-cx
+enddo
+do iy = cy, dimy
+ if((voltemp(cx,iy,cz).ne.0).and.(dmax.lt.(iy-cy)))dmax=iy-cy
+enddo
+do iz = cz, dimz
+ if((voltemp(cx,cy,iz).ne.0).and.(dmax.lt.(iz-cz)))dmax=iz-cz
+enddo
+
+allocate(xdep(-dmax:dmax,-dmax:dmax,-dmax:dmax))
+
+do ix = -dmax,dmax
+do iy = -dmax,dmax
+do iz = -dmax,dmax
+xdep(ix,iy,iz)=voltemp(ix+cx,iy+cy,iz+cz)
 enddo
 enddo
 enddo
 
-
+if(rank.eq.0)print*, 'Depletant volume (from integration, voltemp)', sum(voltemp)*delta**3
+if(rank.eq.0)print*, 'Depletant volume (from integration, xdep)', sum(xdep)*delta**3
+if(rank.eq.0)print*, 'Depletant volume (from radius)', 4./3.*pi*dradius**3
 
 stop
 end subroutine
 
 subroutine endall
 use MPI
-
-
 
 
 implicit none
@@ -298,7 +317,6 @@ if(rank.eq.0) then ! solo el jefe escribe a disco....
   title = 'poten'
   call savetodisk(temp, title, cccc)
 
-
 ! Particle
 !  title = 'avpar'
 !  call savetodisk(volprot, title, cccc)
@@ -310,6 +328,7 @@ open (unit=8, file='out.par', form='unformatted')
 do ix=1,dimx
  do iy=1,dimy
   do iz=1,dimz
+
   xpar(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) = volprot(ix,iy,iz)
   enddo
  enddo

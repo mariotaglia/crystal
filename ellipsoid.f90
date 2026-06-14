@@ -341,6 +341,7 @@ enddo
 enddo
 zmax = int(maxval(box)/delta)+2
 
+
 ! Make a list of the cells that have no ellipsoid, those that have part ellipsoid and those that have full ellipsoid
 ! Consider boundary conditions 
 
