@@ -92,7 +92,7 @@ nsc = 1
 scs(1) = 1.0
 
 dradius = 0.0
-dphi = 0.0
+xdepbulk = 0.0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -294,8 +294,8 @@ do while (ios == 0)
    read(buffer, *, iostat=ios) dradius
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
- case ('dphi')
-   read(buffer, *, iostat=ios) dphi
+ case ('xdepbulk')
+   read(buffer, *, iostat=ios) xdepbulk
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('vscan')

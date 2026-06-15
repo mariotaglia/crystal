@@ -17,7 +17,7 @@ use transform
 use kaist
 use mparameters_monomer
 use mmask
-
+use depletant
 implicit none
 
 integer*4 ier2
@@ -48,7 +48,11 @@ real*8 avpol_tosend(dimx,dimy,dimz,N_monomer)
 real*8 avpol_temp(dimx,dimy,dimz,N_monomer)
 real*8 q_tosend, sumgauche_tosend
 real*8 gradpsi2
-real*8 fv
+real*8 fv, fv2
+logical flagpart
+real*8 avdep_tosend(dimx,dimy,dimz)
+real*8 rhodep_tosend(dimx,dimy,dimz)
+
 
 ! hamiltonian inception
 real*8 hfactor, hd
@@ -193,9 +197,160 @@ do ix=1,dimx
 enddo
 
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!  Depletant
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! depletant    
+    
+rhodep = 0.0
+avdep = 0.0
+avdep_tosend = 0.0
+
+do i = 1,int(dimx/size)
+ ix = i+rank*int(dimx/size)
+! do ix = 1,dimx
+ do iy = 1,dimy
+  do iz = 1,dimz
+
+    rhodep_tosend(ix,iy,iz) = 0.0
+
+    flagpart = .false. ! collide with particle?
+    do ax = -dmax,dmax
+    do ay = -dmax,dmax
+    do az = -dmax,dmax
+
+            jx = ix+ax
+            jy = iy+ay
+            jz = iz+az
+
+            if(jx.lt.1) then
+            if(PBC(1).eq.1)jx = PBCSYMI(jx,dimx)
+            if(PBC(1).eq.3)jx = PBCREFI(jx,dimx)
+            endif
+
+            if(jx.gt.dimx) then
+            if(PBC(2).eq.1)jx = PBCSYMI(jx,dimx)
+            if(PBC(2).eq.3)jx = PBCREFI(jx,dimx)
+            endif
+
+            if(jy.lt.1) then
+            if(PBC(3).eq.1)jy = PBCSYMI(jy,dimy)
+            if(PBC(3).eq.3)jy = PBCREFI(jy,dimy)
+            endif
+
+            if(jy.gt.dimy) then
+            if(PBC(4).eq.1)jy = PBCSYMI(jy,dimy)
+            if(PBC(4).eq.3)jy = PBCREFI(jy,dimy)
+            endif
+
+
+            if(jz.lt.1) then
+            if(PBC(5).eq.1)jz = PBCSYMI(jz,dimz)
+            if(PBC(5).eq.3)jz = PBCREFI(jz,dimz)
+            endif
+
+            if(jz.gt.dimz) then
+            if(PBC(6).eq.1)jz = PBCSYMI(jz,dimz)
+            if(PBC(6).eq.3)jz = PBCREFI(jz,dimz)
+            endif
+
+            if (volprot(jx,jy,jz).ge.0.999) then ! collide
+                flagpart = .true.
+                exit
+            endif
+
+            if((jx.ge.1).and.(jx.le.dimx)) then
+            if((jy.ge.1).and.(jy.le.dimy)) then
+            if((jz.ge.1).and.(jz.le.dimz)) then
+                
+            rhodep_tosend(ix,iy,iz) = rhodep_tosend(ix,iy,iz) + (voldep(ax,ay,az)/vsol)*log(xh(jx,jy,jz)/xsolbulk)
+
+            endif
+            endif
+            endif
+
+    enddo !ax
+    if(flagpart.eqv..true.)exit
+    enddo !ay
+    if(flagpart.eqv..true.)exit
+    enddo !az
+
+    if(flagpart.eqv..true.) then 
+            rhodep_tosend(ix,iy,iz) = 0.0
+    else
+
+    rhodep_tosend(ix,iy,iz) = exp(rhodep_tosend(ix,iy,iz))*xdepbulk/sum(voldep)
+
+ 
+    do ax = -dmax,dmax
+    do ay = -dmax,dmax
+    do az = -dmax,dmax
+
+            jx = ix+ax
+            jy = iy+ay
+            jz = iz+az
+
+            if(jx.lt.1) then
+            if(PBC(1).eq.1)jx = PBCSYMI(jx,dimx)
+            if(PBC(1).eq.3)jx = PBCREFI(jx,dimx)
+            endif
+
+            if(jx.gt.dimx) then
+            if(PBC(2).eq.1)jx = PBCSYMI(jx,dimx)
+            if(PBC(2).eq.3)jx = PBCREFI(jx,dimx)
+            endif
+
+            if(jy.lt.1) then
+            if(PBC(3).eq.1)jy = PBCSYMI(jy,dimy)
+            if(PBC(3).eq.3)jy = PBCREFI(jy,dimy)
+            endif
+
+            if(jy.gt.dimy) then
+            if(PBC(4).eq.1)jy = PBCSYMI(jy,dimy)
+            if(PBC(4).eq.3)jy = PBCREFI(jy,dimy)
+            endif
+
+
+            if(jz.lt.1) then
+            if(PBC(5).eq.1)jz = PBCSYMI(jz,dimz)
+            if(PBC(5).eq.3)jz = PBCREFI(jz,dimz)
+            endif
+
+            if(jz.gt.dimz) then
+            if(PBC(6).eq.1)jz = PBCSYMI(jz,dimz)
+            if(PBC(6).eq.3)jz = PBCREFI(jz,dimz)
+            endif
+
+            if((jx.ge.1).and.(jx.le.dimx)) then
+            if((jy.ge.1).and.(jy.le.dimy)) then
+            if((jz.ge.1).and.(jz.le.dimz)) then
+                
+            fv =  (1.0-volprot(ix,iy,iz))
+            fv2 = (1.0-volprot(jx,jy,jz))
+               
+            avdep_tosend(jx,jy,jz) = avdep_tosend(jx,jy,jz) + rhodep_tosend(ix,iy,iz)*(voldep(ax,ay,az))*fv/fv2
+
+            endif
+            endif
+            endif
+
+
+            enddo !ax
+            enddo !ay
+            enddo !az
+
+    endif ! flagpart     
+       enddo ! ix
+    enddo ! iy
+enddo ! ix
+
+
+!!!!!!!!!!!!!!!!!!!!!!!! xtotal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Compute xtotal por ip = 0 from difference
 
-xtotal(:,:,:,0)=1.0-xh(:,:,:)-xpos(:,:,:)-xneg(:,:,:)-xHplus(:,:,:)-xOHmin(:,:,:)
+xtotal(:,:,:,0)=1.0-xh(:,:,:)-xpos(:,:,:)-xneg(:,:,:)-xHplus(:,:,:)-xOHmin(:,:,:)-avdep(:,:,:)
 do ip = 1, N_poorsol
   xtotal(:,:,:,0) = xtotal(:,:,:,0)-xtotal(:,:,:,ip)
 enddo
@@ -396,11 +551,15 @@ call MPI_Barrier(MPI_COMM_WORLD, err)
 if (rank.eq.0) then
 ! Junta avpol       
   call MPI_REDUCE(avpol_tosend, avpol, ncells*N_monomer, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(rhodep_tosend, rhodep, ncells, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(avdep_tosend, avdep, ncells, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 endif
 ! Subordinados
 if(rank.ne.0) then
 ! Junta avpol       
   call MPI_REDUCE(avpol_tosend, avpol, ncells*N_monomer, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err) 
+  call MPI_REDUCE(rhodep_tosend, rhodep, ncells, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(avdep_tosend, avdep, ncells, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 !!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
   goto 3333
 endif
@@ -441,7 +600,7 @@ do iz=1,dimz
 
 f(ix+dimx*(iy-1)+dimx*dimy*(iz-1))= xh(ix,iy,iz) + &
       xneg(ix, iy, iz) + xpos(ix, iy, iz) + xHplus(ix, iy, iz) + &
-      xOHmin(ix, iy, iz) -1.000000d0
+      xOHmin(ix, iy, iz) + avdep(ix,iy,iz) -1.000000d0
 
  do im = 1, N_monomer
   f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) = f(ix+dimx*(iy-1)+dimx*dimy*(iz-1)) + avpol(ix,iy,iz,im)

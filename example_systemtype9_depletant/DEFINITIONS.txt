@@ -1,0 +1,126 @@
+branched 0
+
+! stdout to file
+stdout 6
+
+sigmar 0.0
+
+electroflag 0
+
+!verbose
+verbose 5
+
+!system size
+dimx 18
+dimy 18
+dimz 18
+
+delta 0.15
+
+dx 0.0
+dy 0.0
+dz 0.0
+
+transform_type 1
+!cdiva
+1.25
+!gama
+90.0
+
+!PBC PBC xmin xmax ymin ymax zmin zmax, 1=yes, 2=wall, 0=bulk
+PBC 1 1 1 1 1 1
+
+!infile
+infile 0
+!what to scan: 1, hamiltonian inception parameter kp, 2, attraction strength st. If 1 then the system will use the first st value.
+vscan 1
+
+!hamiltonian inception
+!hguess: rotational symmetry, hring: initial attractive zone distance to the wall (in xy plane), oval: 3D shape of the growing zone 1 means spherical
+hguess 0
+hring 6
+oval 0.8
+nkp 1
+0.0
+
+!hydroph
+nst 1
+0.0
+
+!gauche
+benergy -0.84195
+
+! xu cut off
+Xucutoff 0.0
+
+!chains
+long 12
+lseg 0.15
+cuantas 100000
+
+!solution
+csalt 0.0001
+pHbulk 7.0
+
+!volume
+vpol 0.027
+vsol 0.217
+
+!output
+
+!save vtk?
+vtkflag 1
+
+! supercell
+scx 1
+scy 1
+scz 1
+
+!dielectric
+dielP 78.54
+dielS 10.0
+
+!systemtype
+systemtype 9
+! number of particles
+2
+!Center
+0.0 0.0 0.0
+0.5 0.5 0.5
+!octahedron large
+1.5
+1.5
+!cube large
+1.0
+1.0
+! rotation matrix
+1.0 0.0 0.0
+0.0 1.0 0.0
+0.0 0.0 1.0
+1.0 0.0 0.0
+0.0 1.0 0.0
+0.0 0.0 1.0
+! coverage
+4.0
+4.0
+!Charge
+0.0
+0.0
+!Surface-polymer atraction
+0.0
+0.0
+
+coordinate_system 2
+
+!readchains, -1: save chains, 1: load chains
+readchains 0
+
+!randominput, not in use
+randominput 0
+
+!seed
+seed 938121
+
+! depletant
+dradius 0.6
+xdepbulk 0.1

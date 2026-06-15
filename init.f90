@@ -43,6 +43,7 @@ use ellipsoid
 use chainsdat
 use inputtemp
 use mparameters_monomer
+use depletant
 implicit none
 integer im
 
@@ -53,6 +54,7 @@ integer im
 if(rank.eq.0) then
        open(unit=301, file='F_tot.dat', access='APPEND')
        open(unit=302, file='F_mixs.dat',  access='APPEND')
+       open(unit=3021, file='F_mixdep.dat',  access='APPEND')
        open(unit=303, file='F_mixpos.dat',  access='APPEND')
        open(unit=304, file='F_mixneg.dat',  access='APPEND')
        open(unit=305, file='F_mixH.dat',  access='APPEND')
@@ -93,7 +95,7 @@ else                  ! pH >7
   xnegbulk= -xsalt/zneg 
 endif
 
-xsolbulk=1.0 -xHplusbulk -xOHminbulk -xnegbulk -xposbulk 
+xsolbulk=1.0 -xHplusbulk -xOHminbulk -xnegbulk -xposbulk -xdepbulk
 
 do im = 1, N_monomer
 Ka(im)=10**(-pKa(im))
@@ -110,11 +112,10 @@ expmuneg = xnegbulk /xsolbulk**vsalt
 expmuHplus = xHplusbulk /xsolbulk   ! vsol = vHplus 
 expmuOHmin = xOHminbulk /xsolbulk   ! vsol = vOHmin 
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Depletant
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 call make_depletant
+expmudep = xdepbulk / xsolbulk**(sumvoldep/vsol)
+
+
 end subroutine
 
 
@@ -168,8 +169,7 @@ Relld(3) = dfloat(cz)*delta-delta/2.
 vect = MATMUL(IMAT,Relld)
 Relld(:) = vect(:)
 
-npoints = 100
-
+npoints = 50
 call integrate(AAAd(:,:),Aelld(:), Relld(:),npoints, voltemp, volsumtemp, flag) ! integrate volume of sphere
 
 !!! Find dmax
@@ -185,21 +185,23 @@ do iz = cz, dimz
  if((voltemp(cx,cy,iz).ne.0).and.(dmax.lt.(iz-cz)))dmax=iz-cz
 enddo
 
-allocate(xdep(-dmax:dmax,-dmax:dmax,-dmax:dmax))
+allocate(voldep(-dmax:dmax,-dmax:dmax,-dmax:dmax))
 
 do ix = -dmax,dmax
 do iy = -dmax,dmax
 do iz = -dmax,dmax
-xdep(ix,iy,iz)=voltemp(ix+cx,iy+cy,iz+cz)
+voldep(ix,iy,iz)=voltemp(ix+cx,iy+cy,iz+cz)
 enddo
 enddo
 enddo
 
 if(rank.eq.0)print*, 'Depletant volume (from integration, voltemp)', sum(voltemp)*delta**3
-if(rank.eq.0)print*, 'Depletant volume (from integration, xdep)', sum(xdep)*delta**3
+if(rank.eq.0)print*, 'Depletant volume (from integration, xdep)', sum(voldep)*delta**3
 if(rank.eq.0)print*, 'Depletant volume (from radius)', 4./3.*pi*dradius**3
+if(rank.eq.0)print*, 'Depletant dmax', dmax
 
-stop
+sumvoldep = sum(voldep)
+
 end subroutine
 
 subroutine endall
@@ -214,6 +216,7 @@ implicit none
 
 close(301)
 close(302)
+close(3021)
 close(303)
 close(304)
 close(305)
@@ -287,11 +290,20 @@ if(rank.eq.0) then ! solo el jefe escribe a disco....
     call savetodisk(temp, title, cccc)
   enddo
 
-! Solvente
-!  temp(:,:,:) = xh(:,:,:)*(1.0 - volprot(:,:,:))
+! Depletant
+  temp(:,:,:) = avdep(:,:,:)*(1.0 - volprot(:,:,:))
 
-!  title = 'avsol'
-!  call savetodisk(temp, title, cccc)
+  title = 'avdep'
+  call savetodisk(temp, title, cccc)
+
+! solvent
+  temp(:,:,:) = xh(:,:,:)*(1.0 - volprot(:,:,:))
+
+  title = 'avsol'
+  call savetodisk(temp, title, cccc)
+
+
+
 ! Cationes
 !  title = 'avpos'
 !  call savetodisk(xpos, title, cccc)

@@ -39,6 +39,9 @@ ALLOCATE (fdis(dimx, dimy, dimz, N_monomer))
 ALLOCATE (epsfcn(0:dimx+1, 0:dimy+1, 0:dimz+1))
 ALLOCATE (Depsfcn(0:dimx+1, 0:dimy+1, 0:dimz+1))
 
+ALLOCATE (avdep(dimx, dimy, dimz))
+ALLOCATE (rhodep(dimx, dimy, dimz))
+
 ! ematrix
 ALLOCATE (volprot(dimx,dimy,dimz))
 ALLOCATE (volprot1(dimx,dimy,dimz))

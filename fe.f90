@@ -21,13 +21,14 @@ use transform
 use kaist
 use conformations
 use mparameters_monomer
+use depletant
 implicit none
 
 integer looped
 real*8  q_tosend(ncha), sumgauche_tosend(ncha)
 real*8  q0(ncha), sumgauche0(ncha)
 integer newcuantas0(ncha)
-real*8 F_Mix_s, F_Mix_pos
+real*8 F_Mix_s, F_Mix_pos, F_Mix_dep
 real*8 F_Mix_neg, F_Mix_Hplus
 real*8 Free_energy2, sumpi, sumrho, sumel, sumdiel, suma, mupol
 real*8 temp
@@ -118,6 +119,32 @@ endif
       F_Mix_s = F_Mix_s * delta**3/vsol
       Free_Energy = Free_Energy + F_Mix_s
 
+! 1. Mezcla depletant
+
+      F_Mix_dep = 0.0 
+
+      do ix = 1, dimx
+      do iy = 1, dimy
+      do iz = 1, dimz
+     
+      fv=(1.0-volprot(ix,iy,iz))
+
+      if(rhodep(ix,iy,iz).ne.0.0) then
+      F_Mix_dep = F_Mix_dep + rhodep(ix, iy,iz) &
+      *(dlog(rhodep(ix, iy, iz)*vsol)-1.0-dlog(expmudep) + dlog(sumvoldep/vsol))*fv
+
+
+      endif
+
+      F_Mix_dep = F_Mix_dep - xdepbulk/sumvoldep &
+      *(dlog(xdepbulk/sumvoldep*vsol)-1.0-dlog(expmudep) + dlog(sumvoldep/vsol))*fv
+
+      enddo
+      enddo
+      enddo
+      F_Mix_dep = F_Mix_dep * delta**3
+      Free_Energy = Free_Energy + F_Mix_dep
+
 ! 2. Mezcla ion positivo
 
       F_Mix_pos = 0.0 
@@ -139,6 +166,7 @@ endif
       enddo
       F_Mix_pos = F_Mix_pos * delta**3/vsol/vsalt
       Free_Energy = Free_Energy + F_Mix_pos
+
 
 ! 3. Mezcla ion negativo
 
@@ -487,11 +515,10 @@ endif
            sumpi = sumpi-dlog(xsolbulk)*fv
      
            sumrho = sumrho + ( - xh(ix, iy, iz) -xHplus(ix, iy, iz) &
-        - xOHmin(ix, iy, iz) - (xpos(ix, iy, iz)+xneg(ix, iy, iz))/vsalt)*fv! sum over  rho_i i=+,-,s
-
+        - xOHmin(ix, iy, iz) - (xpos(ix, iy, iz)+xneg(ix, iy, iz))/vsalt - rhodep(ix,iy,iz)*vsol)*fv  ! sum over  rho_i i=+,-,s
 
            sumrho = sumrho - ( - xsolbulk -xHplusbulk &
-       -xOHminbulk - (xposbulk+xnegbulk)/vsalt)*fv ! sum over  rho_i i=+,-,s
+       -xOHminbulk - (xposbulk+xnegbulk)/vsalt - xdepbulk/(sumvoldep/vsol)  )*fv   ! sum over  rho_i i=+,-,s
 
          sumel = sumel - qtot(ix, iy, iz)*psi(ix, iy, iz)/2.0 
       
@@ -545,6 +572,7 @@ endif
           flush(301)
          write(302,*)looped, F_Mix_s 
          write(303,*)looped, F_Mix_pos
+         write(3021,*)looped, F_Mix_dep
          write(304,*)looped, F_Mix_neg
          write(305,*)looped, F_Mix_Hplus
          write(306,*)looped, F_Mix_OHmin
