@@ -129,15 +129,15 @@ endif
      
       fv=(1.0-volprot(ix,iy,iz))
 
+      if(xdepbulk.ne.0.0) then
       if(rhodep(ix,iy,iz).ne.0.0) then
       F_Mix_dep = F_Mix_dep + rhodep(ix, iy,iz) &
       *(dlog(rhodep(ix, iy, iz)*vsol)-1.0-dlog(expmudep) + dlog(sumvoldep/vsol))*fv
-
-
       endif
 
       F_Mix_dep = F_Mix_dep - xdepbulk/sumvoldep &
       *(dlog(xdepbulk/sumvoldep*vsol)-1.0-dlog(expmudep) + dlog(sumvoldep/vsol))*fv
+      endif
 
       enddo
       enddo
