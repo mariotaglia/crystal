@@ -205,6 +205,7 @@ enddo
 ! depletant    
     
 rhodep = 0.0
+rhodep_tosend = 0.0
 avdep = 0.0
 avdep_tosend = 0.0
 
