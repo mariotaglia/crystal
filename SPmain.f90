@@ -8,6 +8,7 @@ use const
 use montecarlo
 use ematrix
 use kaist
+use depletant
 
 implicit none
 integer counter, counterr
@@ -24,7 +25,7 @@ logical flag
 character*10 filename
 integer j, i, ii, iii
 integer flagcrash
-real*8 stOK,kpOK
+real*8 stOK,kpOK,xdepbulkOK
 
 stdout = 6
 
@@ -123,6 +124,11 @@ if(infile.ne.0) then
    endif
 
 endif
+
+call make_depletant
+if(rank.eq.0)write(stdout,*) 'Depletant OK'
+
+
  ii = 1
  sc = scs(ii)
 
@@ -130,6 +136,7 @@ select case (vscan)
 
 case (1)
 
+xdepbulk = xdepbulks(1)        
 st = sts(1)
 kp = 1.0d10+kps(1)
 do i = 1, nkp
@@ -164,6 +171,7 @@ enddo
 
 case (2)
 
+xdepbulk = xdepbulks(1)        
 kp = kps(1)
 st = 1.0d10+sts(1)
 do i = 1, nst
@@ -195,6 +203,41 @@ do i = 1, nst
  call store2disk(counterr)
 
 enddo
+
+case (3)
+
+st = sts(1)
+xdepbulk = 1.0d10+xdepbulks(1)
+kp = kps(1)        
+do i = 1, nxdepbulk
+ do while (xdepbulk.ne.xdepbulks(i))
+  xdepbulk = xdepbulks(i)
+  if(rank.eq.0)write(stdout,*)'Switch to xdepbulk = ', xdepbulk
+  flagcrash = 1
+  do while(flagcrash.eq.1)
+   flagcrash = 0
+   call solve(flagcrash)
+   if(flagcrash.eq.1) then
+    if(i.eq.1)stop
+    xdepbulk = (xdepbulk + xdepbulkOK)/2.0
+    if(rank.eq.0)write(stdout,*)'Error, switch to xdepbulk = ', xdepbulk
+   endif
+  enddo
+
+  xdepbulkOK = xdepbulk ! last st solved OK
+  if(rank.eq.0)write(stdout,*) 'Solved OK, xdepbulk: ', xdepbulkOK
+ 
+ enddo
+
+ counterr = counter + i + ii  - 1
+ call Free_Energy_Calc(counterr)
+ if(rank.eq.0)write(stdout,*) 'Free energy after solving', free_energy
+ call savedata(counterr)
+ if(rank.eq.0)write(stdout,*) 'Save OK'
+ call store2disk(counterr)
+
+enddo
+
 
 endselect
 

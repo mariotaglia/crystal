@@ -81,7 +81,7 @@ dz = ndr
 cdiva = ndr
 csalt = ndr
 
-vpol = ndr
+vpol0 = ndr
 
 
 vsol0 = ndr
@@ -287,16 +287,20 @@ do while (ios == 0)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('vpol')
-   read(buffer, *, iostat=ios) vpol
+   read(buffer, *, iostat=ios) vpol0
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('dradius')
    read(buffer, *, iostat=ios) dradius
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
- case ('xdepbulk')
-   read(buffer, *, iostat=ios) xdepbulk
+ case ('nxdepbulk')
+   read(buffer, *, iostat=ios) nxdepbulk
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+   do i = 1, nxdepbulk
+   read(fh,*)xdepbulks(i)
+   enddo
 
  case ('vscan')
    read(buffer, *, iostat=ios) vscan

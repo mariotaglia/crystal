@@ -1,6 +1,8 @@
 module depletant
 real*8 dradius ! depletant radius in nm 
 real*8 xdepbulk    ! depletant volume fraction in bulk
+integer nxdepbulk ! # of xdepbulk
+real*8 xdepbulks(100)
 real*8 dvol    ! depletant volume in nm^3
 integer dmax   ! depletant size for volume distribution
 real*8, allocatable :: voldep(:,:,:) ! depletant volume distribution in lattice

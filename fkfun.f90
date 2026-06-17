@@ -60,6 +60,7 @@ real*8, allocatable :: hds(:)
 ALLOCATE(hds(100))
 hds = -1
 
+
 !-----------------------------------------------------
 ! Common variables
 

@@ -40,6 +40,10 @@ double  precision norma_tosend
 
 ncells = dimx*dimy*dimz
 
+! Init bulk
+
+call initbulk
+
 ! Initial guess
 
 if((infile.eq.2).or.(infile.eq.-1).or.(infile.eq.3)) then

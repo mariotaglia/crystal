@@ -16,6 +16,7 @@ use molecules
 use ellipsoid
 use mparameters_monomer
 implicit none
+
 pi = acos(-1.0)
 lb = 0.714 ! bjerrum lenght in nm
 zpos = 1.0
@@ -68,18 +69,34 @@ if(rank.eq.0) then
        open(unit=312, file='F_tot2.dat',  access='APPEND')
        open(unit=314, file='F_mixpos2.dat',  access='APPEND')
 endif
+call initbulk
+
+end subroutine
+
+subroutine initbulk
+use molecules
+use const
+use bulk
+use MPI
+use ellipsoid
+use chainsdat
+use inputtemp
+use mparameters_monomer
+use depletant
+implicit none
+integer im
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Input-dependent variables
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-vpol = vpol/vsol ! vpol in units of vsol
+vpol = vpol0/vsol ! vpol in units of vsol
 constqE = vpol/(2.0d0*constq)
 dielW = 78.54
 dielPr = dielP/dielW
 dielSr = dielS/dielW
-
 
 cHplus = 10**(-pHbulk)    ! concentration H+ in bulk
 xHplusbulk = (cHplus*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
@@ -112,10 +129,7 @@ expmuneg = xnegbulk /xsolbulk**vsalt
 expmuHplus = xHplusbulk /xsolbulk   ! vsol = vHplus 
 expmuOHmin = xOHminbulk /xsolbulk   ! vsol = vOHmin 
 
-call make_depletant
 expmudep = xdepbulk / xsolbulk**(sumvoldep/vsol)
-
-
 end subroutine
 
 
@@ -140,7 +154,6 @@ real*8 volsumtemp
 logical flag
 integer ix,iy,iz,i
 integer cx, cy, cz ! center of the depletant in the lattice
-
 
 if(dradius.eq.0.0)dradius = 1.d-10 ! avoids NaN
 
@@ -176,13 +189,13 @@ call integrate(AAAd(:,:),Aelld(:), Relld(:),npoints, voltemp, volsumtemp, flag) 
 
 dmax = 0
 do ix = cx, dimx
- if((voltemp(ix,cy,cz).ne.0).and.(dmax.lt.(ix-cx)))dmax=ix-cx
+ if((voltemp(ix,cy,cz).ne.0.).and.(dmax.lt.(ix-cx)))dmax=ix-cx
 enddo
 do iy = cy, dimy
- if((voltemp(cx,iy,cz).ne.0).and.(dmax.lt.(iy-cy)))dmax=iy-cy
+ if((voltemp(cx,iy,cz).ne.0.).and.(dmax.lt.(iy-cy)))dmax=iy-cy
 enddo
 do iz = cz, dimz
- if((voltemp(cx,cy,iz).ne.0).and.(dmax.lt.(iz-cz)))dmax=iz-cz
+ if((voltemp(cx,cy,iz).ne.0.).and.(dmax.lt.(iz-cz)))dmax=iz-cz
 enddo
 
 allocate(voldep(-dmax:dmax,-dmax:dmax,-dmax:dmax))
@@ -190,13 +203,13 @@ allocate(voldep(-dmax:dmax,-dmax:dmax,-dmax:dmax))
 do ix = -dmax,dmax
 do iy = -dmax,dmax
 do iz = -dmax,dmax
-voldep(ix,iy,iz)=voltemp(ix+cx,iy+cy,iz+cz)
+voldep(ix,iy,iz)=voltemp(ix+cx,iy+cy,iz+cz)*delta**3
 enddo
 enddo
 enddo
 
 if(rank.eq.0)print*, 'Depletant volume (from integration, voltemp)', sum(voltemp)*delta**3
-if(rank.eq.0)print*, 'Depletant volume (from integration, xdep)', sum(voldep)*delta**3
+if(rank.eq.0)print*, 'Depletant volume (from integration, xdep)', sum(voldep)
 if(rank.eq.0)print*, 'Depletant volume (from radius)', 4./3.*pi*dradius**3
 if(rank.eq.0)print*, 'Depletant dmax', dmax
 
@@ -504,6 +517,7 @@ do ix=1,dimx
       enddo
    enddo
 enddo
+
 
 
 endsubroutine
