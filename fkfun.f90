@@ -210,9 +210,8 @@ rhodep_tosend = 0.0
 avdep = 0.0
 avdep_tosend = 0.0
 
-do i = 1,int(dimx/size)
- ix = i+rank*int(dimx/size)
-! do ix = 1,dimx
+do ix = 1,dimx
+ if(mod(ix,size).eq.rank) then
  do iy = 1,dimy
   do iz = 1,dimz
 
@@ -343,9 +342,10 @@ do i = 1,int(dimx/size)
             enddo !ay
             enddo !az
 
-    endif ! flagpart     
+    endif ! flagpart    
        enddo ! ix
     enddo ! iy
+    endif ! rank 
 enddo ! ix
 
 
