@@ -182,7 +182,7 @@ Relld(3) = dfloat(cz)*delta-delta/2.
 vect = MATMUL(IMAT,Relld)
 Relld(:) = vect(:)
 
-npoints = 50
+npoints = 400
 call integrate(AAAd(:,:),Aelld(:), Relld(:),npoints, voltemp, volsumtemp, flag) ! integrate volume of sphere
 
 !!! Find dmax
@@ -308,6 +308,13 @@ if(rank.eq.0) then ! solo el jefe escribe a disco....
 
   title = 'avdep'
   call savetodisk(temp, title, cccc)
+
+! Depletant
+  temp(:,:,:) = rhodep(:,:,:)*(1.0 - volprot(:,:,:))
+
+  title = 'xddep'
+  call savetodisk(temp, title, cccc)
+
 
 ! solvent
   temp(:,:,:) = xh(:,:,:)*(1.0 - volprot(:,:,:))
