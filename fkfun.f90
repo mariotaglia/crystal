@@ -257,7 +257,7 @@ do ix = 1,dimx
             if(PBC(6).eq.3)jz = PBCREFI(jz,dimz)
             endif
 
-            if (volprot(jx,jy,jz).ge.0.999) then ! collide
+            if ((volprot(jx,jy,jz).ge.0.999).and.(voldep(ax,ay,az).gt.0.999)) then ! collide
                 flagpart = .true.
                 exit
             endif
