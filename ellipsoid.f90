@@ -219,6 +219,8 @@ if (rank.eq.0) then
 write(stdout,*) 'ellipsoid:', 'update_matrix: Total volumen real space= ', temp
 write(stdout,*) 'ellipsoid:', 'update_matrix: Total discretized volumen =', sum(volprot)*delta**3
 write(stdout,*) 'ellipsoid:', 'number of monomers in system =', sumpolseg 
+write(stdout,*) 'ellipsoid:', 'Fraction of volumen core+polymer =', & 
+        (sumpolseg*vpol*vsol+sum(volprot)*delta**3)/(dimx*dimy*dimz*delta**3)
 endif
 endif
 

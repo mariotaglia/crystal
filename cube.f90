@@ -123,6 +123,8 @@ write(stdout,*) 'channel:', 'update_matrix: Total discretized volumen =', (sum(v
 write(stdout,*) 'channel:', 'number of polymers in system =', sumpolseg
 write(stdout,*) 'channel:', 'surface area =', area
 write(stdout,*) 'channel:', 'surface density =', sumpolseg/area
+write(stdout,*) 'ellipsoid:', 'Fraction of volumen core+polymer =', &
+        (sumpolseg*vpol*vsol+sum(volprot)*delta**3)/(dimx*dimy*dimz*delta**3)
 endif
 endif
 

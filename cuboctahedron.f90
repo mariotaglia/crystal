@@ -146,6 +146,8 @@ if (rank.eq.0) then
 write(stdout,*) 'cuboctahedron:', 'Total nanocuboct volumen real space= ', COvol
 write(stdout,*) 'cuboctahedron:', 'Total discretized volumen =', (sum(volprot))*delta**3
 write(stdout,*) 'cuboctahedron:', 'total number of segments in system =', sumpolseg
+write(stdout,*) 'ellipsoid:', 'Fraction of volumen core+polymer =', &
+        (sumpolseg*vpol*vsol+sum(volprot)*delta**3)/(dimx*dimy*dimz*delta**3)
 endif
 endif
 
