@@ -35,11 +35,6 @@ infile 0
 !what to scan: 1, hamiltonian inception parameter kp, 2, attraction strength st. If 1 then the system will use the first st value.
 vscan 3
 
-!hamiltonian inception
-!hguess: rotational symmetry, hring: initial attractive zone distance to the wall (in xy plane), oval: 3D shape of the growing zone 1 means spherical
-hguess 0
-hring 6
-oval 0.8
 nkp 1
 0.0
 
