@@ -20,7 +20,7 @@ use mmask
 use depletant
 implicit none
 
-integer*4 ier2
+integer ier2
 integer ncells
 real*8 x(*),f(*)
 real*8 protemp
@@ -710,7 +710,9 @@ if(rank.eq.0)write(stdout,*)'fkfun:', iter, norma, q(1)
 endif
 
 3333 continue
-ier2 = 0.0 
+ier2 = 0
+if(isnan(norma))ier2 = 1
+
 
 return
 end
