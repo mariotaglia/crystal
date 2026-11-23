@@ -809,7 +809,7 @@ if((flagin.eqv..true.).and.(flagout.eqv..true.)) then ! cell part inside annd ou
 endif
 
 sumvolprot = sumvolprot + voltemp
-volprot(jx,jy,jz) = voltemp
+volprot(jx,jy,jz) = volprot(jx,jy,jz) + voltemp ! important to do =+ when using a large octahedron to create a cube
 endif ! flagsym
 
 
