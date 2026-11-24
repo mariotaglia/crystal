@@ -1,7 +1,7 @@
  st          =    0.0000000000000000     
  kp          =    0.0000000000000000     
  eepsc       =    0.0000000000000000     
- fnorm       =    2.7566465742919355E-016
+ fnorm       =    2.7565641320750803E-016
  length seg  =   0.14999999999999999     
  length seg  =   0.14999999999999999     
  delta       =   0.14999999999999999     
@@ -15,5 +15,5 @@
  iterations  =           22
  sigma cad/nm2 =    59.259259259259260     
  kai =             0.0000000000000000     
- GIT version = f49867-dirty
- Number of segments =             321.41531467437864     
+ GIT version = 3fd66a-dirty
+ Number of segments =             321.41531467437801     
